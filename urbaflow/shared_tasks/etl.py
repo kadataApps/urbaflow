@@ -10,8 +10,7 @@ from utils.db_config import create_engine
 
 
 @task(checkpoint=False)
-def run_sql_script(sql_filepath: Path, db: str = 'local') -> pd.DataFrame:
-
+def run_sql_script(sql_filepath: Path, db: str = "local") -> pd.DataFrame:
     logger = prefect.context.get("logger")
     with open(sql_filepath, "r") as sql_file:
         query = text(sql_file.read())

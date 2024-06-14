@@ -1,41 +1,36 @@
-#!/usr/bin/python
 import os
 
 from utils.script_utils import replace_parameters_in_script
 from utils.dbutils import pg_connection
 
 
-def executeMergeCadastreMajicScripts():
+def execute_merge_cadastre_majic_scripts():
     """
     Execute dans postgis les scripts permettant de
     fusionner les données MAJIC et cadastre dans une seule table
     """
-    annee = '2019'
-    lot = ''
-    replaceDict = {
-        '[ANNEE]': annee,
-        '[LOT]': lot
-    }
+    annee = "2019"
+    lot = ""
+    replace_dict = {"[ANNEE]": annee, "[LOT]": lot}
 
     print("Execution des scripts de fusion Cadastre x MAJIC")
-    scriptList = [
-        'traitements/merge/0-creation_table_parcellaire.sql',
-        'traitements/merge/1-affectation_proprietaire.sql',
-        'traitements/merge/2-affectation_local_pev.sql',
-        'traitements/merge/3-affectation_adresses.sql',
-        'traitements/merge/4-anonymisation.sql',
+    script_list = [
+        "traitements/merge/0-creation_table_parcellaire.sql",
+        "traitements/merge/1-affectation_proprietaire.sql",
+        "traitements/merge/2-affectation_local_pev.sql",
+        "traitements/merge/3-affectation_adresses.sql",
+        "traitements/merge/4-anonymisation.sql",
     ]
 
-    nombreDeScripts = len(scriptList)
+    scripts_count = len(script_list)
     etape = 0
-    sqlScriptsDir = os.path.join(os.getcwd(), 'temp/sql/')
+    sql_scripts_dir = os.path.join(os.getcwd(), "temp/sql/")
     conn = pg_connection()
-    for script in scriptList:
-        etape +=1
-        print("Etape "+str(etape)+"/"+str(nombreDeScripts) + " : " + script)
-        scriptPath = os.path.join(sqlScriptsDir, script)
-        replace_parameters_in_script(scriptPath, replaceDict)
-        conn.executeScript(scriptPath)
-    conn.closeConnection()
+    for script in script_list:
+        etape += 1
+        print("Etape " + str(etape) + "/" + str(scripts_count) + " : " + script)
+        script_path = os.path.join(sql_scripts_dir, script)
+        replace_parameters_in_script(script_path, replace_dict)
+        conn.execute_script(script_path)
+    conn.close_connection()
     print("Fusion Cadastre x MAJIC terminée.")
-

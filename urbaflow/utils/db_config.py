@@ -15,8 +15,8 @@ db_env = {
         "usr": "POSTGRES_USER",
         "pwd": "POSTGRES_PASS",
     },
-   
 }
+
 
 def make_connection_string(db: str) -> str:
     """Returns the connection string for the designated database.

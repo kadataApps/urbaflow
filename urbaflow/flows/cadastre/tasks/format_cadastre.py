@@ -1,47 +1,50 @@
-
 import os
 
 from utils.dbutils import pg_connection
 
 
-def executeInitCadastre():
+def execute_init_cadastre():
     """
     Création table cadastre_parcelles pour import du cadastre
     (Si la table n'existe pas)
     """
-    print('Création table cadastre_parcelles')
-    scriptPathCreate = os.path.join(
-        os.getcwd(), 'temp/sql/traitements/cadastre/0-initialisation_cadastre_parcelle.sql')
+    print("Création table cadastre_parcelles")
+    script_path_create = os.path.join(
+        os.getcwd(),
+        "temp/sql/traitements/cadastre/0-initialisation_cadastre_parcelle.sql",
+    )
     conn = pg_connection()
-    conn.executeScript(scriptPathCreate)
-    conn.closeConnection()
-    print('La table cadastre_parcelles a été créée si nécessaire.')
+    conn.execute_script(script_path_create)
+    conn.close_connection()
+    print("La table cadastre_parcelles a été créée si nécessaire.")
 
 
-def executeFormatageCadastre():
+def execute_format_cadastre():
     """
-    Ajout et mise à jour colonne geo_parcelles 
+    Ajout et mise à jour colonne geo_parcelles
     sur cadastre_parcelles pour jointure
     avec MAJIC
     """
-    print('Ajout/Mise à jour geo_parcelles sur table cadastre_parcelles')
-    scriptPathCreate = os.path.join(
-        os.getcwd(), 'temp/sql/traitements/cadastre/1-traitement_cadastre_parcelles.sql')
+    print("Ajout/Mise à jour geo_parcelles sur table cadastre_parcelles")
+    script_path_create = os.path.join(
+        os.getcwd(), "temp/sql/traitements/cadastre/1-traitement_cadastre_parcelles.sql"
+    )
     conn = pg_connection()
-    conn.executeScript(scriptPathCreate)
-    conn.closeConnection()
-    print('Table cadastre_parcelles mise à jour.')
+    conn.execute_script(script_path_create)
+    conn.close_connection()
+    print("Table cadastre_parcelles mise à jour.")
 
 
-def executeInitBati():
+def execute_init_bati():
     """
     Création table cadastre_bati pour import du cadastre
     (Si la table n'existe pas)
     """
-    print('Création table cadastre_bati')
-    scriptPathCreate = os.path.join(
-        os.getcwd(), 'temp/sql/traitements/bati/0-initialisation_cadastre_bati.sql')
+    print("Création table cadastre_bati")
+    script_path_create = os.path.join(
+        os.getcwd(), "temp/sql/traitements/bati/0-initialisation_cadastre_bati.sql"
+    )
     conn = pg_connection()
-    conn.executeScript(scriptPathCreate)
-    conn.closeConnection()
-    print('La table cadastre_bati a été créée si nécessaire.')
+    conn.execute_script(script_path_create)
+    conn.close_connection()
+    print("La table cadastre_bati a été créée si nécessaire.")

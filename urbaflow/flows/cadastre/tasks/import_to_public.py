@@ -1,66 +1,69 @@
 import os
-import ast
 import psycopg2
 
 from utils.dbutils import pg_connection
 from utils.config import db_schema
 from .get_communes_majic import get_imported_communes_from_file
 
+
 def create_parcellaire_france():
     """
     Importation des parcelles créées dans la table principale
     parcellaire_france du schema "public"
     """
-    print('Création de la table parcellaire_france dans public')
-    scriptPathCreate = os.path.join(
-        os.getcwd(), 'temp/sql/commun_create_parcellaire.sql')
+    print("Création de la table parcellaire_france dans public")
+    script_path_create = os.path.join(
+        os.getcwd(), "temp/sql/commun_create_parcellaire.sql"
+    )
     conn = pg_connection()
-    conn.executeScript(scriptPathCreate)
-    conn.closeConnection()
-    print('La table parcellaire_france a été créée.')
+    conn.execute_script(script_path_create)
+    conn.close_connection()
+    print("La table parcellaire_france a été créée.")
+
 
 def create_proprietaire_droit():
     """
     Importation des données de proprietaire dans la table proprietaire_droit
     du schema "public"
     """
-    print('Création de la table proprietaire_droit dans public')
-    scriptPathCreate = os.path.join(
-        os.getcwd(), 'temp/sql/commun_create_proprietaire.sql')
+    print("Création de la table proprietaire_droit dans public")
+    script_path_create = os.path.join(
+        os.getcwd(), "temp/sql/commun_create_proprietaire.sql"
+    )
     conn = pg_connection()
-    conn.executeScript(scriptPathCreate)
-    conn.closeConnection()
-    print('La table proprietaire_droit a été créée.')
+    conn.execute_script(script_path_create)
+    conn.close_connection()
+    print("La table proprietaire_droit a été créée.")
+
 
 def create_pb0010_local():
     """
     Importation des données de local dans la table pb0010_local
     du schema "public"
     """
-    print('Création de la table pb0010_local dans public')
-    scriptPathCreate = os.path.join(
-        os.getcwd(), 'temp/sql/commun_create_local.sql')
+    print("Création de la table pb0010_local dans public")
+    script_path_create = os.path.join(os.getcwd(), "temp/sql/commun_create_local.sql")
     conn = pg_connection()
-    conn.executeScript(scriptPathCreate)
-    conn.closeConnection()
-    print('La table proprietaire_droit a été créée.')
+    conn.execute_script(script_path_create)
+    conn.close_connection()
+    print("La table proprietaire_droit a été créée.")
+
 
 def create_bati_france():
     """
     Importation de la table bati créée à partir des données du cadastre
     dans la table principale bati_france du schema "public"
     """
-    print('Création de la table bati_france dans public')
-    scriptPathCreate = os.path.join(
-        os.getcwd(), 'temp/sql/commun_create_bati.sql')
+    print("Création de la table bati_france dans public")
+    script_path_create = os.path.join(os.getcwd(), "temp/sql/commun_create_bati.sql")
     conn = pg_connection()
-    conn.executeScript(scriptPathCreate)
-    conn.closeConnection()
-    print('La table bati_france a été créée.')
+    conn.execute_script(script_path_create)
+    conn.close_connection()
+    print("La table bati_france a été créée.")
 
 
 def insert_parcelles_to_public(connexion):
-    schema = db_schema()['schema']
+    schema = db_schema()["schema"]
     importSql = """
     INSERT INTO public.parcellaire_france (
       geom, idparcelle_geom, code_insee, idpar, idprocpte, dcntpa, jdatat,
@@ -80,12 +83,13 @@ def insert_parcelles_to_public(connexion):
     FROM """
     importSql += f"{schema}.parcellaire;"
 
-    connexion.executeSql(importSql)
+    connexion.execute_sql(importSql)
 
     print("Table parcellaire importée dans parcellaire_france")
 
+
 def insert_proprietaire_to_public(connexion):
-    schema = db_schema()['schema']
+    schema = db_schema()["schema"]
     importSql = """
     INSERT INTO public.proprietaire_droit (
       proprietaire, annee, idprodroit, idprocpte, idpersonne, idvoie, idcom,
@@ -115,11 +119,12 @@ def insert_proprietaire_to_public(connexion):
     FROM """
     importSql += f"{schema}.proprietaire;"
 
-    connexion.executeSql(importSql)
+    connexion.execute_sql(importSql)
     print("Table proprietaire importée dans proprietaire_droit")
 
+
 def insert_local_to_public(connexion):
-    schema = db_schema()['schema']
+    schema = db_schema()["schema"]
     importSql = """
     INSERT INTO public.pb0010_local (
       local10, annee, idlocal, idbat, idpar, idprocpte, ccodep, ccodir, ccocom, invar,
@@ -141,45 +146,57 @@ def insert_local_to_public(connexion):
     FROM """
     importSql += f"{schema}.local10;"
 
-    connexion.executeSql(importSql)
+    connexion.execute_sql(importSql)
     print("Table local10 importée dans pb0010_local")
 
+
 def insert_bati_to_public(connexion):
-    schema = db_schema()['schema']
+    schema = db_schema()["schema"]
 
+    importSql = (
+        "INSERT INTO public.bati_france "
+        "(wkb_geometry, type, nom, code_insee, created, updated ) "
+        "SELECT wkb_geometry, type, nom, commune, created, updated "
+        "FROM %(schema)s.cadastre_bati;" % {"schema": schema}
+    )
 
-    importSql = ("INSERT INTO public.bati_france "
-                 "(wkb_geometry, type, nom, code_insee, created, updated ) "
-                 "SELECT wkb_geometry, type, nom, commune, created, updated "
-                 "FROM %(schema)s.cadastre_bati;" % {'schema': schema})
-
-    connexion.executeSql(importSql)
+    connexion.execute_sql(importSql)
 
     print("Table bati importée dans bati_france")
+
 
 def delete_from_public(codes_insee, tableName, connexion):
     print(codes_insee)
     deleteSql = "DELETE FROM public.%s WHERE code_insee = ANY(ARRAY%s);" % (
-        tableName, codes_insee)
+        tableName,
+        codes_insee,
+    )
 
-    connexion.executeSql(deleteSql)
+    connexion.execute_sql(deleteSql)
 
-    print("Les élémens de la table %s ont été supprimés pour les communes %s;" % (tableName, codes_insee))
+    print(
+        "Les élémens de la table %s ont été supprimés pour les communes %s;"
+        % (tableName, codes_insee)
+    )
+
 
 def check_if_table_exists(tableName, schema):
-    tableDoesExistsSql = "SELECT EXISTS(SELECT 1 FROM pg_tables WHERE schemaname = '%s' and tablename='%s');" % (schema, tableName)
+    tableDoesExistsSql = (
+        "SELECT EXISTS(SELECT 1 FROM pg_tables WHERE schemaname = '%s' and tablename='%s');"
+        % (schema, tableName)
+    )
     conn = pg_connection()
-    conn.executeSql(tableDoesExistsSql)
+    conn.execute_sql(tableDoesExistsSql)
     tableDoesExists = conn.cur.fetchone()[0]
     return tableDoesExists
 
 
-def routine_import_parcelles():
+def flow_import_parcelles():
     config = get_imported_communes_from_file()
-    #codes_insee = ast.literal_eval(config["communes"])
+    # codes_insee = ast.literal_eval(config["communes"])
     codes_insee = config["communes"]
-    tableName = 'parcellaire_france'
-    tableDoesExists = check_if_table_exists(tableName, schema='public')
+    tableName = "parcellaire_france"
+    tableDoesExists = check_if_table_exists(tableName, schema="public")
     if not tableDoesExists:
         create_parcellaire_france()
     try:
@@ -191,11 +208,12 @@ def routine_import_parcelles():
         print(error)
     finally:
         if conn is not None:
-            conn.closeConnection()
+            conn.close_connection()
 
-def routine_import_proprietaire():
-    tableName = 'proprietaire_droit'
-    tableDoesExists = check_if_table_exists(tableName, schema='public')
+
+def flow_import_proprietaire():
+    tableName = "proprietaire_droit"
+    tableDoesExists = check_if_table_exists(tableName, schema="public")
     if not tableDoesExists:
         create_proprietaire_droit()
     try:
@@ -206,11 +224,12 @@ def routine_import_proprietaire():
         print(error)
     finally:
         if conn is not None:
-            conn.closeConnection()
+            conn.close_connection()
 
-def routine_import_local():
-    tableName = 'pb0010_local'
-    tableDoesExists = check_if_table_exists(tableName, schema='public')
+
+def flow_import_local():
+    tableName = "pb0010_local"
+    tableDoesExists = check_if_table_exists(tableName, schema="public")
     if not tableDoesExists:
         create_pb0010_local()
     try:
@@ -221,13 +240,14 @@ def routine_import_local():
         print(error)
     finally:
         if conn is not None:
-            conn.closeConnection()
+            conn.close_connection()
 
-def routine_import_bati():
+
+def flow_import_bati():
     config = get_imported_communes_from_file()
     codes_insee = config["communes"]
-    tableName = 'bati_france'
-    tableDoesExists = check_if_table_exists(tableName, schema='public')
+    tableName = "bati_france"
+    tableDoesExists = check_if_table_exists(tableName, schema="public")
     if tableDoesExists is not True:
         create_bati_france()
     try:
@@ -239,4 +259,4 @@ def routine_import_bati():
         print(error)
     finally:
         if conn is not None:
-            conn.closeConnection()
+            conn.close_connection()

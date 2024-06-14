@@ -1,38 +1,41 @@
-#!/usr/bin/python
 import os
 
 from utils.dbutils import pg_connection
 from utils.config import db_schema, config
 
+
 def get_imported_communes_from_file():
     """
     Récupération de la liste des communes dans le fichier communes.txt
     """
-    filename = os.path.join(os.getcwd(), 'temp/communes.txt')
-    return config(filename, section='communes')
+    filename = os.path.join(os.getcwd(), "temp/communes.txt")
+    return config(filename, section="communes")
+
 
 def get_imported_communes_from_postgres():
     """
     Récupération de la liste des communes importées dans postgis via l'import MAJIC
     """
-    print('Liste des code communes importés dans MAJIC')
-    schema = db_schema()['schema']
-    getCommunesSql = ("SELECT '[''' || string_agg(communes, ''',''') ||''']' "
-                      "FROM("
-                      "SELECT distinct ccodep || ccocom as communes "
-                      "FROM %s.parcelle) t;" % schema)
+    print("Liste des code communes importés dans MAJIC")
+    schema = db_schema()["schema"]
+    getCommunesSql = (
+        "SELECT '[''' || string_agg(communes, ''',''') ||''']' "
+        "FROM("
+        "SELECT distinct ccodep || ccocom as communes "
+        "FROM %s.parcelle) t;" % schema
+    )
     conn = pg_connection()
-    conn.executeSql(getCommunesSql)
+    conn.execute_sql(getCommunesSql)
     communes = conn.cur.fetchone()[0]
-    conn.closeConnection()
+    conn.close_connection()
     return communes
+
 
 def write_communes_to_file():
     communes = get_imported_communes_from_postgres()
-    print('Liste des communes', communes)
-    file = open(os.path.join(os.getcwd(),'temp/communes.txt'), 'w')
-    file.write('[communes]\n')
-    file.write('communes = ')
+    print("Liste des communes", communes)
+    file = open(os.path.join(os.getcwd(), "temp/communes.txt"), "w")
+    file.write("[communes]\n")
+    file.write("communes = ")
     if communes is not None:
         file.write(communes)
-

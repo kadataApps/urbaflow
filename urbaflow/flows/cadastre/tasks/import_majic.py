@@ -1,75 +1,76 @@
-import os, glob
-import io
-import string, sys
+import os
 import re
-import time
-import tempfile
-import shutil
 
-from datetime import datetime
 
 from utils.config import majic_config
 from utils.dbutils import pg_connection
 
-class majicImport(object):
 
+class majicImport(object):
     def __init__(self, path):
         self.majic_config = majic_config()
-        
-        self.majicSourceDir = path
 
-        self.maxInsertRows = int(self.majic_config['maxinsertrows'])
+        self.majic_source_dir = path
+
+        self.max_insert_rows = int(self.majic_config["max_insert_rows"])
         self.majicSourceFileNames = [
-            {'key': '[FICHIER_BATI]',
-                'value': self.majic_config['bati'],
-                'table': 'bati',
-                'required': True
+            {
+                "key": "[FICHIER_BATI]",
+                "value": self.majic_config["bati"],
+                "table": "bati",
+                "required": True,
             },
-            {'key': '[FICHIER_FANTOIR]',
-                'value': self.majic_config['fantoir'],
-                'table': 'fanr',
-                'required': True
+            {
+                "key": "[FICHIER_FANTOIR]",
+                "value": self.majic_config["fantoir"],
+                "table": "fanr",
+                "required": True,
             },
-            {'key': '[FICHIER_LOTLOCAL]',
-                'value': self.majic_config['lotlocal'],
-                'table': 'lloc',
-                'required': False
+            {
+                "key": "[FICHIER_LOTLOCAL]",
+                "value": self.majic_config["lotlocal"],
+                "table": "lloc",
+                "required": False,
             },
-            {'key': '[FICHIER_NBATI]',
-                'value': self.majic_config['nbati'],
-                'table': 'nbat',
-                'required': True
+            {
+                "key": "[FICHIER_NBATI]",
+                "value": self.majic_config["nbati"],
+                "table": "nbat",
+                "required": True,
             },
-            {'key': '[FICHIER_PDL]',
-                'value': self.majic_config['pdll'],
-                'table': 'pdll',
-                'required': False
+            {
+                "key": "[FICHIER_PDL]",
+                "value": self.majic_config["pdll"],
+                "table": "pdll",
+                "required": False,
             },
-            {'key': '[FICHIER_PROP]',
-                'value': self.majic_config['prop'],
-                'table': 'prop',
-                'required': True
-            }
+            {
+                "key": "[FICHIER_PROP]",
+                "value": self.majic_config["prop"],
+                "table": "prop",
+                "required": True,
+            },
         ]
 
         self.totalSteps = len(self.majicSourceFileNames)
 
     def chunk(self, iterable, n=100000, padvalue=None):
-        '''
+        """
         Chunks an iterable (file, etc.)
         into pieces
-        '''
+        """
         from itertools import zip_longest
-        return zip_longest(*[iter(iterable)]*n, fillvalue=padvalue)
-    
+
+        return zip_longest(*[iter(iterable)] * n, fillvalue=padvalue)
+
     def importMajic(self):
-        '''
+        """
         Method wich read each majic file
         and bulk import data intp temp tables
         Returns False if no file processed
-        '''
-        
-        majicFilesFound = {}
+        """
+
+        majic_files_found = {}
 
         # Regex to remove all chars not in the range in ASCII table from space to ~
         # http://www.catonmat.net/blog/my-favorite-regex/
@@ -82,15 +83,15 @@ class majicImport(object):
         # and read 1st line to get departement and direction to compare to inputs
         depdirs = {}
         for item in self.majicSourceFileNames:
-            table = item['table']
-            value = item['value']
-            regexFileName = re.compile(r'('+value+')', re.IGNORECASE)
+            table = item["table"]
+            value = item["value"]
+            regex_filename = re.compile(r"(" + value + ")", re.IGNORECASE)
             # Get majic files for item
             majList = []
-            for root, dirs, files in os.walk(self.majicSourceDir):
+            for root, dirs, files in os.walk(self.majic_source_dir):
                 for i in files:
-                    #if os.path.split(i)[1] == value:
-                    if re.search(regexFileName, os.path.split(i)[1]) is not None:
+                    # if os.path.split(i)[1] == value:
+                    if re.search(regex_filename, os.path.split(i)[1]) is not None:
                         fpath = os.path.join(root, i)
                         print(fpath)
                         # Add file path to the list
@@ -98,68 +99,80 @@ class majicImport(object):
 
                         # Store depdir for this file
                         # avoid fantoir, as now it is given for the whole country
-                        if table == 'fanr':
+                        if table == "fanr":
                             continue
                         # Get depdir : first line with content
                         with open(fpath) as fin:
                             for a in fin:
-                                if len( a ) < 4 :
-                                  continue
+                                if len(a) < 4:
+                                    continue
                                 depdir = a[0:3]
                                 depdirs[depdir] = True
                                 break
 
-            majicFilesFound[table] = majList
-        
-        #Print result of exploring majic files
-        numberOfFilesToProceed = 0
-        for table in majicFilesFound:
-            print(table)
-            numberOfFilesToProceed += len(majicFilesFound[table])
+            majic_files_found[table] = majList
 
-        print("Majic files found : (%s files)" % numberOfFilesToProceed )
-        print(majicFilesFound)
+        # Print result of exploring majic files
+        numberOfFilesToProceed = 0
+        for table in majic_files_found:
+            print(table)
+            numberOfFilesToProceed += len(majic_files_found[table])
+
+        print("Majic files found : (%s files)" % numberOfFilesToProceed)
+        print(majic_files_found)
         print("Directions found :")
         print(depdirs)
-        
+
         # 2nd path to insert data
         # Open connection & set search_path
         connection = pg_connection()
-        #connection.setSearchPath(self.db_schema)
+        # connection.setSearchPath(self.db_schema)
         localStep = 0
         for item in self.majicSourceFileNames:
-            table = item['table']
-            #self.totalSteps+= len(majicFilesFound[table])
-            #processedFilesCount+=len(majicFilesFound[table])
+            table = item["table"]
+            # self.totalSteps+= len(majic_files_found[table])
+            # processedFilesCount+=len(majic_files_found[table])
             localStep += 1
-            #print("Etape " + str(processedFilesCount) + '/' + str(self.totalSteps))
-            print("Etape " + str(localStep) + '/' + str(self.totalSteps) + ": " + table)
+            # print("Etape " + str(processedFilesCount) + '/' + str(self.totalSteps))
+            print("Etape " + str(localStep) + "/" + str(self.totalSteps) + ": " + table)
 
             # Drop & create tables where to import data
             print("Drop & create table %s" % table)
-            sql = "DROP TABLE IF EXISTS \"%(table)s\"; CREATE TABLE \"%(table)s\" (tmp text);" % {
-                'table': table}
-            connection.executeSql(sql)
+            sql = (
+                'DROP TABLE IF EXISTS "%(table)s"; CREATE TABLE "%(table)s" (tmp text);'
+                % {"table": table}
+            )
+            connection.execute_sql(sql)
             connection.commit()
 
-            currentFile = 0
-            for fpath in majicFilesFound[table]:
-                currentFile += 1
-                print("Fichier " + str(currentFile) + '/' + str(len(majicFilesFound[table])))
+            current_file = 0
+            for fpath in majic_files_found[table]:
+                current_file += 1
+                print(
+                    "Fichier "
+                    + str(current_file)
+                    + "/"
+                    + str(len(majic_files_found[table]))
+                )
                 # read file content
-                with open(fpath, encoding='ascii', errors='replace') as fin:
+                with open(fpath, encoding="ascii", errors="replace") as fin:
                     # Divide file into chuncks
-                    for a in self.chunk(fin, self.maxInsertRows):
+                    for a in self.chunk(fin, self.max_insert_rows):
                         # Build INSERT list
-                        sql = '\n'.join(
+                        sql = "\n".join(
                             [
-                                "INSERT INTO \"%s\" VALUES (E\'%s\');" % (
+                                "INSERT INTO \"%s\" VALUES (E'%s');"
+                                % (
                                     table,
-                                    rQuoteString.sub("\\'", r.sub(' ', x.strip('\r\n')))
-                                ) for x in a if x and depdirs.get(x[0:3]) == True
+                                    rQuoteString.sub(
+                                        "\\'", r.sub(" ", x.strip("\r\n"))
+                                    ),
+                                )
+                                for x in a
+                                if x and depdirs.get(x[0:3]) is True
                             ]
                         )
-                        connection.executeSql(sql)
+                        connection.execute_sql(sql)
                 connection.commit()
                 print("Import done and commited for %s" % fpath)
-        connection.closeConnection()
+        connection.close_connection()

@@ -5,29 +5,33 @@ import sys
 
 from .config import db_config, db_schema
 
+
 def import_shapefile(
-        file: str,
-        table: str,
-        schema: str,
-        destination_srs: str = 'EPSG:2154',
-        source_srs: str = 'EPSG:4326'):
+    file: str,
+    table: str,
+    schema: str,
+    destination_srs: str = "EPSG:2154",
+    source_srs: str = "EPSG:4326",
+):
     params = db_config()
-    #{'host': 'localhost', 'database': 'local_test', 'user': 'postgres', 'password': 'postgres', 'port': '5433'}
-    params['table'] = table
-    params['file'] = file
-    params['schema'] = schema
-            
+    # {'host': 'localhost', 'database': 'local_test', 'user': 'postgres', 'password': 'postgres', 'port': '5433'}
+    params["table"] = table
+    params["file"] = file
+    params["schema"] = schema
+
     # command = ('ogr2ogr -f "PostgreSQL" '
     #     'PG:"host=%(host)s port=%(port)s user=%(user)s password=%(password)s dbname=%(database)s"'
     #     '"%(file)s" -nln %(table)s -append -update -skipfailures -a_srs "EPSG:4326"'
     #     % params)
-    password_string = f'PGPASSWORD=\'{ params["password"] }\'' if params["password"] != '' else ''
+    password_string = (
+        f'PGPASSWORD=\'{ params["password"] }\'' if params["password"] != "" else ""
+    )
     command = (
-                f'{ password_string } '
-                f'ogr2ogr -f "PostgreSQL" '
-                f'PG:"host={params["host"]} port={params["port"]} user={params["user"]} dbname={params["database"]} " '
-                f'"{params["file"]}" -nln {params["schema"]}.{params["table"]} -append -update -skipfailures -s_srs "{source_srs}" -t_srs "{destination_srs}" -nlt "PROMOTE_TO_MULTI"'
-                )
+        f'{ password_string } '
+        f'ogr2ogr -f "PostgreSQL" '
+        f'PG:"host={params["host"]} port={params["port"]} user={params["user"]} dbname={params["database"]} " '
+        f'"{params["file"]}" -nln {params["schema"]}.{params["table"]} -append -update -skipfailures -s_srs "{source_srs}" -t_srs "{destination_srs}" -nlt "PROMOTE_TO_MULTI"'
+    )
     print(command)
     try:
         os.system(command)
@@ -35,27 +39,28 @@ def import_shapefile(
         print(e)
 
 
-class importGeoJSON(object): 
+class importGeoJSON(object):
     def importFile(self, file, table):
         params = db_config()
-        schema = db_schema()['schema']
-        #{'host': 'localhost', 'database': 'local_test', 'user': 'postgres', 'password': 'postgres', 'port': '5433'}
-        params['table'] = table
-        params['file'] = file
-        params['schema'] = schema
-                
+        schema = db_schema()["schema"]
+        # {'host': 'localhost', 'database': 'local_test', 'user': 'postgres', 'password': 'postgres', 'port': '5433'}
+        params["table"] = table
+        params["file"] = file
+        params["schema"] = schema
+
         # command = ('ogr2ogr -f "PostgreSQL" '
         #     'PG:"host=%(host)s port=%(port)s user=%(user)s password=%(password)s dbname=%(database)s"'
         #     '"%(file)s" -nln %(table)s -append -update -skipfailures -a_srs "EPSG:4326"'
         #     % params)
-        password_string = f'PGPASSWORD=\'{ params["password"] }\'' if params["password"] != '' else ''
+        password_string = (
+            f'PGPASSWORD=\'{ params["password"] }\'' if params["password"] != "" else ""
+        )
         command = (
-                   f'{ password_string } '
-                   f'ogr2ogr -f "PostgreSQL" '
-                   f'PG:"host={params["host"]} port={params["port"]} user={params["user"]} dbname={params["database"]} " '
-                   
-                   f'"{params["file"]}" -nln {params["schema"]}.{params["table"]} -append -update -skipfailures -a_srs "EPSG:4326" -nlt "PROMOTE_TO_MULTI"'
-                   )
+            f'{ password_string } '
+            f'ogr2ogr -f "PostgreSQL" '
+            f'PG:"host={params["host"]} port={params["port"]} user={params["user"]} dbname={params["database"]} " '
+            f'"{params["file"]}" -nln {params["schema"]}.{params["table"]} -append -update -skipfailures -a_srs "EPSG:4326" -nlt "PROMOTE_TO_MULTI"'
+        )
         print(command)
         try:
             os.system(command)
@@ -64,7 +69,8 @@ class importGeoJSON(object):
 
 
 class pg_connection(object):
-    """ Connect to the PostgreSQL database server """
+    """Connect to the PostgreSQL database server"""
+
     conn = None
     cur = None
 
@@ -78,7 +84,7 @@ class pg_connection(object):
             params = db_config()
 
             # connect to the PostgreSQL server
-            print('Connecting to the PostgreSQL database...')
+            print("Connecting to the PostgreSQL database...")
             self.conn = psycopg2.connect(**params)
 
             # create a cursor
@@ -88,60 +94,62 @@ class pg_connection(object):
             print(error)
             if self.conn is not None:
                 self.conn.close()
-                print('Database connection closed after error.')
+                print("Database connection closed after error.")
             sys.exit()
 
     def commit(self):
         if self.conn is not None:
             self.conn.commit()
-            print('Transaction commited.')
+            print("Transaction commited.")
 
-    def closeConnection(self):
+    def close_connection(self):
         if self.conn is not None:
-                self.conn.close()
-                print('Database connection closed.')
+            self.conn.close()
+            print("Database connection closed.")
 
-    def executeSql(self, sql, *args):
+    def execute_sql(self, sql, *args):
         """
         sql queries are not commited.
-        Call connexion.commit() to commit the transaction 
-        before calling connexion.closeConnection()
+        Call connexion.commit() to commit the transaction
+        before calling connexion.close_connection()
         """
         self.cur.execute(sql, *args)
 
-    def executeScript(self, sqlScriptPath):
+    def execute_script(self, sqlscript_path):
         """
         Scripts are commited automatically but connexion remains open.
         """
-        sqlFile = open(sqlScriptPath, "r")
+        sqlFile = open(sqlscript_path, "r")
         self.cur.execute(sqlFile.read())
         self.commit()
-    
+
     def setSearchPathToImportSchema(self):
         """
         Set the search_path parameter in postgis database to [importSchema], public, pg_catalog.
         Creates [importSchema] if it doesn't exists
         """
-        schema = db_schema()['schema']
-        schemaDoesExistsSql = "SELECT EXISTS(SELECT 1 FROM pg_namespace WHERE nspname='%s')" % schema
-        self.executeSql(schemaDoesExistsSql)
+        schema = db_schema()["schema"]
+        schemaDoesExistsSql = (
+            "SELECT EXISTS(SELECT 1 FROM pg_namespace WHERE nspname='%s')" % schema
+        )
+        self.execute_sql(schemaDoesExistsSql)
         schemaDoesExists = self.cur.fetchone()
         if not schemaDoesExists[0]:
             print("Create schema %s" % schema)
-            self.executeSql("CREATE SCHEMA %s" % schema)
-        prefix = 'SET search_path = "%s", public, pg_catalog;' % schema 
-        self.executeSql(prefix)
+            self.execute_sql("CREATE SCHEMA %s" % schema)
+        prefix = 'SET search_path = "%s", public, pg_catalog;' % schema
+        self.execute_sql(prefix)
         print("Working Schema: %s" % schema)
 
-    def setSearchPathToPublic(self):
+    def set_search_path_to_public(self):
         """
         Set the search_path parameter in postgis database to 'public, pg_catalog'
         """
         sql = "SET search_path = public, pg_catalog;"
-        self.executeSql(sql)
+        self.execute_sql(sql)
 
     def getPostgreSQLversion(self):
-        self.cur.execute('SELECT version()')
+        self.cur.execute("SELECT version()")
         # display the PostgreSQL database server version
         db_version = self.cur.fetchone()
         print(db_version)
