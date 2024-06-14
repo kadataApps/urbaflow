@@ -1,0 +1,42 @@
+---
+version: "3"
+services:
+  postgis:
+    image: kartoza/postgis:15-3.3
+    container_name: postgis-carto
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PASSWORD: ${POSTGRES_PASS}
+    ports:
+      - ${POSTGRES_PORT}:5432
+    volumes:
+      - db-carto-data:/var/lib/postgresql/data
+      - "${CARTO_BACKUPS_FOLDER}:/opt/backups"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} -q || exit 1"]
+      interval: 10s
+      timeout: 5s
+      start_period: 60s
+      retries: 30
+
+  urbaflow:
+    build: .
+    environment:
+      - POSTGRES_HOST
+      - POSTGRES_USER
+      - POSTGRES_DB
+      - POSTGRES_PASS
+      - POSTGRES_PORT
+      # urbaflow config
+      - CADASTRE_MILLESIME
+      - IMPORT_SCHEMA
+    command: tail -F anything
+    volumes:
+      - ${PATH_TO_DATA}:/data
+      - ${DEV_FOLDER}:/home/urbaflow-user/urbaflow
+
+
+volumes:
+  db-carto-data:
+    driver: local

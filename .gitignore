@@ -1,0 +1,19 @@
+# cache
+__pycache__
+*.py[cod]
+*.pyc
+.venv
+
+*/node_modules
+.env
+
+
+# virtualenv
+pyvenv.cfg
+lib
+bin
+/temp
+.env
+
+# temp files
+processing/temp/*
