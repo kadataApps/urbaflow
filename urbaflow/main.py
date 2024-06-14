@@ -130,7 +130,7 @@ def majic(
             "11": {"default": etape11},
             "12": {"default": etape12},
         }
-        flow_cadastre(path=dirname, etapes=steps_to_process)
+        flow_cadastre(path=dirname, steps=steps_to_process)
 
 
 @app.command()

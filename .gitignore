@@ -16,4 +16,4 @@ bin
 .env
 
 # temp files
-processing/temp/*
+urbaflow/temp/*

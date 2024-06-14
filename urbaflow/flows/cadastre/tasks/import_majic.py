@@ -13,7 +13,7 @@ class majicImport(object):
         self.majic_source_dir = path
 
         self.max_insert_rows = int(self.majic_config["max_insert_rows"])
-        self.majicSourceFileNames = [
+        self.majic_source_filenames = [
             {
                 "key": "[FICHIER_BATI]",
                 "value": self.majic_config["bati"],
@@ -52,7 +52,7 @@ class majicImport(object):
             },
         ]
 
-        self.totalSteps = len(self.majicSourceFileNames)
+        self.totalSteps = len(self.majic_source_filenames)
 
     def chunk(self, iterable, n=100000, padvalue=None):
         """
@@ -82,7 +82,7 @@ class majicImport(object):
         # 1st path to build the complete list for each majic source type (nbat, bati, lloc, etc.)
         # and read 1st line to get departement and direction to compare to inputs
         depdirs = {}
-        for item in self.majicSourceFileNames:
+        for item in self.majic_source_filenames:
             table = item["table"]
             value = item["value"]
             regex_filename = re.compile(r"(" + value + ")", re.IGNORECASE)
@@ -113,12 +113,12 @@ class majicImport(object):
             majic_files_found[table] = majList
 
         # Print result of exploring majic files
-        numberOfFilesToProceed = 0
+        files_to_proceed_counter = 0
         for table in majic_files_found:
             print(table)
-            numberOfFilesToProceed += len(majic_files_found[table])
+            files_to_proceed_counter += len(majic_files_found[table])
 
-        print("Majic files found : (%s files)" % numberOfFilesToProceed)
+        print("Majic files found : (%s files)" % files_to_proceed_counter)
         print(majic_files_found)
         print("Directions found :")
         print(depdirs)
@@ -128,7 +128,7 @@ class majicImport(object):
         connection = pg_connection()
         # connection.setSearchPath(self.db_schema)
         localStep = 0
-        for item in self.majicSourceFileNames:
+        for item in self.majic_source_filenames:
             table = item["table"]
             # self.totalSteps+= len(majic_files_found[table])
             # processedFilesCount+=len(majic_files_found[table])
