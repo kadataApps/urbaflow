@@ -1,5 +1,17 @@
 # UrbaFlow
 
+ETL de traitement des données liées à l'urbanisme :
+
+- MAJIC
+- DVF (données Valeurs Foncières)
+- Fantoir
+- FFPM (Fichiers Fonciers Personnes Morales)
+- Cadastre
+- Bati
+- PLU
+- Géosirene
+
+
 L'ETL est composé de scripts python et de fichiers SQL.
 Il a été testé pour les environnements linux et OSX.
 
