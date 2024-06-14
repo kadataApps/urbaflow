@@ -17,3 +17,4 @@ bin
 
 # temp files
 urbaflow/temp/*
+urbaflow/temp/**

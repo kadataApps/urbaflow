@@ -4,6 +4,8 @@ import pathlib
 import logging
 from chardet import detect
 
+from logging_config import logger
+
 
 def concat_files(files, sep=";"):
     frames = [
@@ -38,7 +40,7 @@ def encode_to_utf8(src_file):
     """
     encode file to utf-8
     """
-    print("encode_to_utf8: " + src_file)
+    logger.info("encode_to_utf8: " + src_file)
     trg_file = src_file + ".swp"
     from_codec = get_encoding_type(src_file)
     if from_codec == "utf-8":

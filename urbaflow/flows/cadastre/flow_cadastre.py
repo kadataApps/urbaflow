@@ -2,9 +2,10 @@ import sys
 import os
 from pathlib import Path
 
+from logging_config import logger
 from utils.script_utils import copy_files_to_temp
 
-from .tasks.import_majic import majicImport
+from .tasks.import_majic import import_majic
 from .tasks.format_majic import (
     clean_with_drop_db_for_majic_import,
     init_db_for_majic_import,
@@ -76,21 +77,21 @@ def flow_import_majic_to_postgres(path):
     à partir des 6 fichiers bruts
     dans 6 tables "temporaires"
     """
-    majicImp = majicImport(path)
-    print("Import des données MAJIC dans PostgreSQL")
+    majicImp = import_majic(path)
+    logger.info("Import des données MAJIC dans PostgreSQL")
     majicImp.importMajic()
 
 
 def flow_copy_transform_majic_queries():
-    print("Copie des scripts dans le répertoire temporaire:")
+    logger.info("Copie des scripts dans le répertoire temporaire:")
     sql_scripts_dir = os.path.join(
         Path(__file__).resolve().parent.parent.parent, "queries/majic/"
     )
     sqlScriptsDestDir = os.path.join(os.getcwd(), "temp/sql/")
-    print("Source: ", sql_scripts_dir)
-    print("Destination: ", sqlScriptsDestDir)
+    logger.info("Source: ", sql_scripts_dir)
+    logger.info("Destination: ", sqlScriptsDestDir)
     copy_files_to_temp(sql_scripts_dir, sqlScriptsDestDir)
-    print("Scripts copiés dans le répertoire temporaire.")
+    logger.info("Scripts copiés dans le répertoire temporaire.")
 
 
 def flow_clean_db_for_majic():
@@ -142,10 +143,10 @@ def flow_clean():
 def flow_cadastre(path, steps):
     # Check if path exits
     if path is not None and os.path.isdir(path):
-        print("Path is dir and exists. We proceed.")
-        tempDir = os.path.join(os.getcwd(), "temp")
-        print(tempDir)
-        print("----------------")
+        logger.info("Path is dir and exists. We proceed.")
+        temp_dir = os.path.join(os.getcwd(), "temp")
+        logger.info(temp_dir)
+        logger.info("----------------")
         if steps["1"]["default"] is True:
             flow_import_majic_to_postgres(path)
 
@@ -181,9 +182,9 @@ def flow_cadastre(path, steps):
         if steps["12"]["default"] is True:
             flow_clean()
 
-        print("Fin des scripts d'import")
+        logger.info("Fin des scripts d'import")
     else:
-        print(
+        logger.error(
             "Le chemin spécifié n'est pas un répertoire existant. Veuillez vérifier le chemin et réessayer.)"
         )
 
@@ -193,8 +194,8 @@ if __name__ == "__main__":
     try:
         path = sys.argv[1]
     except Exception:
-        print("error")
+        logger.info("error")
 
-    print("Will try to import majic files from dir: ")
-    print(path)
+    logger.info("Will try to import majic files from dir: ")
+    logger.info(path)
     flow_cadastre(path, steps=STEPS_FLOW_CADASTRE)

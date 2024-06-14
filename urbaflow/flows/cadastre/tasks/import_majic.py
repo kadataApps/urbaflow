@@ -1,12 +1,12 @@
 import os
 import re
 
-
+from logging_config import logger
 from utils.config import majic_config
 from utils.dbutils import pg_connection
 
 
-class majicImport(object):
+class import_majic(object):
     def __init__(self, path):
         self.majic_config = majic_config()
 
@@ -52,7 +52,7 @@ class majicImport(object):
             },
         ]
 
-        self.totalSteps = len(self.majic_source_filenames)
+        self.step_counter = len(self.majic_source_filenames)
 
     def chunk(self, iterable, n=100000, padvalue=None):
         """
@@ -75,7 +75,7 @@ class majicImport(object):
         # Regex to remove all chars not in the range in ASCII table from space to ~
         # http://www.catonmat.net/blog/my-favorite-regex/
         r = re.compile(r"[^ -~]")
-        rQuoteString = re.compile(r"'")
+        r_quote_string = re.compile(r"'")
 
         # Loop through all majic files
 
@@ -93,7 +93,7 @@ class majicImport(object):
                     # if os.path.split(i)[1] == value:
                     if re.search(regex_filename, os.path.split(i)[1]) is not None:
                         fpath = os.path.join(root, i)
-                        print(fpath)
+                        logger.info(fpath)
                         # Add file path to the list
                         majList.append(fpath)
 
@@ -112,16 +112,16 @@ class majicImport(object):
 
             majic_files_found[table] = majList
 
-        # Print result of exploring majic files
+        # print result of exploring majic files
         files_to_proceed_counter = 0
         for table in majic_files_found:
-            print(table)
+            logger.info(table)
             files_to_proceed_counter += len(majic_files_found[table])
 
-        print("Majic files found : (%s files)" % files_to_proceed_counter)
-        print(majic_files_found)
-        print("Directions found :")
-        print(depdirs)
+        logger.info("Majic files found : (%s files)" % files_to_proceed_counter)
+        logger.info(majic_files_found)
+        logger.info("Directions found :")
+        logger.info(depdirs)
 
         # 2nd path to insert data
         # Open connection & set search_path
@@ -130,14 +130,15 @@ class majicImport(object):
         localStep = 0
         for item in self.majic_source_filenames:
             table = item["table"]
-            # self.totalSteps+= len(majic_files_found[table])
+            # self.step_counter+= len(majic_files_found[table])
             # processedFilesCount+=len(majic_files_found[table])
             localStep += 1
-            # print("Etape " + str(processedFilesCount) + '/' + str(self.totalSteps))
-            print("Etape " + str(localStep) + "/" + str(self.totalSteps) + ": " + table)
+            logger.info(
+                "Etape " + str(localStep) + "/" + str(self.step_counter) + ": " + table
+            )
 
             # Drop & create tables where to import data
-            print("Drop & create table %s" % table)
+            logger.info("Drop & create table %s" % table)
             sql = (
                 'DROP TABLE IF EXISTS "%(table)s"; CREATE TABLE "%(table)s" (tmp text);'
                 % {"table": table}
@@ -148,7 +149,7 @@ class majicImport(object):
             current_file = 0
             for fpath in majic_files_found[table]:
                 current_file += 1
-                print(
+                logger.info(
                     "Fichier "
                     + str(current_file)
                     + "/"
@@ -164,7 +165,7 @@ class majicImport(object):
                                 "INSERT INTO \"%s\" VALUES (E'%s');"
                                 % (
                                     table,
-                                    rQuoteString.sub(
+                                    r_quote_string.sub(
                                         "\\'", r.sub(" ", x.strip("\r\n"))
                                     ),
                                 )
@@ -174,5 +175,5 @@ class majicImport(object):
                         )
                         connection.execute_sql(sql)
                 connection.commit()
-                print("Import done and commited for %s" % fpath)
+                logger.info("Import done and commited for %s" % fpath)
         connection.close_connection()

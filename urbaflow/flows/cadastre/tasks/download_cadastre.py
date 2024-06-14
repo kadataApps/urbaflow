@@ -4,6 +4,7 @@ import ast
 import sys
 import urllib.request
 
+from logging_config import logger
 from utils.dbutils import importGeoJSON
 from .get_communes_majic import get_imported_communes_from_file
 
@@ -22,6 +23,11 @@ def reporthook(blocknum, blocksize, totalsize):
 
 def download_cadastre(codeinsee: str, targetDir, millesime):
     param_millesime = "latest" if millesime is None else millesime
+    logger.info(
+        "Téléchargement du cadastre pour la commune %s, millesime %s",
+        codeinsee,
+        param_millesime,
+    )
     url = (
         "https://cadastre.data.gouv.fr/data/etalab-cadastre/"
         + param_millesime
@@ -61,38 +67,38 @@ def download_bati(codeinsee, targetDir):
 
 
 def download_cadastre_for_communes():
-    tempDir = os.path.join(os.getcwd(), "temp/downloads/")
+    temp_dir = os.path.join(os.getcwd(), "temp/downloads/")
     config = get_imported_communes_from_file()
     try:
         communes = ast.literal_eval(config["communes"])
     except:
-        print("Aucune commune dans le fichier communes.txt. Rien à télécharger")
+        logger.error("Aucune commune dans le fichier communes.txt. Rien à télécharger")
         raise
     else:
         millesime = os.getenv("CADASTRE_MILLESIME")
-        print(communes)
+        logger.debug(communes)
         for commune in communes:
-            print(commune)
-            download_cadastre(commune, tempDir, millesime)
-            file = os.path.join(tempDir, "cadastre-%s-parcelles.json" % commune)
+            logger.info(commune)
+            download_cadastre(commune, temp_dir, millesime)
+            file = os.path.join(temp_dir, "cadastre-%s-parcelles.json" % commune)
             json = importGeoJSON()
             json.importFile(file, "cadastre_parcelles")
 
 
 def download_bati_for_communes():
-    tempDir = os.path.join(os.getcwd(), "temp/downloads/")
+    temp_dir = os.path.join(os.getcwd(), "temp/downloads/")
     config = get_imported_communes_from_file()
     try:
         communes = ast.literal_eval(config["communes"])
     except:
-        print("Aucune commune dans le fichier communes.txt. Rien à télécharger")
+        logger.error("Aucune commune dans le fichier communes.txt. Rien à télécharger")
         raise
     else:
-        print(communes)
+        logger.info(communes)
         for commune in communes:
-            print(commune)
-            download_bati(commune, tempDir)
-            file = os.path.join(tempDir, "cadastre-%s-batiments.json" % commune)
+            logger.info(commune)
+            download_bati(commune, temp_dir)
+            file = os.path.join(temp_dir, "cadastre-%s-batiments.json" % commune)
             json = importGeoJSON()
             json.importFile(file, "cadastre_bati")
 
