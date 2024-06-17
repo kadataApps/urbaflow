@@ -77,9 +77,8 @@ def flow_import_majic_to_postgres(path):
     à partir des 6 fichiers bruts
     dans 6 tables "temporaires"
     """
-    majicImp = import_majic(path)
     logger.info("Import des données MAJIC dans PostgreSQL")
-    majicImp.importMajic()
+    import_majic(path).import_majic_files()
 
 
 def flow_copy_transform_majic_queries():
@@ -87,10 +86,10 @@ def flow_copy_transform_majic_queries():
     sql_scripts_dir = os.path.join(
         Path(__file__).resolve().parent.parent.parent, "queries/majic/"
     )
-    sqlScriptsDestDir = os.path.join(os.getcwd(), "temp/sql/")
-    logger.info("Source: ", sql_scripts_dir)
-    logger.info("Destination: ", sqlScriptsDestDir)
-    copy_files_to_temp(sql_scripts_dir, sqlScriptsDestDir)
+    sql_scripts_dest_dir = os.path.join(os.getcwd(), "temp/sql/")
+    logger.info("Source: %s", sql_scripts_dir)
+    logger.info("Destination: %s", sql_scripts_dest_dir)
+    copy_files_to_temp(sql_scripts_dir, sql_scripts_dest_dir)
     logger.info("Scripts copiés dans le répertoire temporaire.")
 
 

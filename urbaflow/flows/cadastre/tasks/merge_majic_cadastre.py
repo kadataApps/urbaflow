@@ -21,6 +21,7 @@ def execute_merge_cadastre_majic_scripts():
         "traitements/merge/2-affectation_local_pev.sql",
         "traitements/merge/3-affectation_adresses.sql",
         "traitements/merge/4-anonymisation.sql",
+        "traitements/qualification/qualification_proprietaires.sql",
     ]
 
     scripts_count = len(script_list)

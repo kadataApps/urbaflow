@@ -55,7 +55,7 @@ CREATE TABLE public.pb0010_local (
     ccitlv text,           --
     dteloc char(1),        -- 38
                            -- 39 * Missing dteloctxt
-                           -- 40 * Missing logh
+    logh char(1),          -- 40 * Missing logh
                            -- 41 * Missing loghmais
                            -- 42 * Missing loghappt
     gtauom char(2),        -- 43
@@ -79,7 +79,7 @@ CREATE TABLE public.pb0010_local (
                            -- 58 * Missing proba_rprs
                            -- 59 * Missing typeact
                            -- 61 * Missing actvac
-                           -- 62 * Missing loghvac
+    loghvac char(1),       -- 62 * Missing loghvac
                            -- 65 * Missing actvac2a
                            -- 66 * Missing loghvac2a
                            -- 67 * Missing actvac5a

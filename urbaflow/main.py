@@ -61,51 +61,51 @@ def majic(
         readable=True,
         resolve_path=True,
     ),
-    etape1: bool = typer.Option(
+    step1: bool = typer.Option(
         STEPS_FLOW_CADASTRE["1"]["default"],
         help=STEPS_FLOW_CADASTRE["1"]["description"],
     ),
-    etape2: bool = typer.Option(
+    step2: bool = typer.Option(
         STEPS_FLOW_CADASTRE["2"]["default"],
         help=STEPS_FLOW_CADASTRE["2"]["description"],
     ),
-    etape3: bool = typer.Option(
+    step3: bool = typer.Option(
         STEPS_FLOW_CADASTRE["3"]["default"],
         help=STEPS_FLOW_CADASTRE["3"]["description"],
     ),
-    etape4: bool = typer.Option(
+    step4: bool = typer.Option(
         STEPS_FLOW_CADASTRE["4"]["default"],
         help=STEPS_FLOW_CADASTRE["4"]["description"],
     ),
-    etape5: bool = typer.Option(
+    step5: bool = typer.Option(
         STEPS_FLOW_CADASTRE["5"]["default"],
         help=STEPS_FLOW_CADASTRE["5"]["description"],
     ),
-    etape6: bool = typer.Option(
+    step6: bool = typer.Option(
         STEPS_FLOW_CADASTRE["6"]["default"],
         help=STEPS_FLOW_CADASTRE["6"]["description"],
     ),
-    etape7: bool = typer.Option(
+    step7: bool = typer.Option(
         STEPS_FLOW_CADASTRE["7"]["default"],
         help=STEPS_FLOW_CADASTRE["7"]["description"],
     ),
-    etape8: bool = typer.Option(
+    step8: bool = typer.Option(
         STEPS_FLOW_CADASTRE["8"]["default"],
         help=STEPS_FLOW_CADASTRE["8"]["description"],
     ),
-    etape9: bool = typer.Option(
+    step9: bool = typer.Option(
         STEPS_FLOW_CADASTRE["9"]["default"],
         help=STEPS_FLOW_CADASTRE["9"]["description"],
     ),
-    etape10: bool = typer.Option(
+    step10: bool = typer.Option(
         STEPS_FLOW_CADASTRE["10"]["default"],
         help=STEPS_FLOW_CADASTRE["10"]["description"],
     ),
-    etape11: bool = typer.Option(
+    step11: bool = typer.Option(
         STEPS_FLOW_CADASTRE["11"]["default"],
         help=STEPS_FLOW_CADASTRE["11"]["description"],
     ),
-    etape12: bool = typer.Option(
+    step12: bool = typer.Option(
         STEPS_FLOW_CADASTRE["12"]["default"],
         help=STEPS_FLOW_CADASTRE["12"]["description"],
     ),
@@ -117,18 +117,18 @@ def majic(
     if dirname.is_dir():
         typer.echo(f"Using {dirname}")
         steps_to_process = {
-            "1": {"default": etape1},
-            "2": {"default": etape2},
-            "3": {"default": etape3},
-            "4": {"default": etape4},
-            "5": {"default": etape5},
-            "6": {"default": etape6},
-            "7": {"default": etape7},
-            "8": {"default": etape8},
-            "9": {"default": etape9},
-            "10": {"default": etape10},
-            "11": {"default": etape11},
-            "12": {"default": etape12},
+            "1": {"default": step1},
+            "2": {"default": step2},
+            "3": {"default": step3},
+            "4": {"default": step4},
+            "5": {"default": step5},
+            "6": {"default": step6},
+            "7": {"default": step7},
+            "8": {"default": step8},
+            "9": {"default": step9},
+            "10": {"default": step10},
+            "11": {"default": step11},
+            "12": {"default": step12},
         }
         flow_cadastre(path=dirname, steps=steps_to_process)
 

@@ -63,7 +63,7 @@ class import_majic(object):
 
         return zip_longest(*[iter(iterable)] * n, fillvalue=padvalue)
 
-    def importMajic(self):
+    def import_majic_files(self):
         """
         Method wich read each majic file
         and bulk import data intp temp tables

@@ -7,6 +7,7 @@ CREATE TABLE public.parcellaire_france (
     idparcelle_geom text COLLATE pg_catalog."default" NOT NULL, --
     code_insee character varying COLLATE pg_catalog."default",  --
     idpar text COLLATE pg_catalog."default",                    -- 1
+    idpar_simple text COLLATE pg_catalog."default",             -- 
     idprocpte text COLLATE pg_catalog."default",                -- 4
     dcntpa integer,                                             -- 16
     jdatat char(8),                                             -- 19
@@ -40,6 +41,8 @@ CREATE TABLE public.parcellaire_france (
     typprop text COLLATE pg_catalog."default",                  --
     typproppro text COLLATE pg_catalog."default",               --
     typpropges text COLLATE pg_catalog."default",               --
+    typproprietaire text COLLATE pg_catalog."default",          --
+    typproprietaire_niv2 text COLLATE pg_catalog."default",     --
     ddenomprop text COLLATE pg_catalog."default",               --
     ddenomproppro text COLLATE pg_catalog."default",            --
     ddenompropges text COLLATE pg_catalog."default",            --

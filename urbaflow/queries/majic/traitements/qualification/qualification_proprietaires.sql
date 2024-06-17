@@ -1,8 +1,3 @@
-SET SEARCH_PATH to 'douaisis', public;
-
-ALTER TABLE parcellaire ADD COLUMN IF NOT EXISTS typproprietaire TEXT;
-
-
 /*
 	CCOGRM: 
     1   ETAT    
@@ -230,4 +225,29 @@ UPDATE parcellaire SET typproprietaire =
 		
 		WHEN typproppro ilike 'COPROP%' THEN 'COPROPRIETE'
 		ELSE  'PRIVE' 
+	END;
+
+
+
+UPDATE parcellaire SET typproprietaire_niv2 =
+	CASE 
+		WHEN typproprietaire = 'COPROPRIETE'
+			THEN 'Copropriétés/ASL'
+		WHEN typproppro = 'PERSONNES PHYSIQUES' AND nbindi = 2
+			THEN 'Indivisions simples (2 indivisaires)'
+		WHEN typproppro = 'PERSONNES PHYSIQUES' AND nbindi > 2
+			THEN 'Indivisions complexes (3+ indivisaires)'
+		WHEN descprop = 'PLEINE PROPRIETE' AND typproppro = 'PERSONNES PHYSIQUES' 
+			THEN 'Monopropriétés'
+		WHEN typproppro = 'PERSONNES MORALES PRIVEES' AND ndroitpro = 1
+			THEN 'Sociétés'
+		WHEN typproppro = 'PERSONNES MORALES PRIVEES' AND ndroitpro > 1
+			THEN 'Groupements de sociétés'
+		WHEN typproppro = 'ETAT' OR typproppro = 'REGION' OR typproppro = 'DEPARTEMENT' OR typproppro = 'COMMUNE' 
+			OR typproprietaire = 'EPCI' 
+			THEN 'Public'
+		WHEN typproppro = 'OFFICE HLM' OR typproppro = 'ETABLISSEMENTS PUBLICS OU ORGANISMES ASSIMILES' OR typproprietaire = 'AUTRE_PUB' 
+			OR typproprietaire = 'AMENAGEUR_PUB' OR typproprietaire = 'EPF'
+			THEN 'Parapublic'
+		ELSE 'Autres'
 	END;

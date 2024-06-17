@@ -33,6 +33,8 @@ CREATE TABLE parcellaire AS (
     null::numeric AS ndroitpro,
     null::numeric AS ndroitges,
     null::numeric AS ndroitpro_parcelle_bati,
+    null::text AS typproprietaire,
+    null::text AS typproprietaire_niv2,
     null::text AS typprop,
     null::text AS typproppro,
     null::text AS typpropges,
@@ -104,7 +106,10 @@ CREATE TABLE parcellaire AS (
     || parcelle.dnuplar AS idparref,
     parcelle.ccodep || parcelle.ccocom || parcelle.cprsecr || parcelle.ccosecr AS idsecref,
     parcelle.ccodep || parcelle.ccocom || parcelle.ccoriv AS idvoie,
-    trim(parcelle.ccodep || parcelle.ccocom) AS idcom
+    trim(parcelle.ccodep || parcelle.ccocom) AS idcom,
+    cadastre_parcelles.section || left(
+      '0000', 4 - length(cadastre_parcelles.numero)
+    ) || cadastre_parcelles.numero AS idpar_simple
 
   FROM cadastre_parcelles
   LEFT JOIN parcelle

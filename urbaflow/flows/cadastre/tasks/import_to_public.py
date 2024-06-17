@@ -67,20 +67,22 @@ def insert_parcelles_to_public(connexion):
     schema = db_schema()["schema"]
     import_query = """
     INSERT INTO public.parcellaire_france (
-      geom, idparcelle_geom, code_insee, idpar, idprocpte, dcntpa, jdatat,
+      geom, idparcelle_geom, code_insee, idpar, idpar_simple, idprocpte, dcntpa, jdatat,
       libcom, dlibvoi, adressepar, nbat, jdatatan, jannatmin, jannatmax,
       jannatminh, jannatmaxh, dcntarti, dcntnaf, nlocal, spevtot, nloclog,
       nloccom, nloccomsec, nloccomter, nlogh, nloghvac, nloghpp, nloghlm, ncp,
       ndroit, descprop, ndroitpro, ndroitges, ndroitpro_parcelle_bati, typprop, typproppro, typpropges,
+      typproprietaire, typproprietaire_niv2,
       ddenomprop, ddenomproppro, ddenompropges
       )
     SELECT
-      geom, idparcelle_geom, code_insee, idpar, idprocpte, dcntpa, jdatat,
+      geom, idparcelle_geom, code_insee, idpar, idpar_simple, idprocpte, dcntpa, jdatat,
       libcom, dlibvoi, adressepar, nbat, jdatatan, jannatmin, jannatmax,
-      jannatminh, jannatmaxh, dcntarti, dcntnaf, nlocal, spevtot, nloclog, nloccom, nloccomsec,
-      nloccomter, nlogh, nloghvac, nloghpp, nloghlm, ncp, ndroit, descprop,
-      ndroitpro, ndroitges, ndroitpro_parcelle_bati, typprop, typproppro, typpropges, ddenomprop,
-      ddenomproppro, ddenompropges
+      jannatminh, jannatmaxh, dcntarti, dcntnaf, nlocal, spevtot, nloclog,
+      nloccom, nloccomsec, nloccomter, nlogh, nloghvac, nloghpp, nloghlm, ncp,
+      ndroit, descprop, ndroitpro, ndroitges, ndroitpro_parcelle_bati, typprop, typproppro, typpropges,
+      typproprietaire, typproprietaire_niv2,
+      ddenomprop, ddenomproppro, ddenompropges
     FROM """
     import_query += f"{schema}.parcellaire;"
 
@@ -183,7 +185,7 @@ def delete_from_public(codes_insee, table_name, connexion):
 
 def check_if_table_exists(table_name, schema):
     table_exists_query = (
-        "SELECT EXISTS(SELECT 1 FROM pg_tables WHERE schemaname = '%s' and table_name='%s');"
+        "SELECT EXISTS(SELECT 1 FROM pg_tables WHERE schemaname = '%s' and tablename='%s');"
         % (schema, table_name)
     )
     conn = pg_connection()

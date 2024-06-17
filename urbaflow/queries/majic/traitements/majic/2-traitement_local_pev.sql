@@ -41,3 +41,25 @@ UPDATE local00 SET
   idbat = ccodep || ccocom || CASE
     WHEN trim(ccopre) = '' THEN '000' ELSE ccopre
   END || coalesce(trim(ccosec), '') || dnupla || dnubat;
+
+
+UPDATE local10 SET
+  logh = CASE WHEN (
+        (local10.dteloc = '1' OR local10.dteloc = '2')
+        AND pev.dnupev = '001'
+        AND pev.ccoaff = 'H')
+      THEN 't' END,
+  loghvac = CASE WHEN
+        (local10.dteloc = '1' OR local10.dteloc = '2')
+        AND pev.dnupev = '001'
+        AND pev.ccoaff = 'H'
+        AND pev.ccthp = 'V'
+      THEN 't' END,
+  loghpp = CASE WHEN
+        (local10.dteloc = '1' OR local10.dteloc = '2')
+        AND pev.dnupev = '001'
+        AND pev.ccoaff = 'H'
+        AND pev.ccthp = 'P'
+      THEN 't' END
+FROM pev
+    WHERE local10.idlocal = pev.idlocal;
