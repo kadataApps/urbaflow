@@ -1,2 +1,0 @@
-[communes]
-communes = ['17072']
