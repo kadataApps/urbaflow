@@ -35,6 +35,7 @@ services:
     volumes:
       - ${PATH_TO_DATA}:/data
       - ${DEV_FOLDER}:/home/urbaflow-user/urbaflow
+      - ${LOG_FOLDER}:/home/urbaflow-user/logs
 
 
 volumes:

@@ -47,7 +47,7 @@ def create_pb0010_local():
     conn = pg_connection()
     conn.execute_script(script_path_create)
     conn.close_connection()
-    logger.info("La table proprietaire_droit a été créée.")
+    logger.info("La table pb0010_local a été créée.")
 
 
 def create_bati_france():
@@ -72,7 +72,7 @@ def insert_parcelles_to_public(connexion):
       jannatminh, jannatmaxh, dcntarti, dcntnaf, nlocal, spevtot, nloclog,
       nloccom, nloccomsec, nloccomter, nlogh, nloghvac, nloghpp, nloghlm, ncp,
       ndroit, descprop, ndroitpro, ndroitges, ndroitpro_parcelle_bati, typprop, typproppro, typpropges,
-      typproprietaire, typproprietaire_niv2,
+      catpro, catpro_niv2, presgdprop,
       ddenomprop, ddenomproppro, ddenompropges
       )
     SELECT
@@ -81,7 +81,7 @@ def insert_parcelles_to_public(connexion):
       jannatminh, jannatmaxh, dcntarti, dcntnaf, nlocal, spevtot, nloclog,
       nloccom, nloccomsec, nloccomter, nlogh, nloghvac, nloghpp, nloghlm, ncp,
       ndroit, descprop, ndroitpro, ndroitges, ndroitpro_parcelle_bati, typprop, typproppro, typpropges,
-      typproprietaire, typproprietaire_niv2,
+      catpro, catpro_niv2, presgdprop,
       ddenomprop, ddenomproppro, ddenompropges
     FROM """
     import_query += f"{schema}.parcellaire;"
@@ -105,7 +105,8 @@ def insert_proprietaire_to_public(connexion):
       dnomcp, dprncp, topcdi, oriard, fixard, datadr, topdec, datdec, dsiren,
       ccmm, topja, datja, anospi, cblpmo, gtodge, gpctf, gpctsb, jmodge,
       jandge, jantfc, jantbc, dformjur, dnomus, dprnus, lot, locprop,
-      locproptxt, codnom
+      locproptxt, codnom, catpro, catpro_niv2, nlogh, nloghvac, nloghpp,
+      nloghmeu, nlogloue, nloghautre, nloghnonh, nloghlm, gdprop
       )
     SELECT
       proprietaire, annee, idprodroit, idprocpte, idpersonne, idvoie, idcom,
@@ -118,7 +119,8 @@ def insert_proprietaire_to_public(connexion):
       dnomcp, dprncp, topcdi, oriard, fixard, datadr, topdec, datdec, dsiren,
       ccmm, topja, datja, anospi, cblpmo, gtodge, gpctf, gpctsb, jmodge,
       jandge, jantfc, jantbc, dformjur, dnomus, dprnus, lot, locprop,
-      locproptxt, codnom
+      locproptxt, codnom, catpro, catpro_niv2, nlogh, nloghvac, nloghpp,
+      nloghmeu, nlogloue, nloghautre, nloghnonh, nloghlm, gdprop
     FROM """
     import_query += f"{schema}.proprietaire;"
 

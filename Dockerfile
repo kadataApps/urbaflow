@@ -44,6 +44,9 @@ COPY . ./urbaflow
 RUN pip3 install -e ./urbaflow
 RUN mkdir /home/${USER}/.prefect/
 
+# create log folder
+RUN mkdir /home/${USER}/logs
+
 RUN chown -R ${USER} .
 USER ${USER}
 WORKDIR /home/${USER}/urbaflow

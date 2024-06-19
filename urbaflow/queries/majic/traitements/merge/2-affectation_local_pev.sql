@@ -1,4 +1,4 @@
--- logh	Logement d’habitation	t = oui, sinon blanc
+-- logh  Logement d’habitation  t = oui, sinon blanc
 -- Calculé depuis la table pb21 en prenant dteloc=’1’ ou ‘2’,
 -- dnupev=’001’ et ccoaff=’H’
 DROP TABLE IF EXISTS temp_local_pev_parcelle;

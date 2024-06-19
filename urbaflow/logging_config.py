@@ -4,7 +4,8 @@ import os
 log_level = os.getenv("LOG_LEVEL", logging.DEBUG)
 
 # Get log file path from environment variable (default None)
-log_filepath = os.getenv("LOG_FILE")
+print(os.getcwd())
+log_filepath = os.path.join(os.getcwd(), '../logs/urbaflow.log')
 
 # Configure logging
 logging.basicConfig(

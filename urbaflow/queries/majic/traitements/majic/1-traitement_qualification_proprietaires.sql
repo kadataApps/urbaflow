@@ -14,7 +14,19 @@ ADD COLUMN codgrm text,
 ADD COLUMN codgrmtxt text,
 ADD COLUMN locprop text,
 ADD COLUMN locproptxt text,
-ADD COLUMN codnom text;
+ADD COLUMN codnom text,
+ADD COLUMN catpro text,
+ADD COLUMN catpro_niv2 text,
+ADD COLUMN nlogh integer,
+ADD COLUMN nloghvac integer,
+ADD COLUMN nloghpp integer,
+ADD COLUMN nloghmeu integer,
+ADD COLUMN nlogloue integer,
+ADD COLUMN nloghautre integer,
+ADD COLUMN nloghnonh integer,
+ADD COLUMN nloghlm integer,
+ADD COLUMN gdprop char(1)
+;
 
 UPDATE proprietaire SET
         idprodroit = ccodep || ccocom || dnupro || dnulp,
@@ -28,11 +40,18 @@ UPDATE proprietaire SET
           WHEN ccodro = 'B' OR ccodro = 'C' OR ccodro = 'F' OR ccodro = 'N'
             OR ccodro = 'P' OR ccodro = 'V' OR ccodro = 'X'
             THEN 'P'
-          WHEN ccodro = 'A' OR ccodro = 'D' OR ccodro = 'E' OR ccodro = 'G'
-            OR ccodro = 'H' OR ccodro = 'J' OR ccodro = 'K' OR ccodro = 'L'
-            OR ccodro = 'O' OR ccodro = 'Q' OR ccodro = 'R' OR ccodro = 'S'
-            OR ccodro = 'T' OR ccodro = 'U' OR ccodro = 'W' OR ccodro = 'Y'
+          WHEN ccodro = 'A' OR ccodro = 'D' OR ccodro = 'E'
+            OR ccodro = 'H' OR ccodro = 'J' OR ccodro = 'K'
+            OR ccodro = 'L' OR ccodro = 'O' OR ccodro = 'R'
+            OR ccodro = 'T' OR ccodro = 'U' OR ccodro = 'W'
+            OR ccodro = 'Y' OR ccodro = 'M' OR ccodro = 'Z'
             THEN 'G'
+          WHEN 
+            ccodro = 'G' -- G = GERANT,MANDATAIRE,GESTIONNAIRE, donc pas réellement gestionnaire (pas de droits réels)
+            OR ccodro = 'Q' -- Q = GESTIONNAIRE TAXE SUR LES BUREAUX (ILE DE FRANCE) (pas de droits réels)
+            OR ccodro = 'S' -- S = SYNDIC DE COPROPRIETE (pas de droits réels)
+            THEN 'A' -- Autre propriétaire sans droits réels
+          ELSE 'E' -- Erreur
           END;
 
 UPDATE proprietaire SET

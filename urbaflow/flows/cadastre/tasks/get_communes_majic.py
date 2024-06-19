@@ -34,7 +34,8 @@ def get_imported_communes_from_postgres():
 
 def write_communes_to_file():
     communes = get_imported_communes_from_postgres()
-    logger.info("Liste des communes", communes)
+    logger.info("Liste des communes")
+    logger.info(communes)
     file = open(os.path.join(os.getcwd(), "temp/communes.txt"), "w")
     file.write("[communes]\n")
     file.write("communes = ")

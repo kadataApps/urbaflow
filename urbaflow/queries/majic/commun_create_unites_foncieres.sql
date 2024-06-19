@@ -8,14 +8,14 @@ CREATE TABLE unites_foncieres  (
   geom geometry(MULTIPOLYGON, 2154),
   code_insee text,
   idprocpte text,
-  typproprietaire text
+  catpro text
   );
 
 -- Création unités foncières ----
-INSERT INTO unites_foncieres (geom, idprocpte, typproprietaire, code_insee )
-  SELECT st_multi((st_dump(geom)).geom) geom, idprocpte, typproprietaire, code_insee
+INSERT INTO unites_foncieres (geom, idprocpte, catpro, code_insee )
+  SELECT st_multi((st_dump(geom)).geom) geom, idprocpte, catpro, code_insee
     FROM (
-      SELECT idprocpte, typproprietaire, code_insee, st_union(geom) geom 
+      SELECT idprocpte, catpro, code_insee, st_union(geom) geom 
         FROM parcellaire_douaisis
         GROUP BY 1, 2, 3
     ) t;

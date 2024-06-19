@@ -60,7 +60,7 @@ Modalités:
 - PLEINE PROPRIETE
 - AUTRE
 
-#### typproprietaire
+#### catpro
 
 Retraitement de la classification automatique des propriétaires.
 Une requête manuelle permet d'identifier les propriétaires publics ou parapublics qui ont été incorrectement catégorisés dnas les fichiers MAJIC source.
@@ -86,7 +86,7 @@ Foncier considéré comme non maitrisé :
 - PRIVE (personnes morales ou publiques sans distinction)
 - COPROPRIETE
 
-#### typproprietaire_niv2
+#### catpro_niv2
 
 Cette typologie vise à répondre au besoin d'analyse foncière de la FAB.
 Typologie retenue:
@@ -168,7 +168,7 @@ Exemple d'utilisation:
 - import seulement des données brutes dans postgresql:
 
 ```shell
-python main.py majic /data/ --no-step2 --no-step3 --no-step4 --no-step5 --no-step6 --no-step7 --no-step8 --no-step9 --no-step10 --no-step11 --no-step12
+python main.py majic /data/ --no-step1 --no-step2 --no-step3 --no-step4 --no-step5 --no-step6 --no-step7 --no-step8 --no-step9 --no-step10 --no-step11 --no-step12
 ```
 
 ## Licence

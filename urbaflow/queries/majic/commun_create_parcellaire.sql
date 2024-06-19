@@ -41,8 +41,9 @@ CREATE TABLE public.parcellaire_france (
     typprop text COLLATE pg_catalog."default",                  --
     typproppro text COLLATE pg_catalog."default",               --
     typpropges text COLLATE pg_catalog."default",               --
-    typproprietaire text COLLATE pg_catalog."default",          --
-    typproprietaire_niv2 text COLLATE pg_catalog."default",     --
+    catpro text COLLATE pg_catalog."default",                   --
+    catpro_niv2 text COLLATE pg_catalog."default",              --
+    presgdprop text COLLATE pg_catalog."default",               --
     ddenomprop text COLLATE pg_catalog."default",               --
     ddenomproppro text COLLATE pg_catalog."default",            --
     ddenompropges text COLLATE pg_catalog."default",            --

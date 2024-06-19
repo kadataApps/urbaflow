@@ -100,7 +100,18 @@ CREATE TABLE public.proprietaire_droit (
     lot text,            --
     locprop char(1),     -- 61 *
     locproptxt char(21), -- 62 *
-    codnom text          --
+    codnom text,         --
+    catpro text,      --
+    catpro_niv2 text, --
+    nlogh integer,       --
+    nloghvac integer,    --
+    nloghpp integer,     --
+    nloghmeu integer,    --
+    nlogloue integer,    --
+    nloghautre integer,  --
+    nloghnonh integer,   --
+    nloghlm integer,     --
+    gdprop char(1)       --
 ) WITH (
   OIDS = FALSE
 )

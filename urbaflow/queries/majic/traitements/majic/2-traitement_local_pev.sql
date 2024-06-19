@@ -17,9 +17,9 @@ UPDATE pev SET
   idcom = ccodep || ccocom;
 
 -- UPDATE local10 SET
--- 	idlocal = ccodep || invar,
--- 	idpar = '123'||ccodep || ccocom || CASE WHEN trim(ccopre) = '' THEN '000'
--- 	ELSE ccopre END || COALESCE(trim(ccosec),'') || dnupla ;
+--   idlocal = ccodep || invar,
+--   idpar = '123'||ccodep || ccocom || CASE WHEN trim(ccopre) = '' THEN '000'
+--   ELSE ccopre END || COALESCE(trim(ccosec),'') || dnupla ;
 
 UPDATE local10 SET
   idlocal = ccodep || invar,
@@ -60,6 +60,35 @@ UPDATE local10 SET
         AND pev.dnupev = '001'
         AND pev.ccoaff = 'H'
         AND pev.ccthp = 'P'
-      THEN 't' END
+      THEN 't' END,
+  loghmeu = CASE WHEN
+      (local10.dteloc = '1' OR local10.dteloc = '2')
+      AND pev.dnupev = '001'
+      AND pev.ccoaff = 'H'
+      AND pev.ccthp = 'B'
+    THEN 't' END,
+  logloue = CASE WHEN
+      (local10.dteloc = '1' OR local10.dteloc = '2')
+      AND pev.dnupev = '001'
+      AND pev.ccoaff = 'H'
+      AND pev.ccthp = 'L'
+    THEN 't' END,
+  loghautre = CASE WHEN
+      (local10.dteloc = '1' OR local10.dteloc = '2')
+      AND pev.dnupev = '001'
+      AND pev.ccoaff = 'H'
+      AND (pev.ccthp = 'G' OR pev.ccthp = 'X')
+    THEN 't' END,
+  loghnonh = CASE WHEN
+      (local10.dteloc = '1' OR local10.dteloc = '2')
+      AND pev.dnupev = '001'
+      AND pev.ccoaff = 'H'
+      AND (pev.ccthp = 'N' OR pev.ccthp = 'T' OR pev.ccthp = 'D' OR pev.ccthp = 'R')
+    THEN 't' END,
+  loghlm = CASE WHEN
+      local10.hlmsem = '5'
+      AND pev.dnupev = '001'
+      AND pev.ccoaff = 'H'
+    THEN 't' END
 FROM pev
     WHERE local10.idlocal = pev.idlocal;
