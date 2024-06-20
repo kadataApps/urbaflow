@@ -24,7 +24,7 @@ def execute_merge_cadastre_majic_scripts():
         "traitements/qualification/0-correction_typologie_proprietaire_create.sql",
         "traitements/qualification/1-proprietaire_update_catpro.sql",
         "traitements/qualification/2-parcellaire_update_proprietaires.sql",
-        "traitements/qualification/3-proprietaire_update_gdprop",
+        "traitements/qualification/3-proprietaire_update_gdprop.sql",
     ]
 
     scripts_count = len(script_list)
