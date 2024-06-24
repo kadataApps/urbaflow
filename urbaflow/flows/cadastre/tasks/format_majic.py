@@ -57,6 +57,7 @@ def execute_format_majic_scripts():
         "traitements/majic/2-traitement_local_pev.sql",
         "traitements/majic/3-traitement_lots.sql",
         "traitements/majic/4-traitement_suf.sql",
+        "traitements/majic/5-proprietaire_local10_update_gdprop.sql",
     ]
 
     scripts_count = len(script_list)

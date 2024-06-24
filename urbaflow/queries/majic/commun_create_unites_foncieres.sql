@@ -1,5 +1,5 @@
-SET SEARCH_PATH to public;
-UPDATE parcellaire_douaisis set geom = polygonalmakevalid(geom) where st_isvalid(geom) is false;
+SET SEARCH_PATH to saintes, public;
+UPDATE parcellaire set geom = polygonalmakevalid(geom) where st_isvalid(geom) is false;
 
 -- Création de la table unités foncières
 
@@ -16,20 +16,20 @@ INSERT INTO unites_foncieres (geom, idprocpte, catpro, code_insee )
   SELECT st_multi((st_dump(geom)).geom) geom, idprocpte, catpro, code_insee
     FROM (
       SELECT idprocpte, catpro, code_insee, st_union(geom) geom 
-        FROM parcellaire_douaisis
+        FROM parcellaire
         GROUP BY 1, 2, 3
     ) t;
 
 
 
 -- modification de la table parcelle
-ALTER TABLE parcellaire_douaisis ADD COLUMN id_uf integer;
-ALTER TABLE parcellaire_douaisis ADD COLUMN centroid_geom geometry(POINT, 2154);
-UPDATE parcellaire_douaisis SET centroid_geom = st_pointonsurface(geom);
-CREATE INDEX parcellaire_douaisis_centroid_geom_sidx on parcellaire_douaisis using gist(centroid_geom);
+ALTER TABLE parcellaire ADD COLUMN id_uf integer;
+ALTER TABLE parcellaire ADD COLUMN centroid_geom geometry(POINT, 2154);
+UPDATE parcellaire SET centroid_geom = st_pointonsurface(geom);
+CREATE INDEX parcellaire_centroid_geom_sidx on parcellaire using gist(centroid_geom);
 
 
-UPDATE  parcellaire_douaisis p SET id_uf = uf.id_uf
+UPDATE  parcellaire p SET id_uf = uf.id_uf
   FROM  unites_foncieres uf
   WHERE p.id_uf is null AND uf.geom && p.centroid_geom AND st_intersects(p.centroid_geom, uf.geom);
 
@@ -119,13 +119,13 @@ UPDATE unites_foncieres SET
       max(coalesce(ddenomprop,'')) as ddenomprop,
       max(coalesce(ddenomproppro,'')) as ddenomproppro,
       max(coalesce(ddenompropges,'')) as ddenompropges,
-      sum(coalesce(dcntarti,'')) as dcntarti,
-      sum(coalesce(dcntnaf,'')) as dcntnaf,
-      min(coalesce(jannatmin,'')) as jannatmin,
-      max(coalesce(jannatmax,'')) as jannatmax,
-      max(coalesce(jdatatan,'')) as jdatatan,
-      max(coalesce(ncp,'')) as ncp
-    FROM parcellaire_douaisis p
+      sum(coalesce(dcntarti,0)) as dcntarti,
+      sum(coalesce(dcntnaf,0)) as dcntnaf,
+      min(coalesce(jannatmin,0)) as jannatmin,
+      max(coalesce(jannatmax,0)) as jannatmax,
+      max(coalesce(jdatatan,0)) as jdatatan,
+      max(coalesce(ncp,0)) as ncp
+    FROM parcellaire p
     GROUP BY id_uf
 
   ) a

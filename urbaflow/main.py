@@ -14,6 +14,7 @@ from flows.cadastre.tasks.fantoir_import_db import (
     truncate_fantoir_tables,
 )
 from flows.cadastre.tasks.fantoir_import_file import import_fantoir_file
+from flows.locomvac import import_locomvac
 
 
 app = typer.Typer()
@@ -151,3 +152,16 @@ def dvf(
 
 if __name__ == "__main__":
     app()
+
+@app.command()
+def locomvac(dirname: Path = typer.Argument(
+        "/data/",
+        exists=True,
+        file_okay=False,
+        dir_okay=True,
+        writable=True,
+        readable=True,
+        resolve_path=True,
+    )):
+    typer.echo(f"Running LocomVac flow in directory: {dirname}")
+    import_locomvac.run(dirname)
