@@ -50,7 +50,7 @@ RUN mkdir /home/${USER}/logs
 RUN chown -R ${USER} .
 USER ${USER}
 WORKDIR /home/${USER}/urbaflow
-RUN python urbaflow/main.py --install-completion bash
+RUN python urbaflow/main.py --install-completion
 CMD ["python", "urbaflow/main.py"]
 
 
