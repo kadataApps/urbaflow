@@ -29,12 +29,12 @@ def init_db_for_majic_import():
         "Initialisation base de données - tables métiers MAJIC - cf.QgisCadastre"
     )
     script_path_create = os.path.join(os.getcwd(), "temp/sql/commun_create_metier.sql")
-    script_pathNomenclature = os.path.join(
+    script_path_nomenclature = os.path.join(
         os.getcwd(), "temp/sql/commun_insert_nomenclature.sql"
     )
     conn = pg_connection()
     conn.execute_script(script_path_create)
-    conn.execute_script(script_pathNomenclature)
+    conn.execute_script(script_path_nomenclature)
     conn.close_connection()
     logger.info("Base de données initialisée avec les tables métiers MAJIC.")
 

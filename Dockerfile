@@ -10,8 +10,8 @@ RUN useradd -m -r ${USER} && \
 WORKDIR /home/${USER}
 
 # Install system dependencies
-RUN apt-get update
-RUN apt-get install -y \
+RUN apt-get update && \
+    apt-get install -y \
     libpq-dev \
     build-essential \
     alien \
@@ -28,7 +28,7 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 COPY requirements.txt /tmp/requirements.txt
 
-RUN python3 -m venv $VIRTUAL_ENV && \
+RUN python3 -m venv "$VIRTUAL_ENV" && \
     pip install -U \
     pip \
     setuptools \
@@ -50,7 +50,7 @@ RUN mkdir /home/${USER}/logs
 RUN chown -R ${USER} .
 USER ${USER}
 WORKDIR /home/${USER}/urbaflow
-RUN python urbaflow/main.py --install-completion
+# RUN python urbaflow/main.py --install-completion
 CMD ["python", "urbaflow/main.py"]
 
 

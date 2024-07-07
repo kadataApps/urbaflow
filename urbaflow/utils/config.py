@@ -6,7 +6,6 @@ from configparser import ConfigParser
 defaultConfig = os.path.join(Path(__file__).resolve().parent.parent, "config.ini")
 
 ROOT_DIRECTORY = Path(__file__).resolve().parent.parent.parent
-LIBRARY_LOCATION = ROOT_DIRECTORY / Path("src")
 
 
 def config(filename=defaultConfig, section="postgresql"):

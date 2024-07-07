@@ -87,7 +87,7 @@ class import_majic(object):
             value = item["value"]
             regex_filename = re.compile(r"(" + value + ")", re.IGNORECASE)
             # Get majic files for item
-            majList = []
+            maj_list = []
             for root, dirs, files in os.walk(self.majic_source_dir):
                 for i in files:
                     # if os.path.split(i)[1] == value:
@@ -95,7 +95,7 @@ class import_majic(object):
                         fpath = os.path.join(root, i)
                         logger.info(fpath)
                         # Add file path to the list
-                        majList.append(fpath)
+                        maj_list.append(fpath)
 
                         # Store depdir for this file
                         # avoid fantoir, as now it is given for the whole country
@@ -110,7 +110,7 @@ class import_majic(object):
                                 depdirs[depdir] = True
                                 break
 
-            majic_files_found[table] = majList
+            majic_files_found[table] = maj_list
 
         # print result of exploring majic files
         files_to_proceed_counter = 0
@@ -127,14 +127,14 @@ class import_majic(object):
         # Open connection & set search_path
         connection = pg_connection()
         # connection.setSearchPath(self.db_schema)
-        localStep = 0
+        local_step = 0
         for item in self.majic_source_filenames:
             table = item["table"]
             # self.step_counter+= len(majic_files_found[table])
             # processedFilesCount+=len(majic_files_found[table])
-            localStep += 1
+            local_step += 1
             logger.info(
-                "Etape " + str(localStep) + "/" + str(self.step_counter) + ": " + table
+                "Etape " + str(local_step) + "/" + str(self.step_counter) + ": " + table
             )
 
             # Drop & create tables where to import data

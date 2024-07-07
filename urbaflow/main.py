@@ -1,20 +1,20 @@
 import typer
 from pathlib import Path
 
-from flows.dvf.download_DVF_from_imported_data import flow_dvf
-from flows.cadastre.flow_cadastre import (
+from urbaflow.flows.dvf.download_dvf_from_imported_data import flow_dvf
+from urbaflow.flows.cadastre.flow_cadastre import (
     flow_clean,
     flow_copy_transform_majic_queries,
     flow_cadastre,
     STEPS_FLOW_CADASTRE,
 )
-from flows.cadastre.tasks.fantoir_import_db import (
+from urbaflow.flows.cadastre.tasks.fantoir_import_db import (
     create_fantoir,
     formatage_fantoir,
     truncate_fantoir_tables,
 )
-from flows.cadastre.tasks.fantoir_import_file import import_fantoir_file
-from flows.locomvac import import_locomvac
+from urbaflow.flows.cadastre.tasks.fantoir_import_file import import_fantoir_file
+from urbaflow.flows.locomvac import import_locomvac
 
 
 app = typer.Typer()
@@ -163,5 +163,8 @@ def locomvac(dirname: Path = typer.Argument(
         readable=True,
         resolve_path=True,
     )):
+    """
+    DIRNAME : Chemin du répertoire contenant les fichiers LOCOMVAC
+    """
     typer.echo(f"Running LocomVac flow in directory: {dirname}")
-    import_locomvac.run(dirname)
+    import_locomvac(dirname)

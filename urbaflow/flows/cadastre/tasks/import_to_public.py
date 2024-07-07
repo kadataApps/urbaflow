@@ -198,7 +198,6 @@ def check_if_table_exists(table_name, schema):
 
 def flow_import_parcelles():
     config = get_imported_communes_from_file()
-    # codes_insee = ast.literal_eval(config["communes"])
     codes_insee = config["communes"]
     table_name = "parcellaire_france"
     table_exists = check_if_table_exists(table_name, schema="public")

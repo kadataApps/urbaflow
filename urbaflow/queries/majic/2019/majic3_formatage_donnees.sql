@@ -66,7 +66,7 @@ SELECT
   CASE WHEN trim(SUBSTRING(tmp,179,3))='' THEN NULL ELSE to_number(SUBSTRING(tmp,179,3),'999') END AS ccoifp,
   REPLACE('FR'||SUBSTRING(tmp,1,15),' ','0') AS inspireid,
 
-  '[LOT]' as lot
+  '[LOT]' AS lot
 FROM nbat
 WHERE SUBSTRING(tmp,20,2) ='10';
 
@@ -117,7 +117,7 @@ SELECT
   REPLACE(SUBSTRING(tmp,1,15),' ', '0') AS parcelle,
   REPLACE(SUBSTRING(tmp,1,2)||SUBSTRING(tmp,3,4)||SUBSTRING(tmp,31,6),' ', '0') AS comptecommunal,
   CASE WHEN  trim(SUBSTRING(tmp,81,3))='' THEN NULL ELSE REPLACE(SUBSTRING(tmp,1,6)||SUBSTRING(tmp,72,9)||SUBSTRING(tmp,81,3),' ', '0') END AS pdl,
-  '[LOT]' as lot
+  '[LOT]' AS lot
 FROM nbat
 WHERE SUBSTRING(tmp,20,2) ='21';
 
@@ -149,7 +149,7 @@ SELECT
   CASE WHEN trim(SUBSTRING(tmp,79,10))='' THEN NULL ELSE to_number(SUBSTRING(tmp,79,10),'9999999999')/100 END AS rcexnba,
   SUBSTRING(tmp,90,10) AS mpexnba,
   REPLACE(SUBSTRING(tmp,1,15)||CASE WHEN SUBSTRING(tmp,16,2) IS NULL THEN '' ELSE trim(SUBSTRING(tmp,16,2)) END,' ', '0') AS suf,
-  '[LOT]' as lot
+  '[LOT]' AS lot
 FROM nbat
 WHERE SUBSTRING(tmp,20,2) ='30';
 
@@ -179,7 +179,7 @@ SELECT
   CASE WHEN trim(SUBSTRING(tmp,100,10))='' THEN NULL ELSE to_number(SUBSTRING(tmp,100,10),'9999999999')/100 END  AS c4bisufad,
   CASE WHEN trim(SUBSTRING(tmp,110,9))='' THEN NULL ELSE to_number(SUBSTRING(tmp,110,9),'999999999') END cntmajtc,
   REPLACE(SUBSTRING(tmp,1,15)||CASE WHEN SUBSTRING(tmp,16,2) IS NULL THEN '' ELSE trim(SUBSTRING(tmp,16,2)) END,' ', '0') AS suf,
-  '[LOT]' as lot
+  '[LOT]' AS lot
 FROM nbat
 WHERE SUBSTRING(tmp,20,2) ='36';
 
@@ -217,7 +217,7 @@ SELECT
   SUBSTRING(tmp,107,1) AS locinc,
   REPLACE(SUBSTRING(tmp,1,6)||SUBSTRING(tmp,36,9),' ', '0') AS parcelle,
   REPLACE(SUBSTRING(tmp,1,6)||SUBSTRING(tmp,62,5),' ', '0')||SUBSTRING(tmp,57,4) AS voie,
-  '[LOT]' as lot
+  '[LOT]' AS lot
 FROM bati
 WHERE SUBSTRING(tmp,31,2) ='00';
 
@@ -291,7 +291,7 @@ SELECT
   CASE WHEN trim(SUBSTRING(tmp,175,3))='' THEN NULL ELSE to_number(SUBSTRING(tmp,175,3),'999') END AS ccoifp,
 
   REPLACE(SUBSTRING(tmp,1,2)||SUBSTRING(tmp,3,4)||SUBSTRING(tmp,38,6),' ', '0') AS comptecommunal,
-  '[LOT]' as lot
+  '[LOT]' AS lot
 FROM bati
 WHERE SUBSTRING(tmp,31,2) ='10';
 
@@ -361,7 +361,7 @@ SELECT
   CASE WHEN trim(SUBSTRING(tmp,52,3))='' THEN NULL ELSE to_number(SUBSTRING(tmp,52,3),'999') END AS dcfloc,
   CASE WHEN trim(SUBSTRING(tmp,55,6))='' THEN NULL ELSE to_number(SUBSTRING(tmp,55,6),'999999') END AS dsupot,
   CASE WHEN trim(SUBSTRING(tmp,61,9))='' THEN NULL ELSE to_number(SUBSTRING(tmp,61,9),'999999999') END AS dvlper,
-  CASE when trim(SUBSTRING(tmp,70,9))='' THEN NULL ELSE to_number(SUBSTRING(tmp,70,9),'999999999') END AS dvlpera,
+  CASE WHEN trim(SUBSTRING(tmp,70,9))='' THEN NULL ELSE to_number(SUBSTRING(tmp,70,9),'999999999') END AS dvlpera,
   CASE WHEN trim(SUBSTRING(tmp,79,2))='' THEN NULL ELSE trim(SUBSTRING(tmp,79,2)) END AS gnexpl,
 
   SUBSTRING(tmp,111,1) AS ccthp,
@@ -369,7 +369,7 @@ SELECT
   SUBSTRING(tmp,113,3) AS dnuref,
   SUBSTRING(tmp,116,1) AS gnidom,
 
-  CASE when trim(SUBSTRING(tmp,130,9))='' THEN NULL ELSE to_number(SUBSTRING(tmp,130,9),'999999999') END AS dvltpe,
+  CASE WHEN trim(SUBSTRING(tmp,130,9))='' THEN NULL ELSE to_number(SUBSTRING(tmp,130,9),'999999999') END AS dvltpe,
 
   CASE WHEN trim(SUBSTRING(tmp,144,1))='' THEN NULL ELSE to_number(SUBSTRING(tmp,144,1),'9') END  AS tpevtieom,
 
@@ -383,7 +383,7 @@ SELECT
 
 
   SUBSTRING(tmp,1,3)||SUBSTRING(tmp,7,10) AS local10,
-  '[LOT]' as lot
+  '[LOT]' AS lot
 FROM bati
 WHERE SUBSTRING(tmp,31,2) ='21';
 
@@ -432,7 +432,7 @@ SELECT
 
   REPLACE(SUBSTRING(tmp,1,3)||SUBSTRING(tmp,7,10)||SUBSTRING(tmp,28,3),' ', '0') AS pev,
 
-  '[LOT]' as lot
+  '[LOT]' AS lot
 FROM bati
 WHERE SUBSTRING(tmp,31,2) ='30';
 
@@ -483,7 +483,7 @@ SELECT
 
   REPLACE(SUBSTRING(tmp,1,3)||SUBSTRING(tmp,7,10)||SUBSTRING(tmp,28,3),' ', '0') AS pev,
 
-  '[LOT]' as lot
+  '[LOT]' AS lot
 FROM bati
 WHERE SUBSTRING(tmp,31,2) ='30';
 
@@ -532,7 +532,7 @@ SELECT
 
   REPLACE(SUBSTRING(tmp,1,3)||SUBSTRING(tmp,7,10)||SUBSTRING(tmp,28,3),' ', '0') AS pev,
 
-  '[LOT]' as lot
+  '[LOT]' AS lot
 FROM bati
 WHERE SUBSTRING(tmp,31,2) ='31';
 
@@ -576,7 +576,7 @@ SELECT
   CASE WHEN trim(SUBSTRING(tmp,175,6))='' THEN NULL ELSE to_number(SUBSTRING(tmp,175,6),'999999') END  AS mvltieomx,
 
   REPLACE(SUBSTRING(tmp,1,3)||SUBSTRING(tmp,7,10)||SUBSTRING(tmp,28,3),' ', '0') AS pev,
-  '[LOT]' as lot
+  '[LOT]' AS lot
 FROM bati
 WHERE SUBSTRING(tmp,31,2) ='36';
 
@@ -591,7 +591,7 @@ INSERT INTO pevprincipale (
 )
 SELECT
   REPLACE(SUBSTRING(tmp,1,3)||SUBSTRING(tmp,7,10)||SUBSTRING(tmp,28,3)||CASE WHEN SUBSTRING(tmp,33,3) IS NOT NULL THEN trim(SUBSTRING(tmp,33,3)) ELSE SUBSTRING(tmp,33,3) END,' ','0') AS pevprincipale,
-  '[ANNEE]' as annee,
+  '[ANNEE]' AS annee,
   SUBSTRING(tmp,1,2) AS ccodep,
   SUBSTRING(tmp,3,1) AS ccodir,
   SUBSTRING(tmp,4,3) AS ccocom,
@@ -644,7 +644,7 @@ SELECT
   SUBSTRING(tmp,126,2) AS dnbniv,
 
   REPLACE(SUBSTRING(tmp,1,3)||SUBSTRING(tmp,7,10)||SUBSTRING(tmp,28,3),' ', '0') AS pev,
-  '[LOT]' as lot
+  '[LOT]' AS lot
 FROM bati
 WHERE SUBSTRING(tmp,31,2) ='40';
 
@@ -717,7 +717,7 @@ INSERT INTO pevdependances (
   cconad, asitet, dmatgm, dmatto, detent, geaulc, gelelc, gchclc, dnbbai,
   dnbdou, dnblav, dnbwc, deqtlc, dcimlc, dcetde, dcspde, dcspdea, pev, lot
 )
-select
+SELECT
   REPLACE(SUBSTRING(tmp,1,3)||SUBSTRING(tmp,7,10)||SUBSTRING(tmp,28,3)||SUBSTRING(tmp,33,3), ' ', '0') AS pevdependances,
   '[ANNEE]' AS annee,
   SUBSTRING(tmp,1,2) AS ccodep,
@@ -751,7 +751,7 @@ select
   SUBSTRING(tmp,77,6) AS dcspdea,
 
   REPLACE(SUBSTRING(tmp,1,3)||SUBSTRING(tmp,7,10)||SUBSTRING(tmp,28,3),' ', '0') AS pev,
-  '[LOT]' as lot
+  '[LOT]' AS lot
 FROM bati
 WHERE SUBSTRING(tmp,31,2) ='60';
 
@@ -767,7 +767,7 @@ SELECT
   SUBSTRING(tmp,3,1) AS ccodir,
   SUBSTRING(tmp,4,3) AS ccocom,
   trim(SUBSTRING(tmp,17)) AS libcom,
-  '[LOT]' as lot
+  '[LOT]' AS lot
 FROM bati
 WHERE trim(SUBSTRING(tmp,7,10))='' AND trim(SUBSTRING(tmp,4,3)) != '';
 
@@ -838,7 +838,7 @@ SELECT DISTINCT ON (ccodep,ccocom,dnupro,dnulp,dnuper)
 
 
   REPLACE(SUBSTRING(tmp,1,2)||SUBSTRING(tmp,3,4)||SUBSTRING(tmp,7,6),' ', '0') AS comptecommunal,
-  '[LOT]' as lot
+  '[LOT]' AS lot
 FROM prop
 WHERE trim(SUBSTRING(tmp,7,6)) != ''
 ORDER BY ccodep,ccocom,dnupro,dnulp,dnuper;
@@ -855,7 +855,7 @@ SELECT
   ccocom,
   dnupro,
   'N',
-  '[LOT]' as lot
+  '[LOT]' AS lot
 FROM proprietaire
 WHERE annee='[ANNEE]' AND lot='[LOT]'
 GROUP BY ccodep, ccodir, ccocom, dnupro;
@@ -883,7 +883,7 @@ SELECT
   SUBSTRING(tmp,94,4) AS ccocif,
   REPLACE(SUBSTRING(tmp,1,15),' ', '0') AS parcelle,
   REPLACE(SUBSTRING(tmp,1,2)||SUBSTRING(tmp,3,4)||SUBSTRING(tmp,83,6),' ', '0') AS comptecommunal,
-  '[LOT]' as lot
+  '[LOT]' AS lot
 FROM pdll
 WHERE SUBSTRING(tmp,26,2) ='10';
 
@@ -910,7 +910,7 @@ SELECT
   REPLACE(SUBSTRING(tmp,1,18),' ', '0') AS pdl,
   REPLACE(SUBSTRING(tmp,1,15),' ', '0') AS parcelle,
   CASE WHEN trim(SUBSTRING(tmp,33,4)) ='' THEN null ELSE REPLACE(SUBSTRING(tmp,1,6)||SUBSTRING(tmp,28,9),' ', '0') END parcellea,
-  '[LOT]' as lot
+  '[LOT]' AS lot
 FROM pdll
 WHERE SUBSTRING(tmp,26,2) ='20';
 
@@ -943,7 +943,7 @@ SELECT
   REPLACE(SUBSTRING(tmp,1,18),' ', '0') AS pdl,
   REPLACE(SUBSTRING(tmp,1,2)||SUBSTRING(tmp,3,4)||SUBSTRING(tmp,83,6),' ', '0') AS comptecommunal,
   REPLACE(SUBSTRING(tmp,1,15),' ', '0') AS parcelle,
-  '[LOT]' as lot
+  '[LOT]' AS lot
 FROM pdll
 WHERE SUBSTRING(tmp,26,2) ='30';
 
@@ -974,7 +974,7 @@ SELECT DISTINCT
   REPLACE(SUBSTRING(tmp,1,25),' ', '0') AS lots,
   REPLACE(SUBSTRING(tmp,1,3)||SUBSTRING(tmp,37,10),' ', '0') AS local00,
   REPLACE(SUBSTRING(tmp,1,3)||SUBSTRING(tmp,37,10),' ', '0') AS local10,
-  '[LOT]' as lot
+  '[LOT]' AS lot
 FROM lloc;
 
 

@@ -21,7 +21,7 @@ def reporthook(blocknum, blocksize, totalsize):
         sys.stderr.write("read %d\n" % (readsofar,))
 
 
-def download_cadastre(codeinsee: str, targetDir, millesime):
+def download_cadastre(codeinsee: str, target_dir, millesime):
     param_millesime = "latest" if millesime is None else millesime
     logger.info(
         "Téléchargement du cadastre pour la commune %s, millesime %s",
@@ -41,15 +41,15 @@ def download_cadastre(codeinsee: str, targetDir, millesime):
 
     file_name = url.split("/")[-1]
 
-    if not (os.path.exists(targetDir)):
-        os.makedirs(targetDir)
-    destFileName = os.path.join(targetDir, file_name)
-    urllib.request.urlretrieve(url, destFileName, reporthook)
-    unzip_cadastre(destFileName)
-    return destFileName
+    if not (os.path.exists(target_dir)):
+        os.makedirs(target_dir)
+    dest_filename = os.path.join(target_dir, file_name)
+    urllib.request.urlretrieve(url, dest_filename, reporthook)
+    unzip_cadastre(dest_filename)
+    return dest_filename
 
 
-def download_bati(codeinsee, targetDir):
+def download_bati(codeinsee, target_dir):
     url = "https://cadastre.data.gouv.fr/data/etalab-cadastre/latest/geojson/communes/"
     url += codeinsee[0:2] + "/" + codeinsee
     url += "/cadastre-" + codeinsee
@@ -58,12 +58,12 @@ def download_bati(codeinsee, targetDir):
 
     file_name = url.split("/")[-1]
 
-    if not (os.path.exists(targetDir)):
-        os.makedirs(targetDir)
-    destFileName = os.path.join(targetDir, file_name)
-    urllib.request.urlretrieve(url, destFileName, reporthook)
-    unzip_cadastre(destFileName)
-    return destFileName
+    if not (os.path.exists(target_dir)):
+        os.makedirs(target_dir)
+    dest_filename = os.path.join(target_dir, file_name)
+    urllib.request.urlretrieve(url, dest_filename, reporthook)
+    unzip_cadastre(dest_filename)
+    return dest_filename
 
 
 def download_cadastre_for_communes():
@@ -103,15 +103,15 @@ def download_bati_for_communes():
             json.importFile(file, "cadastre_bati")
 
 
-def unzip_cadastre(archivePath):
-    # get directory where archivePath is stored
-    dir = os.path.dirname(archivePath)
-    # filename = os.path.basename(archivePath)  # get filename
+def unzip_cadastre(archive_path):
+    # get directory where archive_path is stored
+    dir = os.path.dirname(archive_path)
+    # filename = os.path.basename(archive_path)  # get filename
     file_json, file_json_ext = os.path.splitext(
-        archivePath
+        archive_path
     )  # split into file.json and .gz
 
-    src_name = archivePath
+    src_name = archive_path
     dest_name = os.path.join(dir, file_json)
     with gzip.open(src_name, "rb") as infile:
         with open(dest_name, "wb") as outfile:

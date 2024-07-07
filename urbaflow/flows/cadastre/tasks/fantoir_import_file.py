@@ -33,7 +33,7 @@ class import_fantoir_file(object):
         # Regex to remove all chars not in the range in ASCII table from space to ~
         # http://www.catonmat.net/blog/my-favorite-regex/
         r = re.compile(r"[^ -~]")
-        rQuoteString = re.compile(r"'")
+        r_quote_string = re.compile(r"'")
 
         # Loop through all files to find fantoir file
 
@@ -41,7 +41,7 @@ class import_fantoir_file(object):
         value = "fan"
         regex_filename = re.compile(r"(" + value + ")", re.IGNORECASE)
         # Get majic files for item
-        majList = []
+        maj_list = []
         for root, dirs, files in os.walk(self.majic_source_dir):
             for i in files:
                 # if os.path.split(i)[1] == value:
@@ -49,9 +49,9 @@ class import_fantoir_file(object):
                     fpath = os.path.join(root, i)
                     print(fpath)
                     # Add file path to the list
-                    majList.append(fpath)
+                    maj_list.append(fpath)
 
-        majic_files_found[table] = majList
+        majic_files_found[table] = maj_list
 
         # Print result of exploring majic files
 
@@ -87,7 +87,7 @@ class import_fantoir_file(object):
                             "INSERT INTO \"%s\" VALUES (E'%s');"
                             % (
                                 table,
-                                rQuoteString.sub("\\'", r.sub(" ", x.strip("\r\n"))),
+                                r_quote_string.sub("\\'", r.sub(" ", x.strip("\r\n"))),
                             )
                             for x in a
                             if x

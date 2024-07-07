@@ -16,7 +16,7 @@ dev-urbaflow: ## mount the urbaflow folder and run bash environment with availab
 	export DEV_FOLDER="./urbaflow" && docker compose run --rm urbaflow /bin/bash
 
 update-python-dependencies:
-	cd urbaflow && poetry export --without-hashes -o requirements.txt && poetry export --without-hashes --with dev -o requirements-dev.txt
+	poetry export --without-hashes -o requirements.txt
 
 
 

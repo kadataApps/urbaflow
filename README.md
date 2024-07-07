@@ -34,6 +34,18 @@ L'ETL charge les données dans une base PostGIS qui doit être configurée dans 
 
 ## Documentation
 
+### GeoSIRENE
+
+[Base SIRENE des établissements (SIRET) - géolocalisée avec la Base d'Adresse Nationale (BAN)](https://www.data.gouv.fr/fr/datasets/base-sirene-des-etablissements-siret-geolocalisee-avec-la-base-dadresse-nationale-ban/)
+
+Jeu de données: <https://files.data.gouv.fr/geo-sirene/last/dep/>
+
+
+### LOCOMVAC
+
+[documentation LOCOMVAC sur le site collectivites-locales.gouv.fr](https://www.collectivites-locales.gouv.fr/sites/default/files/migration/fiche_technique_locaux_vacants_commerciaux_2020.pdf)
+
+
 ### Documentation des traitements issus des Fichiers Fonciers (FF) du CEREMA et des traitements MAJIC à l'aide du plugin QgisCadastre
 
 L'ensemble des traitements des données MAJIC s'inspire des travaux de la DGFiP, du CEREMA et du groupe national de travail sur les données foncières.
