@@ -1,9 +1,9 @@
 #!/usr/bin/python
+from prefect import get_run_logger
 import psycopg2
 import os
 import sys
 
-from logging_config import logger
 from .config import db_config, db_schema
 
 
@@ -14,6 +14,7 @@ def import_shapefile(
     destination_srs: str = "EPSG:2154",
     source_srs: str = "EPSG:4326",
 ):
+    logger = get_run_logger()
     params = db_config()
     # {'host': 'localhost', 'database': 'local_test', 'user': 'postgres', 'password': 'postgres', 'port': '5433'}
     params["table"] = table
@@ -31,8 +32,11 @@ def import_shapefile(
         f'{ password_string } '
         f'ogr2ogr -f "PostgreSQL" '
         f'PG:"host={params["host"]} port={params["port"]} user={params["user"]} dbname={params["database"]} " '
-        f'"{params["file"]}" -nln {params["schema"]}.{params["table"]} -append -update -skipfailures -s_srs "{source_srs}" -t_srs "{destination_srs}" -nlt "PROMOTE_TO_MULTI"'
+        f'"{params["file"]}" -nln {params["schema"]}.{params["table"]} '
+        f'-lco GEOMETRY_NAME=geom '
+        f'-append -update -skipfailures -s_srs "{source_srs}" -t_srs "{destination_srs}" -nlt "PROMOTE_TO_MULTI"'
     )
+    
     logger.info(command)
     try:
         os.system(command)
@@ -42,6 +46,7 @@ def import_shapefile(
 
 class importGeoJSON(object):
     def importFile(self, file, table):
+        logger = get_run_logger()
         params = db_config()
         schema = db_schema()["schema"]
         # {'host': 'localhost', 'database': 'local_test', 'user': 'postgres', 'password': 'postgres', 'port': '5433'}
@@ -80,6 +85,7 @@ class pg_connection(object):
         self.setSearchPathToImportSchema()
 
     def openConnection(self):
+        logger = get_run_logger()
         try:
             # read connection parameters
             params = db_config()
@@ -99,11 +105,13 @@ class pg_connection(object):
             sys.exit()
 
     def commit(self):
+        logger = get_run_logger()
         if self.conn is not None:
             self.conn.commit()
             logger.info("Transaction commited.")
 
     def close_connection(self):
+        logger = get_run_logger()
         if self.conn is not None:
             self.conn.close()
             logger.info("Database connection closed.")
@@ -129,6 +137,7 @@ class pg_connection(object):
         Set the search_path parameter in postgis database to [importSchema], public, pg_catalog.
         Creates [importSchema] if it doesn't exists
         """
+        logger = get_run_logger()
         schema = db_schema()["schema"]
         schemaDoesExistsSql = (
             "SELECT EXISTS(SELECT 1 FROM pg_namespace WHERE nspname='%s')" % schema
@@ -150,6 +159,7 @@ class pg_connection(object):
         self.execute_sql(sql)
 
     def getPostgreSQLversion(self):
+        logger = get_run_logger()
         self.cur.execute("SELECT version()")
         # display the PostgreSQL database server version
         db_version = self.cur.fetchone()

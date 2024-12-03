@@ -20,6 +20,7 @@ chardet = "^5.2.0"
 duckdb = "^1.0.0"
 prefect = "^2.19.6"
 typer = "^0.12.3"
+owslib = "^0.31.0"
 
 
 [tool.poetry.group.dev.dependencies]

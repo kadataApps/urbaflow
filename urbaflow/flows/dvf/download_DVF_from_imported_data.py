@@ -4,6 +4,7 @@ import urllib.request
 from utils.report_hook import reporthook
 from utils.unzip_file import unzip_file_in_place
 
+# https://github.com/ESO-Rennes/Analyse-Donnees-DVF
 
 def download_dvf_by_dep_year(departement, year, targetDir):
     url = "https://cadastre.data.gouv.fr/data/etalab-dvf/latest/csv/"

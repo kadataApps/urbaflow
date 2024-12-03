@@ -1,10 +1,8 @@
 import os
+import re
 import pandas as pd
-import pathlib
-import logging
 from chardet import detect
-
-from logging_config import logger
+from prefect import get_run_logger
 
 
 def concat_files(files, sep=";"):
@@ -22,9 +20,15 @@ def concat_files_with_encoding(files, encoding="latin-1"):
     return pd.concat(frames, ignore_index=True)
 
 
-def list_files_at_path(path, ext="**/*"):
-    files = [f for f in pathlib.Path(path).glob(ext) if f.is_file()]
-    return files
+def list_files_at_path(path, regex, extension=".csv"):
+    matching_files = []
+    pattern = re.compile(regex)
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            if pattern.match(file) and file.endswith(extension):
+                file_path = os.path.join(root, file)
+                matching_files.append(file_path)
+    return matching_files
 
 
 def get_encoding_type(file):
@@ -39,14 +43,18 @@ def get_encoding_type(file):
 def encode_to_utf8(src_file):
     """
     encode file to utf-8
+    
+    Replaces the file with a new file with the same name but encoded in utf-8
     """
+    logger = get_run_logger()
     logger.info("encode_to_utf8: " + src_file)
     trg_file = src_file + ".swp"
     from_codec = get_encoding_type(src_file)
     if from_codec == "utf-8":
-        logging.Logger.info("Already UTF-8")
+        logger.info("Already UTF-8")
         return
     try:
+        logger.info(f"Converting {src_file} from {from_codec} to utf-8")
         with open(src_file, "r", encoding=from_codec) as f, open(
             trg_file, "w", encoding="utf-8"
         ) as e:
@@ -55,6 +63,6 @@ def encode_to_utf8(src_file):
         os.remove(src_file)
         os.rename(trg_file, src_file)
     except UnicodeDecodeError:
-        logging.Logger.error("Decode Error")
+        logger.error("Decode Error")
     except UnicodeEncodeError:
-        logging.Logger.error("Encode Error")
+        logger.error("Encode Error")

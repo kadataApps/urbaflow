@@ -150,9 +150,6 @@ def dvf(
     flow_dvf(departement, dirname)
 
 
-if __name__ == "__main__":
-    app()
-
 @app.command()
 def locomvac(dirname: Path = typer.Argument(
         "/data/",
@@ -168,3 +165,7 @@ def locomvac(dirname: Path = typer.Argument(
     """
     typer.echo(f"Running LocomVac flow in directory: {dirname}")
     import_locomvac(dirname)
+
+
+if __name__ == "__main__":
+    app()
