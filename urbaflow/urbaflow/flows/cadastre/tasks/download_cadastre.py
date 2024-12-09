@@ -5,7 +5,7 @@ import sys
 import urllib.request
 
 from logging_config import logger
-from utils.dbutils import importGeoJSON
+from utils.dbutils import import_geojson
 from .get_communes_majic import get_imported_communes_from_file
 
 
@@ -81,8 +81,7 @@ def download_cadastre_for_communes():
             logger.info(commune)
             download_cadastre(commune, temp_dir, millesime)
             file = os.path.join(temp_dir, "cadastre-%s-parcelles.json" % commune)
-            json = importGeoJSON()
-            json.importFile(file, "cadastre_parcelles")
+            import_geojson(file, "cadastre_parcelles")
 
 
 def download_bati_for_communes():
@@ -99,8 +98,7 @@ def download_bati_for_communes():
             logger.info(commune)
             download_bati(commune, temp_dir)
             file = os.path.join(temp_dir, "cadastre-%s-batiments.json" % commune)
-            json = importGeoJSON()
-            json.importFile(file, "cadastre_bati")
+            import_geojson(file, "cadastre_bati")
 
 
 def unzip_cadastre(archive_path):

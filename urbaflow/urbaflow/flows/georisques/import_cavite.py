@@ -6,10 +6,11 @@ from prefect import flow, get_run_logger, task
 from sqlalchemy import DDL
 
 from urbaflow.shared_tasks.generic_tasks import load
-from urbaflow.utils.db_config import create_engine
+from urbaflow.urbaflow.utils.db_engine import create_engine
 from urbaflow.utils.file_utils import encode_to_utf8, list_files_at_path
 
 # %%
+
 
 @task
 def create_table_cavite(schema="public", table_name="risques_cavite"):
@@ -64,110 +65,116 @@ def create_table_cavite(schema="public", table_name="risques_cavite"):
                 """
             )
         )
-        
+
+
 @task
-def load_cavite(file, schema= "public", table_name="risques_cavite"):
+def load_cavite(file, schema="public", table_name="risques_cavite"):
     """
     Import des données de mouvements de terrain à partir d'un fichier CSV.
     Les données sont importées par défaut dans la table "risques_cavite" du schéma "public".
     """
     logger = get_run_logger()
     logger.info("Importing file: " + file)
-    
-    
+
     cavite_df = pd.read_csv(file, sep=";", encoding="UTF-8", low_memory=False)
     ## renommage des colonnes pour correspondre au schéma de la table
     ## (snake_case, clarification des noms)
-    cavite_df = cavite_df.rename(columns={
-        "numCavite": "num_cavite",
-        "indiceBSS": "indice_bss",
-        "designationBSS": "designation_bss",
-        "natureCavite": "nature_cavite",
-        "typeCavite": "type_cavite",
-        "typeCaviteAppauvri": "type_cavite_appauvri",
-        "nomCavite": "nom_cavite",
-        "statut": "statut",
-        "confidentialite": "confidentialite",
-        "raisonConfidentialite": "raison_confidentialite",
-        "organismeChxConfidentialite": "organisme_chx_confidentialite",
-        "reperageGeographique": "reperage_geographique",
-        "positionnement": "positionnement",
-        "positionnementAppauvri": "positionnement_appauvri",
-        "sourceCoordonnees": "source_coordonnees",
-        "precisionXY": "precision_xy",
-        "dateValidite": "date_validite",
-        "auteurDescription": "auteur_description",
-        "dateMajCavite": "date_maj_cavite",
-        "lambertOuvrage": "lambert_ouvrage",
-        "xOuvrage": "x_ouvrage",
-        "yOuvrage": "y_ouvrage",
-        "zOuvrage": "z_ouvrage",
-        "xouvl2e": "xouvl2e",
-        "youvl2e": "youvl2e",
-        "numInsee": "num_insee",
-        "commentaires": "commentaires",
-        "caviteAssociee": "cavite_associee",
-        "cUserSaisie": "c_user_saisie",
-        "cDateSaisie": "c_date_saisie",
-        "cUserModif": "c_user_modif",
-        "dateValidationSaisie": "date_validation_saisie",
-        "dateValidationDiffusion": "date_validation_diffusion",
-        "userValidationSaisie": "user_validation_saisie",
-        "userValidationDiffusion": "user_validation_diffusion",
-        "statutValidation": "statut_validation",
-        "dangerosite": "dangerosite"
-    })
+    cavite_df = cavite_df.rename(
+        columns={
+            "numCavite": "num_cavite",
+            "indiceBSS": "indice_bss",
+            "designationBSS": "designation_bss",
+            "natureCavite": "nature_cavite",
+            "typeCavite": "type_cavite",
+            "typeCaviteAppauvri": "type_cavite_appauvri",
+            "nomCavite": "nom_cavite",
+            "statut": "statut",
+            "confidentialite": "confidentialite",
+            "raisonConfidentialite": "raison_confidentialite",
+            "organismeChxConfidentialite": "organisme_chx_confidentialite",
+            "reperageGeographique": "reperage_geographique",
+            "positionnement": "positionnement",
+            "positionnementAppauvri": "positionnement_appauvri",
+            "sourceCoordonnees": "source_coordonnees",
+            "precisionXY": "precision_xy",
+            "dateValidite": "date_validite",
+            "auteurDescription": "auteur_description",
+            "dateMajCavite": "date_maj_cavite",
+            "lambertOuvrage": "lambert_ouvrage",
+            "xOuvrage": "x_ouvrage",
+            "yOuvrage": "y_ouvrage",
+            "zOuvrage": "z_ouvrage",
+            "xouvl2e": "xouvl2e",
+            "youvl2e": "youvl2e",
+            "numInsee": "num_insee",
+            "commentaires": "commentaires",
+            "caviteAssociee": "cavite_associee",
+            "cUserSaisie": "c_user_saisie",
+            "cDateSaisie": "c_date_saisie",
+            "cUserModif": "c_user_modif",
+            "dateValidationSaisie": "date_validation_saisie",
+            "dateValidationDiffusion": "date_validation_diffusion",
+            "userValidationSaisie": "user_validation_saisie",
+            "userValidationDiffusion": "user_validation_diffusion",
+            "statutValidation": "statut_validation",
+            "dangerosite": "dangerosite",
+        }
+    )
 
     # extraction des colonnes à importer
-    cavite_df = cavite_df[[
-        "id",
-        "num_cavite",
-        "indice_bss",
-        "designation_bss",
-        "nature_cavite",
-        "type_cavite",
-        "type_cavite_appauvri",
-        "nom_cavite",
-        "statut",
-        "confidentialite",
-        "raison_confidentialite",
-        "organisme_chx_confidentialite",
-        "reperage_geographique",
-        "positionnement",
-        "positionnement_appauvri",
-        "source_coordonnees",
-        "precision_xy",
-        "date_validite",
-        "auteur_description",
-        "date_maj_cavite",
-        "lambert_ouvrage",
-        "x_ouvrage",
-        "y_ouvrage",
-        "z_ouvrage",
-        "xouvl2e",
-        "youvl2e",
-        "num_insee",
-        "commentaires",
-        "cavite_associee",
-        "c_user_saisie",
-        "c_date_saisie",
-        "c_user_modif",
-        "date_validation_saisie",
-        "date_validation_diffusion",
-        "user_validation_saisie",
-        "user_validation_diffusion",
-        "statut_validation",
-        "dangerosite"
-    ]]
+    cavite_df = cavite_df[
+        [
+            "id",
+            "num_cavite",
+            "indice_bss",
+            "designation_bss",
+            "nature_cavite",
+            "type_cavite",
+            "type_cavite_appauvri",
+            "nom_cavite",
+            "statut",
+            "confidentialite",
+            "raison_confidentialite",
+            "organisme_chx_confidentialite",
+            "reperage_geographique",
+            "positionnement",
+            "positionnement_appauvri",
+            "source_coordonnees",
+            "precision_xy",
+            "date_validite",
+            "auteur_description",
+            "date_maj_cavite",
+            "lambert_ouvrage",
+            "x_ouvrage",
+            "y_ouvrage",
+            "z_ouvrage",
+            "xouvl2e",
+            "youvl2e",
+            "num_insee",
+            "commentaires",
+            "cavite_associee",
+            "c_user_saisie",
+            "c_date_saisie",
+            "c_user_modif",
+            "date_validation_saisie",
+            "date_validation_diffusion",
+            "user_validation_saisie",
+            "user_validation_diffusion",
+            "statut_validation",
+            "dangerosite",
+        ]
+    ]
 
     e = create_engine()
     with e.begin() as conn:
-        load(cavite_df, 
+        load(
+            cavite_df,
             connection=conn,
             table_name=table_name,
             how="replace",
             schema=schema,
-            logger=logger)
+            logger=logger,
+        )
 
 
 @task
@@ -188,6 +195,7 @@ def add_geometry_column_to_table(schema="public", table_name="risques_cavite"):
                 """
             )
         )
+
 
 @task
 def populate_geom(schema="public", table_name="risques_cavite"):
@@ -211,6 +219,7 @@ def populate_geom(schema="public", table_name="risques_cavite"):
             )
         )
 
+
 @task
 def import_cavite_files(path: Path):
     logger = get_run_logger()
@@ -231,4 +240,3 @@ def import_risques_cavite_flow(path: Path):
     logger.info(f"Importing files from {path}")
     import_cavite_files(path)
     populate_geom()
-

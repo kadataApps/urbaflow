@@ -11,6 +11,7 @@ from urbaflow.utils.file_utils import list_files_at_path
 url_znieff1 = "https://inpn.mnhn.fr/docs/Shape/znieff1.zip"
 url_znieff2 = "https://inpn.mnhn.fr/docs/Shape/znieff2.zip"
 
+
 @task
 def download_znieff(url, path, znieff_type):
     download_and_unzip(url, extract_to_path=path)
@@ -24,24 +25,23 @@ def download_znieff(url, path, znieff_type):
     return files[0]
 
 
-
 @task
-def import_znieff_shape(file,  schema="public", table=None):
+def import_znieff_shape(file, schema="public", table=None):
     if table is None:
         raise ValueError("Table name must be provided")
     logger = get_run_logger()
     logger.info(f"Importing file: {file}")
-    import_shapefile(file=file, 
-                      table=table,
-                      source_srs="EPSG:2154",
-                      destination_srs="EPSG:2154", 
-                      schema=schema)
-
+    import_shapefile(
+        file=file,
+        table=table,
+        source_srs="EPSG:2154",
+        destination_srs="EPSG:2154",
+        schema=schema,
+    )
 
 
 @flow(name="import INPN Znieff 1 et 2")
 def import_znieff_flow(path, schema="public"):
-    
     logger = get_run_logger()
     logger.info(f"Downloading ZNIEFF 1. Url: {url_znieff1}")
     file = download_znieff(url_znieff1, path, "1")

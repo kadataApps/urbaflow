@@ -7,7 +7,7 @@
 
 
 # CREATE TABLE saintes.patrimoine_immeubles_proteges_mh AS (
-#   SELECT * FROM patrimoine_immeubles_proteges_mh p 
+#   SELECT * FROM patrimoine_immeubles_proteges_mh p
 #   WHERE st_intersects(p.geom, (SELECT st_union(geom) from saintes.communes))
 #   );
 # CREATE INDEX sidx_patrimoine_immeubles_proteges_mh ON saintes.patrimoine_immeubles_proteges_mh using gist(geom);

@@ -14,11 +14,10 @@ from urbaflow.flows.locomvac import import_locomvac
 app = typer.Typer()
 
 
-
 @app.command()
 def majic(
     dirname: Path = typer.Argument(
-        ...,
+        Path("/data/"),
         exists=True,
         file_okay=False,
         dir_okay=True,
@@ -29,7 +28,7 @@ def majic(
     steps: List[str] = typer.Argument(
         None,
         help="List of steps to run (e.g., 'step1', 'step2'). If not provided, all steps are run.",
-    )
+    ),
 ):
     """
     DIRNAME : Chemin du répertoire contenant les fichiers MAJIC
@@ -39,10 +38,11 @@ def majic(
         for step in steps:
             if step not in STEPS_FLOW_CADASTRE.keys():
                 raise typer.BadParameter(
-                    f"Invalid step name '{step}'. Valid step names are: {STEPS_FLOW_CADASTRE.keys()}")
-            
+                    f"Invalid step name '{step}'. Valid step names are: {STEPS_FLOW_CADASTRE.keys()}"
+                )
+
     steps_to_process = steps if steps else STEPS_FLOW_CADASTRE.keys()
-    
+
     import_cadastre_majic_flow._run(path=dirname, enabled_steps=steps_to_process)
 
 
@@ -50,7 +50,7 @@ def majic(
 def dvf(
     departement: str,
     dirname: Path = typer.Argument(
-        ...,
+        Path("/data/"),
         exists=True,
         file_okay=False,
         dir_okay=True,
@@ -63,15 +63,17 @@ def dvf(
 
 
 @app.command()
-def locomvac(dirname: Path = typer.Argument(
-        "/data/",
+def locomvac(
+    dirname: Path = typer.Argument(
+        Path("/data/"),
         exists=True,
         file_okay=False,
         dir_okay=True,
         writable=True,
         readable=True,
         resolve_path=True,
-    )):
+    ),
+):
     """
     DIRNAME : Chemin du répertoire contenant les fichiers LOCOMVAC
     """

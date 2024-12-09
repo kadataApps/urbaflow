@@ -43,7 +43,7 @@ def get_encoding_type(file):
 def encode_to_utf8(src_file):
     """
     encode file to utf-8
-    
+
     Replaces the file with a new file with the same name but encoded in utf-8
     """
     logger = get_run_logger()
@@ -55,9 +55,10 @@ def encode_to_utf8(src_file):
         return
     try:
         logger.info(f"Converting {src_file} from {from_codec} to utf-8")
-        with open(src_file, "r", encoding=from_codec) as f, open(
-            trg_file, "w", encoding="utf-8"
-        ) as e:
+        with (
+            open(src_file, "r", encoding=from_codec) as f,
+            open(trg_file, "w", encoding="utf-8") as e,
+        ):
             text = f.read()
             e.write(text)
         os.remove(src_file)

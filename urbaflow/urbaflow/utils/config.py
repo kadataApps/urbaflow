@@ -1,31 +1,5 @@
 #!/usr/bin/python
 import os
-from pathlib import Path
-from configparser import ConfigParser
-
-defaultConfig = os.path.join(Path(__file__).resolve().parent.parent, "config.ini")
-
-ROOT_DIRECTORY = Path(__file__).resolve().parent.parent.parent
-
-
-def config(filename=defaultConfig, section="postgresql"):
-    # create a parser
-    parser = ConfigParser()
-    # read config file
-    parser.read(filename)
-
-    # get section, default to postgresql
-    parameters = {}
-    if parser.has_section(section):
-        params = parser.items(section)
-        for param in params:
-            parameters[param[0]] = param[1]
-    else:
-        raise Exception(
-            "Section {0} not found in the {1} file".format(section, filename)
-        )
-
-    return parameters
 
 
 def db_config():
@@ -38,10 +12,8 @@ def db_config():
     }
 
 
-def db_schema():
-    return {
-        "schema": os.getenv("IMPORT_SCHEMA", default="public"),
-    }
+def db_schema() -> str:
+    return os.getenv("IMPORT_SCHEMA", default="public")
 
 
 def majic_config():

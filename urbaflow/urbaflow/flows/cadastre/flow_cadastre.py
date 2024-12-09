@@ -67,7 +67,11 @@ STEPS_FLOW_CADASTRE = {
     "step7": {
         "description": "Download and import cadastre geometries",
         "default": True,
-        "tasks": [execute_init_cadastre, download_cadastre_for_communes, execute_format_cadastre],
+        "tasks": [
+            execute_init_cadastre,
+            download_cadastre_for_communes,
+            execute_format_cadastre,
+        ],
     },
     "step8": {
         "description": "Merge cadastre data with MAJIC",
@@ -118,7 +122,7 @@ def import_cadastre_majic_flow(path: Path, enabled_steps: List[str]):
     logger.info(f"Temporary directory: {temp_dir}")
     logger.info("----------------")
 
-    for step_name, step  in STEPS_FLOW_CADASTRE.items():
+    for step_name, step in STEPS_FLOW_CADASTRE.items():
         if step_name in enabled_steps:
             logger.info(f"Executing Step {step_name}: {step['description']}")
             for task in step["tasks"]:
@@ -131,15 +135,3 @@ def import_cadastre_majic_flow(path: Path, enabled_steps: List[str]):
             logger.info(f"Skipping Step {step_name}: {step['description']}")
 
     logger.info("Workflow completed successfully.")
-
-
-# if __name__ == "__main__":
-#     path = None
-#     try:
-#         path = sys.argv[1]
-#     except Exception:
-#         logger.info("error")
-
-#     logger.info("Will try to import majic files from dir: ")
-#     logger.info(path)
-#     flow_cadastre(path, steps=STEPS_FLOW_CADASTRE.keys())

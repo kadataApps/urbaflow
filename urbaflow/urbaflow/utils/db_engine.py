@@ -1,11 +1,6 @@
 import os
 import sqlalchemy as sa
 
-# from dotenv import load_dotenv
-# from config import ROOT_DIRECTORY
-
-# load_dotenv(ROOT_DIRECTORY / ".env")
-
 
 def make_connection_string() -> str:
     """Returns the connection string for the designated database.
@@ -18,7 +13,7 @@ def make_connection_string() -> str:
         environment variables.
     """
 
-    CLIENT = 'postgresql'
+    CLIENT = "postgresql"
     HOST = os.getenv("POSTGRES_HOST")
     PORT = os.getenv("POSTGRES_PORT", default=5432)
     DBNAME = os.getenv("POSTGRES_DB")

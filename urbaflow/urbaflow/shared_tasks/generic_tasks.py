@@ -155,7 +155,6 @@ def load(
         timedelta_columns=timedelta_columns,
     )
 
-    
     load_with_connection(
         df=df,
         connection=connection,
@@ -219,9 +218,7 @@ def load_with_connection(
         pass
 
     else:
-        raise ValueError(
-            f"how must be 'replace', 'upsert' or 'append', got {how}"
-        )
+        raise ValueError(f"how must be 'replace', 'upsert' or 'append', got {how}")
 
     # Insert data into table
     logger.info(f"Loading into {schema}.{table_name}")
@@ -255,61 +252,63 @@ def load_with_connection(
 
 
 def create_table_from_geodataframe(
-        gdf: gpd.GeoDataFrame,
-        connection: Connection,
-        table_name: str, 
-        schema: str = "public",
-        recreate: bool = False,
-        logger: logging.Logger = None,
-        srs: int = None,
-        ):
-        """
-        Creates a table in a PostgreSQL database from a GeoDataFrame.
+    gdf: gpd.GeoDataFrame,
+    connection: Connection,
+    table_name: str,
+    schema: str = "public",
+    recreate: bool = False,
+    logger: logging.Logger = None,
+    srs: int = None,
+):
+    """
+    Creates a table in a PostgreSQL database from a GeoDataFrame.
 
-        Parameters:
-        - conn: Connection object to the PostgreSQL database (from sqlalchemy).
-        - table_name: Name of the table to be created.
-        - gdf: GeoDataFrame containing the data and column definitions.
-        - schema: Name of the schema where the table will be created.
-        - recreate: If True, the table will be dropped and recreated if it already exists.
-        - logger: Logger object to log messages.
-        - srs: EPSG code of the spatial reference system of the geometry column.
-        """
-        dtype_mapping = {
-        'int64': 'INTEGER',
-        'float64': 'DOUBLE PRECISION',
-        'object': 'TEXT',
-        'datetime64[ns]': 'TIMESTAMP',
-        'geometry': 'GEOMETRY'
-        }
+    Parameters:
+    - conn: Connection object to the PostgreSQL database (from sqlalchemy).
+    - table_name: Name of the table to be created.
+    - gdf: GeoDataFrame containing the data and column definitions.
+    - schema: Name of the schema where the table will be created.
+    - recreate: If True, the table will be dropped and recreated if it already exists.
+    - logger: Logger object to log messages.
+    - srs: EPSG code of the spatial reference system of the geometry column.
+    """
+    dtype_mapping = {
+        "int64": "INTEGER",
+        "float64": "DOUBLE PRECISION",
+        "object": "TEXT",
+        "datetime64[ns]": "TIMESTAMP",
+        "geometry": "GEOMETRY",
+    }
 
-        if recreate:
-            recreate_query = f"DROP TABLE IF EXISTS {schema}.{table_name};"
-            connection.execute(text(recreate_query))
+    if recreate:
+        recreate_query = f"DROP TABLE IF EXISTS {schema}.{table_name};"
+        connection.execute(text(recreate_query))
 
-        geometry_type = gdf.geom_type.iloc[0].upper()  # Convert to uppercase (e.g., 'POINT', 'POLYGON')
-        crs = gdf.crs
+    geometry_type = gdf.geom_type.iloc[
+        0
+    ].upper()  # Convert to uppercase (e.g., 'POINT', 'POLYGON')
+    crs = gdf.crs
 
-        # Extract the EPSG code from the CRS, if available
-        # Use srs if provided, otherwise try to extract it from the GeoDataFrame
-        srid = srs if srs else crs.to_epsg() if crs else None
+    # Extract the EPSG code from the CRS, if available
+    # Use srs if provided, otherwise try to extract it from the GeoDataFrame
+    srid = srs if srs else crs.to_epsg() if crs else None
 
-        # Start creating the CREATE TABLE statement
-        create_table_query = f"CREATE TABLE IF NOT EXISTS {schema}.{table_name} (\n"
+    # Start creating the CREATE TABLE statement
+    create_table_query = f"CREATE TABLE IF NOT EXISTS {schema}.{table_name} (\n"
 
-        # Add columns to the CREATE TABLE statement based on GeoDataFrame
-        for column_name, dtype in gdf.dtypes.items():
-            if column_name == gdf.geometry.name:
-                # Define the geometry column with type and SRID
-                pg_type = f'GEOMETRY({geometry_type}'
-                if srid:
-                    pg_type += f', {srid}'
-                pg_type += ')'
-            else:
-                pg_type = dtype_mapping.get(str(dtype), 'TEXT')
-            create_table_query += f"    {column_name} {pg_type},\n"
+    # Add columns to the CREATE TABLE statement based on GeoDataFrame
+    for column_name, dtype in gdf.dtypes.items():
+        if column_name == gdf.geometry.name:
+            # Define the geometry column with type and SRID
+            pg_type = f"GEOMETRY({geometry_type}"
+            if srid:
+                pg_type += f", {srid}"
+            pg_type += ")"
+        else:
+            pg_type = dtype_mapping.get(str(dtype), "TEXT")
+        create_table_query += f"    {column_name} {pg_type},\n"
 
-        # Remove the last comma and add the closing parenthesis
-        create_table_query = create_table_query.rstrip(",\n") + "\n);"
+    # Remove the last comma and add the closing parenthesis
+    create_table_query = create_table_query.rstrip(",\n") + "\n);"
 
-        connection.execute(text(create_table_query))
+    connection.execute(text(create_table_query))

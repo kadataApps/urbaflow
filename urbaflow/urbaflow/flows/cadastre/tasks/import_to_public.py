@@ -64,7 +64,7 @@ def create_bati_france():
 
 
 def insert_parcelles_to_public(connexion):
-    schema = db_schema()["schema"]
+    schema = db_schema()
     import_query = """
     INSERT INTO public.parcellaire_france (
       geom, idparcelle_geom, code_insee, idpar, idpar_simple, idprocpte, dcntpa, jdatat,
@@ -92,7 +92,7 @@ def insert_parcelles_to_public(connexion):
 
 
 def insert_proprietaire_to_public(connexion):
-    schema = db_schema()["schema"]
+    schema = db_schema()
     import_query = """
     INSERT INTO public.proprietaire_droit (
       proprietaire, annee, idprodroit, idprocpte, idpersonne, idvoie, idcom,
@@ -129,7 +129,7 @@ def insert_proprietaire_to_public(connexion):
 
 
 def insert_local_to_public(connexion):
-    schema = db_schema()["schema"]
+    schema = db_schema()
     import_query = """
     INSERT INTO public.pb0010_local (
       local10, annee, idlocal, idbat, idpar, idprocpte, ccodep, ccodir, ccocom, invar,
@@ -156,7 +156,7 @@ def insert_local_to_public(connexion):
 
 
 def insert_bati_to_public(connexion):
-    schema = db_schema()["schema"]
+    schema = db_schema()
 
     import_query = (
         "INSERT INTO public.bati_france "

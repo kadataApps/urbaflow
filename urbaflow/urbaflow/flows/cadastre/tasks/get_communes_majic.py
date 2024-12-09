@@ -18,7 +18,7 @@ def get_imported_communes_from_postgres():
     Récupération de la liste des communes importées dans postgis via l'import MAJIC
     """
     logger.info("Liste des code communes importés dans MAJIC")
-    schema = db_schema()["schema"]
+    schema = db_schema()
     select_communes_query = (
         "SELECT '[''' || string_agg(communes, ''',''') ||''']' "
         "FROM("

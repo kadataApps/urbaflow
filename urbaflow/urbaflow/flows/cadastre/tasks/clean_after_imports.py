@@ -10,7 +10,7 @@ def clean_temp_dir():
 
 
 def clean_db():
-    schema = db_schema()["schema"]
+    schema = db_schema()
 
     sql = "DROP SCHEMA %s CASCADE;" % schema
     conn = pg_connection()

@@ -8,6 +8,7 @@ from utils.unzip_file import unzip_file_in_place
 
 # https://github.com/ESO-Rennes/Analyse-Donnees-DVF
 
+
 def download_dvf_by_dep_year(departement, year, targetDir):
     url = "https://cadastre.data.gouv.fr/data/etalab-dvf/latest/csv/"
     url += year + "/departements/"
@@ -37,6 +38,7 @@ def import_dvf(departements):
     for dep in departements:
         # download dvf for requested code insee
         download_dvf_by_dep(dep)
+
 
 @flow(name="import INPN Znieff 1 et 2")
 def dvf_flow(dep, targetDir):

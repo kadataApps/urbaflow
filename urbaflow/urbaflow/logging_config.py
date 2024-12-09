@@ -4,7 +4,7 @@ import os
 log_level = os.getenv("LOG_LEVEL", logging.DEBUG)
 
 # Get log file path from environment variable (default None)
-log_filepath = os.path.join(os.getcwd(), '../logs/urbaflow.log')
+log_filepath = os.path.join(os.getcwd(), "../logs/urbaflow.log")
 
 # Configure logging
 logging.basicConfig(
@@ -19,4 +19,3 @@ logger = logging.getLogger(__name__)
 console_handler = logging.StreamHandler()
 console_handler.setLevel(logging.DEBUG)  # Set console log level to DEBUG (always print)
 logger.addHandler(console_handler)
-

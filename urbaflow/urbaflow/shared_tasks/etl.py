@@ -5,7 +5,7 @@ import prefect
 from prefect import task
 from sqlalchemy import text
 
-from urbaflow.utils.db_config import create_engine
+from urbaflow.urbaflow.utils.db_engine import create_engine
 
 
 @task(checkpoint=False)
@@ -19,4 +19,3 @@ def run_sql_script(sql_filepath: Path, db: str = "local") -> pd.DataFrame:
     logger.info(f"Executing {sql_filepath}.")
     with e.begin() as con:
         con.execute(query)
-
