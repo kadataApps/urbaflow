@@ -38,5 +38,5 @@ def import_dvf(departements):
 
 
 def flow_dvf(dep, targetDir):
-    #    importDVF(dep)
+    import_dvf(dep)
     download_dvf_by_dep(dep, targetDir)

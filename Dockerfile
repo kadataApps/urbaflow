@@ -25,23 +25,22 @@ RUN apt-get update && \
 
 # Create and "activate" venv by prepending it to PATH then install python dependencies
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
-
-COPY requirements.txt /tmp/requirements.txt
-
 RUN python3 -m venv "$VIRTUAL_ENV" && \
     pip install -U \
     pip \
     setuptools \
     wheel
 
+COPY urbaflow/requirements.txt /tmp/requirements.txt
 RUN pip install -r /tmp/requirements.txt
 
 # Make library importable
 ENV PYTHONPATH=/home/${USER}
 
 # Add source
-COPY . ./urbaflow
+COPY ./urbaflow ./urbaflow
 RUN pip3 install -e ./urbaflow
+
 RUN mkdir /home/${USER}/.prefect/
 
 # create log folder
@@ -50,18 +49,6 @@ RUN mkdir /home/${USER}/logs
 RUN chown -R ${USER} .
 USER ${USER}
 WORKDIR /home/${USER}/urbaflow
-# RUN python urbaflow/main.py --install-completion
+
+# Default command for production
 CMD ["python", "urbaflow/main.py"]
-
-
-# RUN mkdir /app
-# WORKDIR /app/
-
-# RUN pip3 install -r requirements.txt
-# ENV PYTHONPATH "${PYTONPATH}:/opt/app"
-# COPY ./src .
-
-# RUN python setup.py install
-
-# RUN echo 'eval "$(_PROCESS_COMPLETE=source process)"' >> ~/.bashrc
-

@@ -1,7 +1,7 @@
 import typer
 from pathlib import Path
 
-from urbaflow.flows.dvf.download_dvf_from_imported_data import flow_dvf
+# from urbaflow.flows.dvf.dvf import flow_dvf
 from urbaflow.flows.cadastre.flow_cadastre import (
     flow_clean,
     flow_copy_transform_majic_queries,
@@ -134,20 +134,20 @@ def majic(
         flow_cadastre(path=dirname, steps=steps_to_process)
 
 
-@app.command()
-def dvf(
-    departement: str,
-    dirname: Path = typer.Argument(
-        ...,
-        exists=True,
-        file_okay=False,
-        dir_okay=True,
-        writable=True,
-        readable=True,
-        resolve_path=True,
-    ),
-):
-    flow_dvf(departement, dirname)
+# @app.command()
+# def dvf(
+#     departement: str,
+#     dirname: Path = typer.Argument(
+#         ...,
+#         exists=True,
+#         file_okay=False,
+#         dir_okay=True,
+#         writable=True,
+#         readable=True,
+#         resolve_path=True,
+#     ),
+# ):
+#     flow_dvf(departement, dirname)
 
 
 @app.command()

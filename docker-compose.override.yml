@@ -1,0 +1,8 @@
+---
+version: "3.9"
+services:
+  urbaflow:
+    hostname: urbaflow-dev
+    volumes:
+      # mount source code folder
+      - ./urbaflow/:/home/urbaflow-user/urbaflow

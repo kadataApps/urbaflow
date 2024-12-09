@@ -1,4 +1,4 @@
-.PHONY: help start-postgis stop-postgis build-urbaflow urbaflow dev-urbaflow update-python-dependencies
+.PHONY: help start-postgis stop-postgis build-urbaflow urbaflow dev update-python-dependencies
 
 start-postgis: ## Start a postgis server as a daemon, exposed on port 5432
 	docker compose up -d postgis
@@ -6,14 +6,21 @@ start-postgis: ## Start a postgis server as a daemon, exposed on port 5432
 stop-postgis: ## Stop the postgis server daemon
 	docker compose stop postgis
 
+
+urbaflow: ## Run bash environment with available python dependencies for data urbaflow
+	docker compose -f docker-compose.yml run --rm urbaflow /bin/bash
+
+
+# DEV COMMANDS
 build-urbaflow:
 	docker compose build urbaflow
 
-urbaflow: ## Run bash environment with available python dependencies for data urbaflow
+dev: ## mount the urbaflow folder and run bash environment with available python dependencies for data urbaflow
 	docker compose run --rm urbaflow /bin/bash
 
-dev-urbaflow: ## mount the urbaflow folder and run bash environment with available python dependencies for data urbaflow
-	export DEV_FOLDER="./urbaflow" && docker compose run --rm urbaflow /bin/bash
+lint:
+	poetry run ruff check
+	poetry run ruff format
 
 update-python-dependencies:
 	poetry export --without-hashes -o requirements.txt

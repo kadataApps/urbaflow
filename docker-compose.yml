@@ -1,5 +1,5 @@
 ---
-version: "3"
+version: "3.9"
 services:
   postgis:
     image: kartoza/postgis:15-3.3
@@ -21,6 +21,7 @@ services:
       retries: 30
 
   urbaflow:
+    container_name: urbaflow
     build: .
     environment:
       - POSTGRES_HOST
@@ -31,10 +32,8 @@ services:
       # urbaflow config
       - CADASTRE_MILLESIME
       - IMPORT_SCHEMA
-    command: tail -F anything
     volumes:
       - ${PATH_TO_DATA}:/data
-      - ${DEV_FOLDER}:/home/urbaflow-user/urbaflow
       - ${LOG_FOLDER}:/home/urbaflow-user/logs
 
 
