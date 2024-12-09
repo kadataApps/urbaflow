@@ -1,6 +1,8 @@
-import sys
 import os
 from pathlib import Path
+from typing import List
+
+from prefect import flow
 
 from urbaflow.logging_config import logger
 from urbaflow.utils.script_utils import copy_files_to_temp
@@ -32,62 +34,62 @@ from .tasks.clean_after_imports import clean_temp_dir, clean_db
 
 
 STEPS_FLOW_CADASTRE = {
-    "1": {
+    "step1": {
         "description": "Import raw MAJIC data into temporary PostgreSQL tables",
         "default": True,
         "tasks": [lambda dirname: import_majic(dirname).import_majic_files()],
     },
-    "2": {
+    "step2": {
         "description": "Copy SQL scripts to the temp directory",
         "default": True,
         "tasks": [lambda: copy_files_to_temp("queries/majic", "temp/sql")],
     },
-    "3": {
+    "step3": {
         "description": "Drop existing tables before importing new MAJIC data",
         "default": True,
         "tasks": [clean_with_drop_db_for_majic_import],
     },
-    "4": {
+    "step4": {
         "description": "Initialize database for MAJIC data import",
         "default": True,
         "tasks": [init_db_for_majic_import],
     },
-    "5": {
+    "step5": {
         "description": "Format and process MAJIC data",
         "default": True,
         "tasks": [execute_format_majic_scripts],
     },
-    "6": {
+    "step6": {
         "description": "Identify imported communes and write to file",
         "default": True,
         "tasks": [write_communes_to_file],
     },
-    "7": {
+    "step7": {
         "description": "Download and import cadastre geometries",
         "default": True,
         "tasks": [execute_init_cadastre, download_cadastre_for_communes, execute_format_cadastre],
     },
-    "8": {
+    "step8": {
         "description": "Merge cadastre data with MAJIC",
         "default": True,
         "tasks": [execute_merge_cadastre_majic_scripts],
     },
-    "9": {
+    "step9": {
         "description": "Export parcel, owner, and local data to the public schema",
         "default": True,
         "tasks": [flow_import_parcelles, flow_import_proprietaire, flow_import_local],
     },
-    "10": {
+    "step10": {
         "description": "Download and import building geometries",
         "default": True,
         "tasks": [execute_init_bati, download_bati_for_communes],
     },
-    "11": {
+    "step11": {
         "description": "Export building data to the public schema",
         "default": True,
         "tasks": [flow_import_bati],
     },
-    "12": {
+    "step12": {
         "description": "Clean up temporary files and database tables",
         "default": True,
         "tasks": [clean_temp_dir, clean_db],
@@ -95,7 +97,8 @@ STEPS_FLOW_CADASTRE = {
 }
 
 
-def flow_cadastre(path, steps):
+@flow(name="import cadastre et majic")
+def import_cadastre_majic_flow(path: Path, enabled_steps: List[str]):
     """
     Execute the cadastre workflow based on the given steps.
 
@@ -115,29 +118,28 @@ def flow_cadastre(path, steps):
     logger.info(f"Temporary directory: {temp_dir}")
     logger.info("----------------")
 
-    # Iterate through steps and execute enabled tasks
-    for step, config in STEPS_FLOW_CADASTRE.items():
-        if steps.get(step, {}).get("default", config["default"]):
-            logger.info(f"Executing Step {step}: {config['description']}")
-            for task in config["tasks"]:
+    for step_name, step  in STEPS_FLOW_CADASTRE.items():
+        if step_name in enabled_steps:
+            logger.info(f"Executing Step {step_name}: {step['description']}")
+            for task in step["tasks"]:
                 # Pass `path` to tasks that accept it
                 if "dirname" in task.__code__.co_varnames:
                     task(path)
                 else:
                     task()
         else:
-            logger.info(f"Skipping Step {step}: {config['description']}")
+            logger.info(f"Skipping Step {step_name}: {step['description']}")
 
     logger.info("Workflow completed successfully.")
 
 
-if __name__ == "__main__":
-    path = None
-    try:
-        path = sys.argv[1]
-    except Exception:
-        logger.info("error")
+# if __name__ == "__main__":
+#     path = None
+#     try:
+#         path = sys.argv[1]
+#     except Exception:
+#         logger.info("error")
 
-    logger.info("Will try to import majic files from dir: ")
-    logger.info(path)
-    flow_cadastre(path, steps=STEPS_FLOW_CADASTRE)
+#     logger.info("Will try to import majic files from dir: ")
+#     logger.info(path)
+#     flow_cadastre(path, steps=STEPS_FLOW_CADASTRE.keys())

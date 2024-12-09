@@ -11,7 +11,7 @@ WORKDIR /home/${USER}
 
 # Install system dependencies
 RUN apt-get update && \
-    apt-get install -y \
+    DEBIAN_FRONTEND=noninteractive  apt-get install -y \
     libpq-dev \
     build-essential \
     alien \
@@ -20,8 +20,10 @@ RUN apt-get update && \
     python3.10-venv \
     python3-dev \
     gcc \
+    tzdata \
     && rm -rf /var/lib/apt/lists/*
 ## adding python3-dev + gcc fix error installing with arm64
+ENV TZ=UTC
 
 # Create and "activate" venv by prepending it to PATH then install python dependencies
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
@@ -34,12 +36,13 @@ RUN python3 -m venv "$VIRTUAL_ENV" && \
 COPY urbaflow/requirements.txt /tmp/requirements.txt
 RUN pip install -r /tmp/requirements.txt
 
-# Make library importable
-ENV PYTHONPATH=/home/${USER}
 
 # Add source
-COPY ./urbaflow ./urbaflow
+COPY urbaflow/ ./urbaflow
 RUN pip3 install -e ./urbaflow
+
+# Make library importable
+ENV PYTHONPATH=/home/${USER}/urbaflow
 
 RUN mkdir /home/${USER}/.prefect/
 

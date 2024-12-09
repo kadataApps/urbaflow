@@ -1,6 +1,8 @@
 import os
 import urllib.request
 
+from prefect import flow
+
 from utils.report_hook import reporthook
 from utils.unzip_file import unzip_file_in_place
 
@@ -36,7 +38,7 @@ def import_dvf(departements):
         # download dvf for requested code insee
         download_dvf_by_dep(dep)
 
-
-def flow_dvf(dep, targetDir):
+@flow(name="import INPN Znieff 1 et 2")
+def dvf_flow(dep, targetDir):
     import_dvf(dep)
     download_dvf_by_dep(dep, targetDir)
