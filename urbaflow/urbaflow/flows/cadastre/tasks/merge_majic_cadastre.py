@@ -1,8 +1,9 @@
 import os
 
-from urbaflow.urbaflow.shared_tasks.logging_config import logger
-from urbaflow.urbaflow.shared_tasks.sql_query_utils import replace_parameters_in_script
-from utils.dbutils import pg_connection
+from shared_tasks.db_engine import create_engine
+from shared_tasks.db_sql_utils import run_sql_script
+from shared_tasks.logging_config import logger
+from shared_tasks.sql_query_utils import replace_parameters_in_script
 
 
 def execute_merge_cadastre_majic_scripts():
@@ -29,12 +30,14 @@ def execute_merge_cadastre_majic_scripts():
     scripts_count = len(script_list)
     etape = 0
     sql_scripts_dir = os.path.join(os.getcwd(), "temp/sql/")
-    conn = pg_connection()
-    for script in script_list:
-        etape += 1
-        logger.info("Etape " + str(etape) + "/" + str(scripts_count) + " : " + script)
-        script_path = os.path.join(sql_scripts_dir, script)
-        replace_parameters_in_script(script_path, replace_dict)
-        conn.execute_script(script_path)
-    conn.close_connection()
+    e = create_engine()
+    with e.begin() as conn:
+        for script in script_list:
+            etape += 1
+            logger.info(
+                "Etape " + str(etape) + "/" + str(scripts_count) + " : " + script
+            )
+            script_path = os.path.join(sql_scripts_dir, script)
+            replace_parameters_in_script(script_path, replace_dict)
+            run_sql_script(sql_filepath=script_path, connection=conn)
     logger.info("Fusion Cadastre x MAJIC terminée.")

@@ -1,16 +1,7 @@
-import os
-
-from urbaflow.urbaflow.shared_tasks.logging_config import logger
-from utils.dbutils import pg_connection
-from urbaflow.urbaflow.shared_tasks.config import db_schema, config
-
-
-def get_imported_communes_from_file():
-    """
-    Récupération de la liste des communes dans le fichier communes.txt
-    """
-    filename = os.path.join(os.getcwd(), "temp/communes.txt")
-    return config(filename, section="communes")
+from shared_tasks.db_engine import create_engine
+from shared_tasks.db_sql_utils import read_query
+from shared_tasks.logging_config import logger
+from shared_tasks.config import db_schema
 
 
 def get_imported_communes_from_postgres():
@@ -20,24 +11,10 @@ def get_imported_communes_from_postgres():
     logger.info("Liste des code communes importés dans MAJIC")
     schema = db_schema()
     select_communes_query = (
-        "SELECT '[''' || string_agg(communes, ''',''') ||''']' "
-        "FROM("
-        "SELECT distinct ccodep || ccocom as communes "
-        "FROM %s.parcelle) t;" % schema
+        "SELECT distinct ccodep || ccocom as communes " "FROM %s.parcelle;" % schema
     )
-    conn = pg_connection()
-    conn.execute_sql(select_communes_query)
-    communes = conn.cur.fetchone()[0]
-    conn.close_connection()
+
+    e = create_engine()
+    with e.connect() as conn:
+        communes = read_query(connection=conn, query=select_communes_query)
     return communes
-
-
-def write_communes_to_file():
-    communes = get_imported_communes_from_postgres()
-    logger.info("Liste des communes")
-    logger.info(communes)
-    file = open(os.path.join(os.getcwd(), "temp/communes.txt"), "w")
-    file.write("[communes]\n")
-    file.write("communes = ")
-    if communes is not None:
-        file.write(communes)

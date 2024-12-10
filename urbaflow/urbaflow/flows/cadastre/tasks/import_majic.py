@@ -1,9 +1,10 @@
 import os
 import re
 
+from urbaflow.urbaflow.shared_tasks.db_engine import create_engine
+from urbaflow.urbaflow.shared_tasks.db_sql_utils import run_sql_script
 from urbaflow.urbaflow.shared_tasks.logging_config import logger
 from urbaflow.urbaflow.shared_tasks.config import majic_config
-from utils.dbutils import pg_connection
 
 
 class import_majic(object):
@@ -123,57 +124,57 @@ class import_majic(object):
         logger.info("Directions found :")
         logger.info(depdirs)
 
-        # 2nd path to insert data
-        # Open connection & set search_path
-        connection = pg_connection()
-        # connection.setSearchPath(self.db_schema)
         local_step = 0
-        for item in self.majic_source_filenames:
-            table = item["table"]
-            # self.step_counter+= len(majic_files_found[table])
-            # processedFilesCount+=len(majic_files_found[table])
-            local_step += 1
-            logger.info(
-                "Etape " + str(local_step) + "/" + str(self.step_counter) + ": " + table
-            )
-
-            # Drop & create tables where to import data
-            logger.info("Drop & create table %s" % table)
-            sql = (
-                'DROP TABLE IF EXISTS "%(table)s"; CREATE TABLE "%(table)s" (tmp text);'
-                % {"table": table}
-            )
-            connection.execute_sql(sql)
-            connection.commit()
-
-            current_file = 0
-            for fpath in majic_files_found[table]:
-                current_file += 1
+        e = create_engine()
+        with e.begin() as conn:
+            for item in self.majic_source_filenames:
+                table = item["table"]
+                # self.step_counter+= len(majic_files_found[table])
+                # processedFilesCount+=len(majic_files_found[table])
+                local_step += 1
                 logger.info(
-                    "Fichier "
-                    + str(current_file)
+                    "Etape "
+                    + str(local_step)
                     + "/"
-                    + str(len(majic_files_found[table]))
+                    + str(self.step_counter)
+                    + ": "
+                    + table
                 )
-                # read file content
-                with open(fpath, encoding="ascii", errors="replace") as fin:
-                    # Divide file into chuncks
-                    for a in self.chunk(fin, self.max_insert_rows):
-                        # Build INSERT list
-                        sql = "\n".join(
-                            [
-                                "INSERT INTO \"%s\" VALUES (E'%s');"
-                                % (
-                                    table,
-                                    r_quote_string.sub(
-                                        "\\'", r.sub(" ", x.strip("\r\n"))
-                                    ),
-                                )
-                                for x in a
-                                if x and depdirs.get(x[0:3]) is True
-                            ]
-                        )
-                        connection.execute_sql(sql)
-                connection.commit()
-                logger.info("Import done and commited for %s" % fpath)
-        connection.close_connection()
+
+                # Drop & create tables where to import data
+                logger.info("Drop & create table %s" % table)
+                sql = (
+                    'DROP TABLE IF EXISTS "%(table)s"; CREATE TABLE "%(table)s" (tmp text);'
+                    % {"table": table}
+                )
+                run_sql_script(sql=sql, connection=conn)
+
+                current_file = 0
+                for fpath in majic_files_found[table]:
+                    current_file += 1
+                    logger.info(
+                        "Fichier "
+                        + str(current_file)
+                        + "/"
+                        + str(len(majic_files_found[table]))
+                    )
+                    # read file content
+                    with open(fpath, encoding="ascii", errors="replace") as fin:
+                        # Divide file into chuncks
+                        for a in self.chunk(fin, self.max_insert_rows):
+                            # Build INSERT list
+                            sql = "\n".join(
+                                [
+                                    "INSERT INTO \"%s\" VALUES (E'%s');"
+                                    % (
+                                        table,
+                                        r_quote_string.sub(
+                                            "\\'", r.sub(" ", x.strip("\r\n"))
+                                        ),
+                                    )
+                                    for x in a
+                                    if x and depdirs.get(x[0:3]) is True
+                                ]
+                            )
+                            run_sql_script(sql=sql, connection=conn)
+                    logger.info("Import done and commited for %s" % fpath)

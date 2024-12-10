@@ -23,7 +23,6 @@ from .tasks.format_cadastre import (
     execute_init_bati,
 )
 from .tasks.merge_majic_cadastre import execute_merge_cadastre_majic_scripts
-from .tasks.get_communes_majic import write_communes_to_file
 from .tasks.import_to_public import (
     flow_import_bati,
     flow_import_parcelles,
@@ -60,11 +59,6 @@ STEPS_FLOW_CADASTRE = {
         "tasks": [execute_format_majic_scripts],
     },
     "step6": {
-        "description": "Identify imported communes and write to file",
-        "default": True,
-        "tasks": [write_communes_to_file],
-    },
-    "step7": {
         "description": "Download and import cadastre geometries",
         "default": True,
         "tasks": [
@@ -73,27 +67,27 @@ STEPS_FLOW_CADASTRE = {
             execute_format_cadastre,
         ],
     },
-    "step8": {
+    "step7": {
         "description": "Merge cadastre data with MAJIC",
         "default": True,
         "tasks": [execute_merge_cadastre_majic_scripts],
     },
-    "step9": {
+    "step8": {
         "description": "Export parcel, owner, and local data to the public schema",
         "default": True,
         "tasks": [flow_import_parcelles, flow_import_proprietaire, flow_import_local],
     },
-    "step10": {
+    "step9": {
         "description": "Download and import building geometries",
         "default": True,
         "tasks": [execute_init_bati, download_bati_for_communes],
     },
-    "step11": {
+    "step10": {
         "description": "Export building data to the public schema",
         "default": True,
         "tasks": [flow_import_bati],
     },
-    "step12": {
+    "step11": {
         "description": "Clean up temporary files and database tables",
         "default": True,
         "tasks": [clean_temp_dir, clean_db],

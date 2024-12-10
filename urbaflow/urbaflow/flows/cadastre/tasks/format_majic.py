@@ -1,8 +1,9 @@
 import os
 
+from urbaflow.urbaflow.shared_tasks.db_engine import create_engine
+from urbaflow.urbaflow.shared_tasks.db_sql_utils import run_sql_script
 from urbaflow.urbaflow.shared_tasks.logging_config import logger
 from urbaflow.urbaflow.shared_tasks.sql_query_utils import replace_parameters_in_script
-from utils.dbutils import pg_connection
 
 
 def clean_with_drop_db_for_majic_import():
@@ -13,9 +14,9 @@ def clean_with_drop_db_for_majic_import():
         "Nettoyage base de données - Suppression tables métiers MAJIC - cf.QgisCadastre"
     )
     script_path = os.path.join(os.getcwd(), "temp/sql/commun_drop_metier.sql")
-    conn = pg_connection()
-    conn.execute_script(script_path)
-    conn.close_connection()
+    e = create_engine()
+    with e.begin() as conn:
+        run_sql_script(sql_filepath=script_path, connection=conn)
     logger.info(
         "Base de données prête pour initialisation avec les tables métiers MAJIC."
     )
@@ -32,10 +33,10 @@ def init_db_for_majic_import():
     script_path_nomenclature = os.path.join(
         os.getcwd(), "temp/sql/commun_insert_nomenclature.sql"
     )
-    conn = pg_connection()
-    conn.execute_script(script_path_create)
-    conn.execute_script(script_path_nomenclature)
-    conn.close_connection()
+    e = create_engine()
+    with e.begin() as conn:
+        run_sql_script(sql_filepath=script_path_create, connection=conn)
+        run_sql_script(sql_filepath=script_path_nomenclature, connection=conn)
     logger.info("Base de données initialisée avec les tables métiers MAJIC.")
 
 
@@ -60,16 +61,18 @@ def execute_format_majic_scripts():
         "traitements/majic/5-proprietaire_local10_update_gdprop.sql",
     ]
 
-    scripts_count = len(script_list)
-    etape = 0
-    sql_scripts_dir = os.path.join(os.getcwd(), "temp/sql/")
-    conn = pg_connection()
-    # conn.setSearchPath()
-    for script in script_list:
-        etape += 1
-        logger.info("Etape " + str(etape) + "/" + str(scripts_count) + " : " + script)
-        script_path = os.path.join(sql_scripts_dir, script)
-        replace_parameters_in_script(script_path, replace_dict)
-        conn.execute_script(script_path)
-    conn.close_connection()
+    e = create_engine()
+    with e.begin() as conn:
+        scripts_count = len(script_list)
+        etape = 0
+        sql_scripts_dir = os.path.join(os.getcwd(), "temp/sql/")
+        for script in script_list:
+            etape += 1
+            logger.info(
+                "Etape " + str(etape) + "/" + str(scripts_count) + " : " + script
+            )
+            script_path = os.path.join(sql_scripts_dir, script)
+            replace_parameters_in_script(script_path, replace_dict)
+            run_sql_script(sql_filepath=script_path, connection=conn)
+
     logger.info("Formatage terminé.")

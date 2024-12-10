@@ -1,9 +1,10 @@
 import os
 import psycopg2
 
-from urbaflow.urbaflow.shared_tasks.logging_config import logger
-from utils.dbutils import pg_connection
-from urbaflow.urbaflow.shared_tasks.config import db_schema
+from shared_tasks.db_engine import create_engine
+from shared_tasks.db_sql_utils import run_sql_script
+from shared_tasks.logging_config import logger
+from shared_tasks.config import db_schema
 from .get_communes_majic import get_imported_communes_from_file
 
 
@@ -16,9 +17,9 @@ def create_parcellaire_france():
     script_path_create = os.path.join(
         os.getcwd(), "temp/sql/commun_create_parcellaire.sql"
     )
-    conn = pg_connection()
-    conn.execute_script(script_path_create)
-    conn.close_connection()
+    e = create_engine()
+    with e.begin() as conn:
+        run_sql_script(sql_filepath=script_path_create, connection=conn)
     logger.info("La table parcellaire_france a été créée.")
 
 
@@ -31,9 +32,9 @@ def create_proprietaire_droit():
     script_path_create = os.path.join(
         os.getcwd(), "temp/sql/commun_create_proprietaire.sql"
     )
-    conn = pg_connection()
-    conn.execute_script(script_path_create)
-    conn.close_connection()
+    e = create_engine()
+    with e.begin() as conn:
+        run_sql_script(sql_filepath=script_path_create, connection=conn)
     logger.info("La table proprietaire_droit a été créée.")
 
 
@@ -44,9 +45,9 @@ def create_pb0010_local():
     """
     logger.info("Création de la table pb0010_local dans public")
     script_path_create = os.path.join(os.getcwd(), "temp/sql/commun_create_local.sql")
-    conn = pg_connection()
-    conn.execute_script(script_path_create)
-    conn.close_connection()
+    e = create_engine()
+    with e.begin() as conn:
+        run_sql_script(sql_filepath=script_path_create, connection=conn)
     logger.info("La table pb0010_local a été créée.")
 
 
@@ -57,13 +58,13 @@ def create_bati_france():
     """
     logger.info("Création de la table bati_france dans public")
     script_path_create = os.path.join(os.getcwd(), "temp/sql/commun_create_bati.sql")
-    conn = pg_connection()
-    conn.execute_script(script_path_create)
-    conn.close_connection()
+    e = create_engine()
+    with e.begin() as conn:
+        run_sql_script(sql_filepath=script_path_create, connection=conn)
     logger.info("La table bati_france a été créée.")
 
 
-def insert_parcelles_to_public(connexion):
+def insert_parcelles_to_public():
     schema = db_schema()
     import_query = """
     INSERT INTO public.parcellaire_france (
@@ -86,12 +87,14 @@ def insert_parcelles_to_public(connexion):
     FROM """
     import_query += f"{schema}.parcellaire;"
 
-    connexion.execute_sql(import_query)
+    e = create_engine()
+    with e.begin() as conn:
+        run_sql_script(sql=import_query, connection=conn)
 
     logger.info("Table parcellaire importée dans parcellaire_france")
 
 
-def insert_proprietaire_to_public(connexion):
+def insert_proprietaire_to_public():
     schema = db_schema()
     import_query = """
     INSERT INTO public.proprietaire_droit (
@@ -124,11 +127,13 @@ def insert_proprietaire_to_public(connexion):
     FROM """
     import_query += f"{schema}.proprietaire;"
 
-    connexion.execute_sql(import_query)
+    e = create_engine()
+    with e.begin() as conn:
+        run_sql_script(sql=import_query, connection=conn)
     logger.info("Table proprietaire importée dans proprietaire_droit")
 
 
-def insert_local_to_public(connexion):
+def insert_local_to_public():
     schema = db_schema()
     import_query = """
     INSERT INTO public.pb0010_local (
@@ -151,11 +156,13 @@ def insert_local_to_public(connexion):
     FROM """
     import_query += f"{schema}.local10;"
 
-    connexion.execute_sql(import_query)
+    e = create_engine()
+    with e.begin() as conn:
+        run_sql_script(sql=import_query, connection=conn)
     logger.info("Table local10 importée dans pb0010_local")
 
 
-def insert_bati_to_public(connexion):
+def insert_bati_to_public():
     schema = db_schema()
 
     import_query = (
@@ -165,19 +172,26 @@ def insert_bati_to_public(connexion):
         "FROM %(schema)s.cadastre_bati;" % {"schema": schema}
     )
 
-    connexion.execute_sql(import_query)
+    e = create_engine()
+    with e.begin() as conn:
+        run_sql_script(sql=import_query, connection=conn)
 
     logger.info("Table bati importée dans bati_france")
 
 
-def delete_from_public(codes_insee, table_name, connexion):
+def delete_from_public(
+    codes_insee,
+    table_name,
+):
     logger.info(codes_insee)
     delete_query = "DELETE FROM public.%s WHERE code_insee = ANY(ARRAY%s);" % (
         table_name,
         codes_insee,
     )
 
-    connexion.execute_sql(delete_query)
+    e = create_engine()
+    with e.begin() as conn:
+        run_sql_script(sql=delete_query, connection=conn)
 
     logger.info(
         "Les élémens de la table %s ont été supprimés pour les communes %s;"
@@ -185,82 +199,41 @@ def delete_from_public(codes_insee, table_name, connexion):
     )
 
 
-def check_if_table_exists(table_name, schema):
-    table_exists_query = (
-        "SELECT EXISTS(SELECT 1 FROM pg_tables WHERE schemaname = '%s' and tablename='%s');"
-        % (schema, table_name)
-    )
-    conn = pg_connection()
-    conn.execute_sql(table_exists_query)
-    table_exists = conn.cur.fetchone()[0]
-    return table_exists
-
-
 def flow_import_parcelles():
     config = get_imported_communes_from_file()
     codes_insee = config["communes"]
     table_name = "parcellaire_france"
-    table_exists = check_if_table_exists(table_name, schema="public")
-    if not table_exists:
-        create_parcellaire_france()
+    create_parcellaire_france()
     try:
-        conn = pg_connection()
-        delete_from_public(codes_insee, table_name, connexion=conn)
-        insert_parcelles_to_public(connexion=conn)
-        conn.commit()
+        delete_from_public(codes_insee, table_name)
+        insert_parcelles_to_public()
     except psycopg2.DatabaseError as error:
         logger.error(error)
-    finally:
-        if conn is not None:
-            conn.close_connection()
 
 
 def flow_import_proprietaire():
-    table_name = "proprietaire_droit"
-    table_exists = check_if_table_exists(table_name, schema="public")
-    if not table_exists:
-        create_proprietaire_droit()
+    create_proprietaire_droit()
     try:
-        conn = pg_connection()
-        insert_proprietaire_to_public(connexion=conn)
-        conn.commit()
+        insert_proprietaire_to_public()
     except psycopg2.DatabaseError as error:
         logger.error(error)
-    finally:
-        if conn is not None:
-            conn.close_connection()
 
 
 def flow_import_local():
-    table_name = "pb0010_local"
-    table_exists = check_if_table_exists(table_name, schema="public")
-    if not table_exists:
-        create_pb0010_local()
+    create_pb0010_local()
     try:
-        conn = pg_connection()
-        insert_local_to_public(connexion=conn)
-        conn.commit()
+        insert_local_to_public()
     except psycopg2.DatabaseError as error:
         logger.error(error)
-    finally:
-        if conn is not None:
-            conn.close_connection()
 
 
 def flow_import_bati():
     config = get_imported_communes_from_file()
     codes_insee = config["communes"]
     table_name = "bati_france"
-    table_exists = check_if_table_exists(table_name, schema="public")
-    if table_exists is not True:
-        create_bati_france()
+    create_bati_france()
     try:
-        conn = pg_connection()
-        delete_from_public(codes_insee, table_name, connexion=conn)
-        insert_bati_to_public(connexion=conn)
-        conn.commit()
+        delete_from_public(codes_insee, table_name)
+        insert_bati_to_public()
     except psycopg2.DatabaseError as error:
         logger.error(error)
-    finally:
-        if conn is not None:
-            conn.close_connection()

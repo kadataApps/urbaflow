@@ -2,7 +2,7 @@
 
 -- DROP TABLE public.pb0010_local;
 
-CREATE TABLE public.pb0010_local (
+CREATE TABLE IF NOT EXISTS public.pb0010_local (
     -- Computed fields are marked with *
     -- Numbering is the one as from CEREMA
     -- Fields without numbers are additional fields
@@ -160,6 +160,6 @@ CREATE TABLE public.pb0010_local (
 )
 TABLESPACE pg_default;
 
-CREATE INDEX sidx_pb0010_local
+CREATE INDEX IF NOT EXISTS sidx_pb0010_local
     ON public.pb0010_local (idlocal)
 TABLESPACE pg_default;

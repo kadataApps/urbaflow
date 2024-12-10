@@ -2,7 +2,7 @@
 
 -- DROP TABLE public.parcellaire_france;
 
-CREATE TABLE public.parcellaire_france (
+CREATE TABLE IF NOT EXISTS public.parcellaire_france (
     geom geometry(MultiPolygon, 2154),                          --
     idparcelle_geom text COLLATE pg_catalog."default" NOT NULL, --
     code_insee character varying COLLATE pg_catalog."default",  --
@@ -54,7 +54,7 @@ WITH (
 )
 TABLESPACE pg_default;
 
-CREATE INDEX sidx_parcellaire_france
+CREATE INDEX IF NOT EXISTS sidx_parcellaire_france
     ON public.parcellaire_france
     USING gist(geom)
 TABLESPACE pg_default;

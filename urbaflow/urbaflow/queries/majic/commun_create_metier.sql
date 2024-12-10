@@ -1,4 +1,4 @@
-CREATE TABLE parcelle (
+CREATE TABLE IF NOT EXISTS parcelle (
     parcelle text,
     annee text,
     ccodep text,
@@ -49,7 +49,7 @@ CREATE TABLE parcelle (
     lot text
 );
 
-CREATE TABLE suf (
+CREATE TABLE IF NOT EXISTS suf (
     suf text,
     annee text,
     idsuf char(16),
@@ -89,7 +89,7 @@ CREATE TABLE suf (
     lot text
 );
 
-CREATE TABLE sufexoneration (
+CREATE TABLE IF NOT EXISTS sufexoneration (
     sufexoneration text,
     annee text,
     ccodep text,
@@ -115,7 +115,7 @@ CREATE TABLE sufexoneration (
     lot text
 );
 
-CREATE TABLE suftaxation (
+CREATE TABLE IF NOT EXISTS suftaxation (
     suftaxation text,
     annee text,
     ccodep text,
@@ -139,7 +139,7 @@ CREATE TABLE suftaxation (
     lot text
 );
 
-CREATE TABLE local00 (
+CREATE TABLE IF NOT EXISTS local00 (
     local00 text,
     annee text,
     ccodep text,
@@ -167,7 +167,7 @@ CREATE TABLE local00 (
     lot text
 );
 
-CREATE TABLE local10 (
+CREATE TABLE IF NOT EXISTS local10 (
     local10 text,
     annee text,
     idbat char(16),
@@ -239,7 +239,7 @@ CREATE TABLE local10 (
     lot text
 );
 
-CREATE TABLE pev (
+CREATE TABLE IF NOT EXISTS pev (
     pev text,
     annee text,
     ccodep text,
@@ -286,7 +286,7 @@ CREATE TABLE pev (
     lot text
 );
 
-CREATE TABLE pevexoneration (
+CREATE TABLE IF NOT EXISTS pevexoneration (
     pevexoneration text,
     annee text,
     ccodep text,
@@ -316,7 +316,7 @@ CREATE TABLE pevexoneration (
     lot text
 );
 
-CREATE TABLE pevexoneration_imposable (
+CREATE TABLE IF NOT EXISTS pevexoneration_imposable (
     pevexoneration_imposable text,
     annee text,
     ccodep text,
@@ -346,7 +346,7 @@ CREATE TABLE pevexoneration_imposable (
     lot text
 );
 
-CREATE TABLE pevexoneration_imposee (
+CREATE TABLE IF NOT EXISTS pevexoneration_imposee (
     pevexoneration_imposee text,
     annee text,
     ccodep text,
@@ -376,7 +376,7 @@ CREATE TABLE pevexoneration_imposee (
     lot text
 );
 
-CREATE TABLE pevtaxation (
+CREATE TABLE IF NOT EXISTS pevtaxation (
     pevtaxation text,
     annee text,
     ccodep text,
@@ -408,7 +408,7 @@ CREATE TABLE pevtaxation (
     lot text
 );
 
-CREATE TABLE pevprincipale (
+CREATE TABLE IF NOT EXISTS pevprincipale (
     pevprincipale text,
     annee text,
     ccodep text,
@@ -460,7 +460,7 @@ CREATE TABLE pevprincipale (
     lot text
 );
 
-CREATE TABLE pevprofessionnelle (
+CREATE TABLE IF NOT EXISTS pevprofessionnelle (
     pevprofessionnelle text,
     annee text,
     ccodep text,
@@ -486,7 +486,7 @@ CREATE TABLE pevprofessionnelle (
     lot text
 );
 
-CREATE TABLE pevlissage (
+CREATE TABLE IF NOT EXISTS pevlissage (
     pevlissage text,
     annee  text,
     ccodep text,
@@ -509,7 +509,7 @@ CREATE TABLE pevlissage (
     lot text
 );
 
-CREATE TABLE pevdependances (
+CREATE TABLE IF NOT EXISTS pevdependances (
     pevdependances text,
     annee text,
     ccodep text,
@@ -540,7 +540,7 @@ CREATE TABLE pevdependances (
     lot text
 );
 
-CREATE TABLE proprietaire (
+CREATE TABLE IF NOT EXISTS proprietaire (
     proprietaire text,
     annee text,
     ccodep text,
@@ -614,7 +614,7 @@ CREATE TABLE proprietaire (
     lot text
 );
 
-CREATE TABLE comptecommunal (
+CREATE TABLE IF NOT EXISTS comptecommunal (
     comptecommunal text,
     annee text,
     ccodep text,
@@ -626,7 +626,7 @@ CREATE TABLE comptecommunal (
 );
 
 
-CREATE TABLE pdl (
+CREATE TABLE IF NOT EXISTS pdl (
     pdl text,
     annee text,
     ccodep text,
@@ -647,7 +647,7 @@ CREATE TABLE pdl (
     lot text
 );
 
-CREATE TABLE parcellecomposante(
+CREATE TABLE IF NOT EXISTS parcellecomposante(
     parcellecomposante text,
     annee text,
     ccodep text,
@@ -667,7 +667,7 @@ CREATE TABLE parcellecomposante(
     lot text
 );
 
-CREATE TABLE lots (
+CREATE TABLE IF NOT EXISTS lots (
     lots text,
     annee text,
     idlot char(25),   -- 1  *
@@ -696,7 +696,7 @@ CREATE TABLE lots (
     lot text
 );
 
-CREATE TABLE lotslocaux (
+CREATE TABLE IF NOT EXISTS lotslocaux (
     lotslocaux text,
     annee text,
     ccodepl text,
@@ -720,7 +720,7 @@ CREATE TABLE lotslocaux (
     lot text
 );
 
-CREATE TABLE commune_majic(
+CREATE TABLE IF NOT EXISTS commune_majic(
     commune text,
     annee text,
     ccodep text,
@@ -786,56 +786,56 @@ CREATE TABLE commune_majic(
 -- );
 
 -- Tables de nomenclature
-CREATE TABLE gpdl (gpdl text primary key,gpdl_lib text);
-CREATE TABLE gnexps (gnexps text primary key,gnexps_lib text );
-CREATE TABLE cgrnum ( cgrnum text primary key,cgrnum_lib text );
-CREATE TABLE dsgrpf (dsgrpf text primary key, dsgrpf_lib text);
-CREATE TABLE cnatsp (cnatsp text primary key, cnatsp_lib text);
-CREATE TABLE ccolloc (ccolloc text primary key, ccolloc_lib text);
-CREATE TABLE gnexts (gnexts text primary key, gnexts_lib text);
-CREATE TABLE ccoeva (ccoeva text primary key, ccoeva_lib text);
-CREATE TABLE dteloc (dteloc text primary key, dteloc_lib text);
-CREATE TABLE ccoplc (ccoplc text primary key, ccoplc_lib text);
-CREATE TABLE cconlc (cconlc text primary key, cconlc_lib text);
-CREATE TABLE top48a (top48a text primary key, top48a_lib text);
-CREATE TABLE dnatlc (dnatlc text primary key, dnatlc_lib text);
-CREATE TABLE dnatcg (dnatcg text primary key, dnatcg_lib text);
-CREATE TABLE gimtom (gimtom text primary key, gimtom_lib text);
-CREATE TABLE hlmsem (hlmsem text primary key, hlmsem_lib text);
-CREATE TABLE ccoaff (ccoaff text primary key, ccoaff_lib text);
-CREATE TABLE gnexpl (gnexpl text primary key, gnexpl_lib text);
-CREATE TABLE cbtabt (cbtabt text primary key, cbtabt_lib text);
-CREATE TABLE gnextl (gnextl text primary key, gnextl_lib text);
-CREATE TABLE ccthp (ccthp text primary key, ccthp_lib text);
-CREATE TABLE cconad (cconad text primary key, cconad_lib text);
-CREATE TABLE ctpdl (ctpdl text primary key, ctpdl_lib text);
-CREATE TABLE cconlo (cconlo text primary key, cconlo_lib text);
-CREATE TABLE ccodro (ccodro text primary key, ccodro_lib text);
-CREATE TABLE ccodem (ccodem text primary key, ccodem_lib text);
-CREATE TABLE gtoper (gtoper text primary key, gtoper_lib text);
-CREATE TABLE ccoqua (ccoqua text primary key, ccoqua_lib text);
-CREATE TABLE dnatpr (dnatpr text primary key, dnatpr_lib text);
-CREATE TABLE ccogrm (ccogrm text primary key, ccogrm_lib text);
-CREATE TABLE gtyp3 (gtyp3 text primary key, gtyp3_lib text);
-CREATE TABLE gtyp4 (gtyp4 text primary key, gtyp4_lib text);
-CREATE TABLE gtyp5 (gtyp5 text primary key, gtyp5_lib text);
-CREATE TABLE gtyp6 (gtyp6 text primary key, gtyp6_lib text);
-CREATE TABLE typcom (typcom text primary key, typcom_lib text);
-CREATE TABLE natvoi (natvoi text primary key, natvoi_lib text);
-CREATE TABLE natvoiriv (natvoiriv text primary key, natvoiriv_lib text);
-CREATE TABLE carvoi (carvoi text primary key, carvoi_lib text);
-CREATE TABLE annul (annul text primary key, annul_lib text);
-CREATE TABLE typvoi (typvoi text primary key, typvoi_lib text);
-CREATE TABLE indldnbat (indldnbat text primary key, indldnbat_lib text);
-CREATE TABLE dformjur (dformjur text primary key, formjur text, libformjur text);
-CREATE TABLE ccocac (ccocac text primary key, ccocac_lib text);
-CREATE TABLE cconac (cconac text primary key, cconac_lib text);
-CREATE TABLE dmatgm (dmatgm text primary key, dmatgm_lib text);
-CREATE TABLE dmatto (dmatto text primary key, dmatto_lib text);
-CREATE TABLE drgpos (dgrpos text primary key, dgrpos_lib text);
-CREATE TABLE detent (detent text primary key, detent_lib text);
-CREATE TABLE type_filiation (type_filiation text primary key, type_filiation_lib text);
-CREATE TABLE fburx (fburx text primary key, fburx_lib text);
+CREATE TABLE IF NOT EXISTS gpdl (gpdl text primary key,gpdl_lib text);
+CREATE TABLE IF NOT EXISTS gnexps (gnexps text primary key,gnexps_lib text );
+CREATE TABLE IF NOT EXISTS cgrnum ( cgrnum text primary key,cgrnum_lib text );
+CREATE TABLE IF NOT EXISTS dsgrpf (dsgrpf text primary key, dsgrpf_lib text);
+CREATE TABLE IF NOT EXISTS cnatsp (cnatsp text primary key, cnatsp_lib text);
+CREATE TABLE IF NOT EXISTS ccolloc (ccolloc text primary key, ccolloc_lib text);
+CREATE TABLE IF NOT EXISTS gnexts (gnexts text primary key, gnexts_lib text);
+CREATE TABLE IF NOT EXISTS ccoeva (ccoeva text primary key, ccoeva_lib text);
+CREATE TABLE IF NOT EXISTS dteloc (dteloc text primary key, dteloc_lib text);
+CREATE TABLE IF NOT EXISTS ccoplc (ccoplc text primary key, ccoplc_lib text);
+CREATE TABLE IF NOT EXISTS cconlc (cconlc text primary key, cconlc_lib text);
+CREATE TABLE IF NOT EXISTS top48a (top48a text primary key, top48a_lib text);
+CREATE TABLE IF NOT EXISTS dnatlc (dnatlc text primary key, dnatlc_lib text);
+CREATE TABLE IF NOT EXISTS dnatcg (dnatcg text primary key, dnatcg_lib text);
+CREATE TABLE IF NOT EXISTS gimtom (gimtom text primary key, gimtom_lib text);
+CREATE TABLE IF NOT EXISTS hlmsem (hlmsem text primary key, hlmsem_lib text);
+CREATE TABLE IF NOT EXISTS ccoaff (ccoaff text primary key, ccoaff_lib text);
+CREATE TABLE IF NOT EXISTS gnexpl (gnexpl text primary key, gnexpl_lib text);
+CREATE TABLE IF NOT EXISTS cbtabt (cbtabt text primary key, cbtabt_lib text);
+CREATE TABLE IF NOT EXISTS gnextl (gnextl text primary key, gnextl_lib text);
+CREATE TABLE IF NOT EXISTS ccthp (ccthp text primary key, ccthp_lib text);
+CREATE TABLE IF NOT EXISTS cconad (cconad text primary key, cconad_lib text);
+CREATE TABLE IF NOT EXISTS ctpdl (ctpdl text primary key, ctpdl_lib text);
+CREATE TABLE IF NOT EXISTS cconlo (cconlo text primary key, cconlo_lib text);
+CREATE TABLE IF NOT EXISTS ccodro (ccodro text primary key, ccodro_lib text);
+CREATE TABLE IF NOT EXISTS ccodem (ccodem text primary key, ccodem_lib text);
+CREATE TABLE IF NOT EXISTS gtoper (gtoper text primary key, gtoper_lib text);
+CREATE TABLE IF NOT EXISTS ccoqua (ccoqua text primary key, ccoqua_lib text);
+CREATE TABLE IF NOT EXISTS dnatpr (dnatpr text primary key, dnatpr_lib text);
+CREATE TABLE IF NOT EXISTS ccogrm (ccogrm text primary key, ccogrm_lib text);
+CREATE TABLE IF NOT EXISTS gtyp3 (gtyp3 text primary key, gtyp3_lib text);
+CREATE TABLE IF NOT EXISTS gtyp4 (gtyp4 text primary key, gtyp4_lib text);
+CREATE TABLE IF NOT EXISTS gtyp5 (gtyp5 text primary key, gtyp5_lib text);
+CREATE TABLE IF NOT EXISTS gtyp6 (gtyp6 text primary key, gtyp6_lib text);
+CREATE TABLE IF NOT EXISTS typcom (typcom text primary key, typcom_lib text);
+CREATE TABLE IF NOT EXISTS natvoi (natvoi text primary key, natvoi_lib text);
+CREATE TABLE IF NOT EXISTS natvoiriv (natvoiriv text primary key, natvoiriv_lib text);
+CREATE TABLE IF NOT EXISTS carvoi (carvoi text primary key, carvoi_lib text);
+CREATE TABLE IF NOT EXISTS annul (annul text primary key, annul_lib text);
+CREATE TABLE IF NOT EXISTS typvoi (typvoi text primary key, typvoi_lib text);
+CREATE TABLE IF NOT EXISTS indldnbat (indldnbat text primary key, indldnbat_lib text);
+CREATE TABLE IF NOT EXISTS dformjur (dformjur text primary key, formjur text, libformjur text);
+CREATE TABLE IF NOT EXISTS ccocac (ccocac text primary key, ccocac_lib text);
+CREATE TABLE IF NOT EXISTS cconac (cconac text primary key, cconac_lib text);
+CREATE TABLE IF NOT EXISTS dmatgm (dmatgm text primary key, dmatgm_lib text);
+CREATE TABLE IF NOT EXISTS dmatto (dmatto text primary key, dmatto_lib text);
+CREATE TABLE IF NOT EXISTS drgpos (dgrpos text primary key, dgrpos_lib text);
+CREATE TABLE IF NOT EXISTS detent (detent text primary key, detent_lib text);
+CREATE TABLE IF NOT EXISTS type_filiation (type_filiation text primary key, type_filiation_lib text);
+CREATE TABLE IF NOT EXISTS fburx (fburx text primary key, fburx_lib text);
 
 
 

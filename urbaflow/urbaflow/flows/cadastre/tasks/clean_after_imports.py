@@ -1,8 +1,9 @@
 import shutil
 import os
 
-from utils.dbutils import pg_connection
-from urbaflow.urbaflow.shared_tasks.config import db_schema
+from shared_tasks.db_engine import create_engine
+from shared_tasks.db_sql_utils import run_sql_script
+from shared_tasks.config import db_schema
 
 
 def clean_temp_dir():
@@ -13,7 +14,6 @@ def clean_db():
     schema = db_schema()
 
     sql = "DROP SCHEMA %s CASCADE;" % schema
-    conn = pg_connection()
-    conn.execute_sql(sql)
-    conn.commit()
-    conn.close_connection()
+    e = create_engine()
+    with e.begin() as conn:
+        run_sql_script(sql=sql, connection=conn)

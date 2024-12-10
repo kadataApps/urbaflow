@@ -3,7 +3,8 @@ import re
 
 
 from urbaflow.urbaflow.shared_tasks.config import majic_config
-from utils.dbutils import pg_connection
+from urbaflow.urbaflow.shared_tasks.db_engine import create_engine
+from urbaflow.urbaflow.shared_tasks.db_sql_utils import run_sql_script
 
 
 class import_fantoir_file(object):
@@ -56,8 +57,6 @@ class import_fantoir_file(object):
         # Print result of exploring majic files
 
         # 2nd path to insert data
-        # Open connection & set search_path
-        connection = pg_connection()
 
         # Drop & create tables where to import data
         print("Drop & create table %s" % table)
@@ -65,8 +64,9 @@ class import_fantoir_file(object):
             'DROP TABLE IF EXISTS "%(table)s"; CREATE TABLE "%(table)s" (tmp text);'
             % {"table": table}
         )
-        connection.execute_sql(sql)
-        connection.commit()
+        e = create_engine()
+        with e.begin() as conn:
+            run_sql_script(sql=sql, connection=conn)
 
         current_file = 0
         for fpath in majic_files_found[table]:
@@ -93,7 +93,6 @@ class import_fantoir_file(object):
                             if x
                         ]
                     )
-                    connection.execute_sql(sql)
-            connection.commit()
+                    with e.begin() as conn:
+                        run_sql_script(sql=sql, connection=conn)
             print("Import done and commited for %s" % fpath)
-        connection.close_connection()

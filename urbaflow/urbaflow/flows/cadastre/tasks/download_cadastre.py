@@ -6,7 +6,10 @@ import urllib.request
 
 from urbaflow.urbaflow.shared_tasks.logging_config import logger
 from utils.dbutils import import_geojson
-from .get_communes_majic import get_imported_communes_from_file
+from .get_communes_majic import (
+    get_imported_communes_from_file,
+    get_imported_communes_from_postgres,
+)
 
 
 def reporthook(blocknum, blocksize, totalsize):
@@ -68,20 +71,14 @@ def download_bati(codeinsee, target_dir):
 
 def download_cadastre_for_communes():
     temp_dir = os.path.join(os.getcwd(), "temp/downloads/")
-    config = get_imported_communes_from_file()
-    try:
-        communes = ast.literal_eval(config["communes"])
-    except:
-        logger.error("Aucune commune dans le fichier communes.txt. Rien à télécharger")
-        raise
-    else:
-        millesime = os.getenv("CADASTRE_MILLESIME")
-        logger.debug(communes)
-        for commune in communes:
-            logger.info(commune)
-            download_cadastre(commune, temp_dir, millesime)
-            file = os.path.join(temp_dir, "cadastre-%s-parcelles.json" % commune)
-            import_geojson(file, "cadastre_parcelles")
+    communes = get_imported_communes_from_postgres()
+    millesime = os.getenv("CADASTRE_MILLESIME")
+    logger.debug(communes)
+    for commune in communes["communes"]:
+        logger.info(commune)
+        download_cadastre(commune, temp_dir, millesime)
+        file = os.path.join(temp_dir, "cadastre-%s-parcelles.json" % commune)
+        import_geojson(file, "cadastre_parcelles")
 
 
 def download_bati_for_communes():

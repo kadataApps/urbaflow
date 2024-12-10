@@ -138,17 +138,40 @@ def read_query(
 
 def run_sql_script(
     connection: Connection,
-    sql_filepath: Path,
     logger: logging.Logger,
+    sql_filepath: Path = None,
+    sql: str = None,
 ) -> pd.DataFrame:
     """
     Run saved SQLquery on a database.
-
     """
-    with open(sql_filepath, "r") as sql_file:
-        query = text(sql_file.read())
-        logger.info(f"Executing {sql_filepath}.")
-        connection.execute(query)
+    if sql:
+        try:
+            assert sql_filepath is None
+        except AssertionError:
+            raise ValueError("Cannot pass both `sql` and `sql_filepath`.")
+
+        try:
+            assert isinstance(sql, str)
+        except AssertionError:
+            raise ValueError(f"`sql` must be `str`, got `{type(sql)}` instead.")
+
+    else:
+        try:
+            assert isinstance(sql_filepath, Path)
+        except AssertionError:
+            raise ValueError(
+                (
+                    "`sql_filepath` must be a `pathlib.Path`, "
+                    f"got `{type(sql_filepath)}` instead."
+                )
+            )
+
+        with open(sql_filepath, "r") as sql_file:
+            sql = text(sql_file.read())
+            logger.info(f"Executing {sql_filepath}.")
+
+    connection.execute(sql)
 
 
 def psql_insert_copy(table, conn, keys, data_iter):
