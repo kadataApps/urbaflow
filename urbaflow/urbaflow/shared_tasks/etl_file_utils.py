@@ -2,6 +2,7 @@ import requests
 import zipfile
 import io
 import os
+import gzip
 
 
 def download_and_unzip(url, extract_to_path="."):
@@ -20,3 +21,16 @@ def download_and_unzip(url, extract_to_path="."):
         print(f"Successfully extracted to {os.path.abspath(extract_to_path)}")
     else:
         print(f"Failed to download the file. Status code: {response.status_code}")
+
+
+def unzip_file_in_place(archive_path):
+    # get directory where archive_path is stored
+    dir_path = os.path.dirname(archive_path)
+    file_root, _ = os.path.splitext(archive_path)  # split into file.json and .gz
+
+    src_name = archive_path
+    dest_name = os.path.join(dir_path, file_root)
+    with gzip.open(src_name, "rb") as infile:
+        with open(dest_name, "wb") as outfile:
+            for line in infile:
+                outfile.write(line)

@@ -6,7 +6,7 @@ from prefect import flow, task
 from sqlalchemy import DDL, text
 
 from urbaflow.urbaflow.shared_tasks.db_engine import create_engine
-from urbaflow.logging_config import logger
+from urbaflow.urbaflow.shared_tasks.logging_config import logger
 
 # Fichier de géolocalisation des établissements réalisé par data.gouv.fr
 # https://files.data.gouv.fr/geo-sirene/last/dep/

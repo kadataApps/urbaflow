@@ -2,7 +2,7 @@
 from prefect import task
 import requests
 import zipfile
-from urbaflow.logging_config import logger
+from urbaflow.urbaflow.shared_tasks.logging_config import logger
 
 
 @task

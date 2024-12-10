@@ -1,6 +1,6 @@
 import os
 
-from logging_config import logger
+from urbaflow.urbaflow.shared_tasks.logging_config import logger
 from utils.dbutils import pg_connection
 
 

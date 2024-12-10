@@ -3,8 +3,9 @@ import urllib.request
 
 from prefect import flow
 
-from utils.report_hook import reporthook
-from utils.unzip_file import unzip_file_in_place
+from shared_tasks.etl_file_utils import unzip_file_in_place
+from urbaflow.urbaflow.shared_tasks.report_hook import reporthook
+
 
 # https://github.com/ESO-Rennes/Analyse-Donnees-DVF
 

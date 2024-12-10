@@ -4,7 +4,7 @@ from prefect import task, flow
 import pandas as pd
 from sqlalchemy import DDL, text
 
-from urbaflow.logging_config import logger
+from urbaflow.urbaflow.shared_tasks.logging_config import logger
 from urbaflow.urbaflow.shared_tasks.etl_gpd_utils import load
 from urbaflow.urbaflow.shared_tasks.db_engine import create_engine
 

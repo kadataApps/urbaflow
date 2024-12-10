@@ -1,7 +1,7 @@
 import os
 
-from logging_config import logger
-from utils.script_utils import replace_parameters_in_script
+from urbaflow.urbaflow.shared_tasks.logging_config import logger
+from urbaflow.urbaflow.shared_tasks.sql_query_utils import replace_parameters_in_script
 from utils.dbutils import pg_connection
 
 

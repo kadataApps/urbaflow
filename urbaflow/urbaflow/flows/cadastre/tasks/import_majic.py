@@ -1,7 +1,7 @@
 import os
 import re
 
-from logging_config import logger
+from urbaflow.urbaflow.shared_tasks.logging_config import logger
 from urbaflow.urbaflow.shared_tasks.config import majic_config
 from utils.dbutils import pg_connection
 

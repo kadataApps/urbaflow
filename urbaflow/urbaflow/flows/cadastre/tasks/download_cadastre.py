@@ -4,7 +4,7 @@ import ast
 import sys
 import urllib.request
 
-from logging_config import logger
+from urbaflow.urbaflow.shared_tasks.logging_config import logger
 from utils.dbutils import import_geojson
 from .get_communes_majic import get_imported_communes_from_file
 
