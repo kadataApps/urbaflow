@@ -1,8 +1,6 @@
 #!/usr/bin/python
 
 import re
-import os
-from distutils import dir_util
 
 
 def replace_parameters_in_string(string, replace_dict):
@@ -40,19 +38,3 @@ def replace_parameters_in_script(script_path, replace_dict):
     except IOError as e:
         msg = "<b>Erreur lors du paramétrage des scripts d'import: %s</b>" % e
         return msg
-
-
-def copy_files_to_temp(source, target):
-    """
-    Copy cadastre scripts
-    into a temporary folder
-    """
-    # copy script directory
-    try:
-        dir_util.copy_tree(source, target)
-        os.chmod(target, 0o777)
-    except IOError as e:
-        msg = "<b>Erreur lors de la copie des scripts d'import: %s</b>" % e
-        return msg
-
-    return None

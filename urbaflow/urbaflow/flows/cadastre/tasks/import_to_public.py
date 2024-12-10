@@ -4,7 +4,7 @@ import psycopg2
 from shared_tasks.db_engine import create_engine
 from shared_tasks.db_sql_utils import run_sql_script
 from shared_tasks.logging_config import logger
-from shared_tasks.config import db_schema
+from shared_tasks.config import TEMP_DIR, db_schema
 from .get_communes_majic import get_imported_communes_from_postgres
 
 
@@ -14,9 +14,8 @@ def create_parcellaire_france():
     parcellaire_france du schema "public"
     """
     logger.info("Création de la table parcellaire_france dans public")
-    script_path_create = os.path.join(
-        os.getcwd(), "temp/sql/commun_create_parcellaire.sql"
-    )
+    script_path_create = TEMP_DIR / "sql/commun_create_parcellaire.sql"
+    
     e = create_engine()
     with e.begin() as conn:
         run_sql_script(sql_filepath=script_path_create, connection=conn)
@@ -29,9 +28,8 @@ def create_proprietaire_droit():
     du schema "public"
     """
     logger.info("Création de la table proprietaire_droit dans public")
-    script_path_create = os.path.join(
-        os.getcwd(), "temp/sql/commun_create_proprietaire.sql"
-    )
+    script_path_create = TEMP_DIR / "sql/commun_create_proprietaire.sql"
+    
     e = create_engine()
     with e.begin() as conn:
         run_sql_script(sql_filepath=script_path_create, connection=conn)
@@ -44,7 +42,7 @@ def create_pb0010_local():
     du schema "public"
     """
     logger.info("Création de la table pb0010_local dans public")
-    script_path_create = os.path.join(os.getcwd(), "temp/sql/commun_create_local.sql")
+    script_path_create = TEMP_DIR / "sql/commun_create_local.sql"
     e = create_engine()
     with e.begin() as conn:
         run_sql_script(sql_filepath=script_path_create, connection=conn)
@@ -57,7 +55,7 @@ def create_bati_france():
     dans la table principale bati_france du schema "public"
     """
     logger.info("Création de la table bati_france dans public")
-    script_path_create = os.path.join(os.getcwd(), "temp/sql/commun_create_bati.sql")
+    script_path_create = TEMP_DIR / "sql/commun_create_bati.sql"
     e = create_engine()
     with e.begin() as conn:
         run_sql_script(sql_filepath=script_path_create, connection=conn)

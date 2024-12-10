@@ -5,9 +5,10 @@ from typing import List
 from prefect import flow
 
 from shared_tasks.logging_config import logger
-from shared_tasks.sql_query_utils import copy_files_to_temp
+from shared_tasks.file_utils import copy_directory
+from shared_tasks.config import QUERIES_DIR, TEMP_DIR
 
-from .tasks.import_majic import import_majic
+from .tasks.import_majic import import_majic_files
 from .tasks.format_majic import (
     clean_with_drop_db_for_majic_import,
     init_db_for_majic_import,
@@ -36,12 +37,12 @@ STEPS_FLOW_CADASTRE = {
     "step1": {
         "description": "Import raw MAJIC data into temporary PostgreSQL tables",
         "default": True,
-        "tasks": [lambda dirname: import_majic(dirname).import_majic_files()],
+        "tasks": [lambda dirname: import_majic_files(dirname)],
     },
     "step2": {
         "description": "Copy SQL scripts to the temp directory",
         "default": True,
-        "tasks": [lambda: copy_files_to_temp("queries/majic", "temp/sql")],
+        "tasks": [lambda: copy_directory(os.path.join(QUERIES_DIR, 'majic'), os.path.join(TEMP_DIR, 'sql'))],
     },
     "step3": {
         "description": "Drop existing tables before importing new MAJIC data",

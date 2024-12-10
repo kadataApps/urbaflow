@@ -1,5 +1,7 @@
 import logging
 import os
+from prefect import get_run_logger
+from contextlib import suppress
 
 log_level = os.getenv("LOG_LEVEL", logging.DEBUG)
 
@@ -19,3 +21,8 @@ logger = logging.getLogger(__name__)
 console_handler = logging.StreamHandler()
 console_handler.setLevel(logging.DEBUG)  # Set console log level to DEBUG (always print)
 logger.addHandler(console_handler)
+
+def get_logger():
+    with suppress(Exception):
+        return get_run_logger() 
+    return logger

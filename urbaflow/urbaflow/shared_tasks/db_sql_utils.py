@@ -4,9 +4,10 @@ from pathlib import Path
 from typing import Optional, Union
 from io import StringIO
 import csv
-import logging
+from shared_tasks.logging_config import get_logger
 import geopandas as gpd
 import pandas as pd
+import sqlparse
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
 
@@ -138,13 +139,14 @@ def read_query(
 
 def run_sql_script(
     connection: Connection,
-    logger: logging.Logger,
     sql_filepath: Path = None,
     sql: str = None,
+    strip_statements: bool = False,
 ) -> pd.DataFrame:
     """
     Run saved SQLquery on a database.
     """
+    logger = get_logger()
     if sql:
         try:
             assert sql_filepath is None
@@ -168,10 +170,18 @@ def run_sql_script(
             )
 
         with open(sql_filepath, "r") as sql_file:
-            sql = text(sql_file.read())
+            sql = sql_file.read()
             logger.info(f"Executing {sql_filepath}.")
 
-    connection.execute(sql)
+    if strip_statements:
+        statements = sqlparse.split(sql)
+        logger.info(f"Found {len(statements)} statements in the script.")
+        for statement in statements:
+            statement = statement.strip()
+            if statement:  # Ignore empty statements
+                connection.execute(text(statement))
+    else:
+        connection.connection.cursor().execute(sql)
 
 
 def psql_insert_copy(table, conn, keys, data_iter):

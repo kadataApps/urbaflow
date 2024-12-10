@@ -1,6 +1,12 @@
 #!/usr/bin/python
 import os
+from pathlib import Path
 
+APP_DIR = Path(__file__).parent.parent.resolve()
+
+TEMP_DIR = APP_DIR / "temp"
+
+QUERIES_DIR = APP_DIR / "queries"
 
 def db_config():
     return {

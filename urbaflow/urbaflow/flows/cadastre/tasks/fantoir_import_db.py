@@ -1,8 +1,7 @@
-import os
-
 from shared_tasks.db_engine import create_engine
 from shared_tasks.db_sql_utils import run_sql_script
 from shared_tasks.sql_query_utils import replace_parameters_in_script
+from shared_tasks.config import TEMP_DIR
 
 
 def create_fantoir():
@@ -12,7 +11,7 @@ def create_fantoir():
     print(
         "Initialisation base de données - tables métiers FANTOIR / MAJIC - cf.QgisCadastre"
     )
-    script_path_create = os.path.join(os.getcwd(), "temp/sql/create_fantoir.sql")
+    script_path_create = TEMP_DIR / "sql/create_fantoir.sql"
     e = create_engine()
     with e.begin() as conn:
         run_sql_script(sql_filepath=script_path_create, connection=conn)
@@ -39,7 +38,7 @@ def formatage_fantoir():
     lot = ""
     replace_dict = {"[ANNEE]": annee, "[LOT]": lot}
 
-    script_path = os.path.join(os.getcwd(), "temp/sql/formatage_fantoir.sql")
+    script_path = TEMP_DIR / "sql/formatage_fantoir.sql"
     print("formatage Script Fantoir")
     replace_parameters_in_script(script_path, replace_dict)
     print("Script file: %s" % script_path)

@@ -3,10 +3,12 @@ import re
 import pandas as pd
 import pathlib
 import shutil
-
+from distutils import dir_util
 
 from chardet import detect
 from prefect import get_run_logger
+
+from shared_tasks.logging_config import get_logger
 
 
 def concat_files(files, sep=";"):
@@ -73,7 +75,7 @@ def encode_to_utf8(src_file):
         logger.error("Encode Error")
 
 
-def move(
+def move_file(
     src_fp: pathlib.Path, dest_dirpath: pathlib.Path, if_exists: str = "raise"
 ) -> None:
     """Moves a file to another directory. If the destination directory
@@ -90,3 +92,21 @@ def move(
             shutil.move(src_fp.as_posix(), dest_dirpath.as_posix())
         else:
             raise ValueError(f"if_exists must be 'raise' or 'replace', got {if_exists}")
+
+
+def copy_directory(source, target):
+    """
+    Copy files from source
+    into target
+    """
+    # copy script directory
+    logger = get_logger()
+    logger.info(f"Copying ${source} to ${target}")
+    try:
+        dir_util.copy_tree(source, target)
+        os.chmod(target, 0o777)
+    except IOError as e:
+        msg = "Erreur lors de la copie des scripts d'import: %s" % e
+        return msg
+
+    return None
