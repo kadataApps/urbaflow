@@ -2,7 +2,7 @@ import shutil
 import os
 
 from utils.dbutils import pg_connection
-from utils.config import db_schema
+from urbaflow.urbaflow.shared_tasks.config import db_schema
 
 
 def clean_temp_dir():

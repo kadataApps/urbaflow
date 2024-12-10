@@ -2,7 +2,7 @@ import os
 
 from logging_config import logger
 from utils.dbutils import pg_connection
-from utils.config import db_schema, config
+from urbaflow.urbaflow.shared_tasks.config import db_schema, config
 
 
 def get_imported_communes_from_file():

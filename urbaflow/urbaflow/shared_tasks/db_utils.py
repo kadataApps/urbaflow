@@ -1,12 +1,7 @@
-# COPYRIGHT Vincent Chery - MonitorEnv
+# Inspired from (c) Vincent Chery - MonitorEnv
 
-import csv
 import logging
-import os
-import pathlib
-import shutil
 import sys
-from io import StringIO
 from typing import Sequence
 
 import geoalchemy2
@@ -105,52 +100,3 @@ def delete_rows(
     n = connection.execute(count_statement).fetchall()[0][0]
     if logger:
         logger.info(f"Rows after deletion: {n}.")
-
-
-def psql_insert_copy(table, conn, keys, data_iter):
-    """
-    Execute SQL statement inserting data
-
-    Parameters
-    ----------
-    table : pandas.io.sql.SQLTable
-    conn : sqlalchemy.engine.Engine or sqlalchemy.engine.Connection
-    keys : list of str
-        Column names
-    data_iter : Iterable that iterates the values to be inserted
-    """
-    # gets a DBAPI connection that can provide a cursor
-    dbapi_conn = conn.connection
-    with dbapi_conn.cursor() as cur:
-        s_buf = StringIO()
-        writer = csv.writer(s_buf)
-        writer.writerows(data_iter)
-        s_buf.seek(0)
-
-        columns = ", ".join('"{}"'.format(k) for k in keys)
-        if table.schema:
-            table_name = f'"{table.schema}"."{table.name}"'
-        else:
-            table_name = f'"{table.name}"'
-
-        sql = "COPY {} ({}) FROM STDIN WITH CSV".format(table_name, columns)
-        cur.copy_expert(sql=sql, file=s_buf)
-
-
-def move(
-    src_fp: pathlib.Path, dest_dirpath: pathlib.Path, if_exists: str = "raise"
-) -> None:
-    """Moves a file to another directory. If the destination directory
-    does not exist, it is created, as well as all intermediate directories."""
-    if not dest_dirpath.exists():
-        os.makedirs(dest_dirpath)
-    try:
-        shutil.move(src_fp.as_posix(), dest_dirpath.as_posix())
-    except shutil.Error:
-        if if_exists == "raise":
-            raise
-        elif if_exists == "replace":
-            os.remove(dest_dirpath / src_fp.name)
-            shutil.move(src_fp.as_posix(), dest_dirpath.as_posix())
-        else:
-            raise ValueError(f"if_exists must be 'raise' or 'replace', got {if_exists}")

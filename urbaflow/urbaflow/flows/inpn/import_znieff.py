@@ -4,7 +4,7 @@ from pathlib import Path
 from prefect import flow, get_run_logger, task
 from urbaflow.utils.dbutils import import_shapefile
 from urbaflow.utils.download_file import download_and_unzip
-from urbaflow.utils.file_utils import list_files_at_path
+from urbaflow.urbaflow.shared_tasks.file_utils import list_files_at_path
 
 
 # ZNIEFF continentales de métropole

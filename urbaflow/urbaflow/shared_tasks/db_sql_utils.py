@@ -1,8 +1,10 @@
-# COPYRIGHT Vincent Chery - MonitorEnv
+# Inspired from (c) Vincent Chery - MonitorEnv
 
 from pathlib import Path
 from typing import Optional, Union
-
+from io import StringIO
+import csv
+import logging
 import geopandas as gpd
 import pandas as pd
 from sqlalchemy import text
@@ -132,3 +134,48 @@ def read_query(
         )
     else:
         raise ValueError(f"backend must be 'pandas' or 'geopandas', got {backend}")
+
+
+def run_sql_script(
+    connection: Connection,
+    sql_filepath: Path,
+    logger: logging.Logger,
+) -> pd.DataFrame:
+    """
+    Run saved SQLquery on a database.
+
+    """
+    with open(sql_filepath, "r") as sql_file:
+        query = text(sql_file.read())
+        logger.info(f"Executing {sql_filepath}.")
+        connection.execute(query)
+
+
+def psql_insert_copy(table, conn, keys, data_iter):
+    """
+    Execute SQL statement inserting data
+
+    Parameters
+    ----------
+    table : pandas.io.sql.SQLTable
+    conn : sqlalchemy.engine.Engine or sqlalchemy.engine.Connection
+    keys : list of str
+        Column names
+    data_iter : Iterable that iterates the values to be inserted
+    """
+    # gets a DBAPI connection that can provide a cursor
+    dbapi_conn = conn.connection
+    with dbapi_conn.cursor() as cur:
+        s_buf = StringIO()
+        writer = csv.writer(s_buf)
+        writer.writerows(data_iter)
+        s_buf.seek(0)
+
+        columns = ", ".join('"{}"'.format(k) for k in keys)
+        if table.schema:
+            table_name = f'"{table.schema}"."{table.name}"'
+        else:
+            table_name = f'"{table.name}"'
+
+        sql = "COPY {} ({}) FROM STDIN WITH CSV".format(table_name, columns)
+        cur.copy_expert(sql=sql, file=s_buf)
