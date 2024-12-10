@@ -3,8 +3,8 @@ from pathlib import Path
 
 from prefect import flow, task
 
-from urbaflow.utils.dbutils import import_shapefile
-from urbaflow.urbaflow.shared_tasks.file_utils import list_files_at_path
+from shared_tasks.etl_ogr_utils import import_shapefile
+from shared_tasks.file_utils import list_files_at_path
 
 
 @task

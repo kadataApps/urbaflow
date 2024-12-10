@@ -4,8 +4,8 @@ from typing import List
 
 from prefect import flow
 
-from urbaflow.urbaflow.shared_tasks.logging_config import logger
-from urbaflow.urbaflow.shared_tasks.sql_query_utils import copy_files_to_temp
+from shared_tasks.logging_config import logger
+from shared_tasks.sql_query_utils import copy_files_to_temp
 
 from .tasks.import_majic import import_majic
 from .tasks.format_majic import (

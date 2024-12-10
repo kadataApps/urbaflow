@@ -1,10 +1,10 @@
 import os
 import re
 
-from urbaflow.urbaflow.shared_tasks.db_engine import create_engine
-from urbaflow.urbaflow.shared_tasks.db_sql_utils import run_sql_script
-from urbaflow.urbaflow.shared_tasks.logging_config import logger
-from urbaflow.urbaflow.shared_tasks.config import majic_config
+from shared_tasks.db_engine import create_engine
+from shared_tasks.db_sql_utils import run_sql_script
+from shared_tasks.logging_config import logger
+from shared_tasks.config import majic_config
 
 
 class import_majic(object):

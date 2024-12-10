@@ -2,13 +2,13 @@ from typing import List
 import typer
 from pathlib import Path
 
-from urbaflow.flows.dvf.dvf import dvf_flow
-from urbaflow.flows.cadastre.flow_cadastre import (
+from flows.dvf.dvf import dvf_flow
+from flows.cadastre.flow_cadastre import (
     STEPS_FLOW_CADASTRE,
     import_cadastre_majic_flow,
 )
 
-from urbaflow.flows.locomvac import import_locomvac
+from flows.locomvac import import_locomvac
 
 
 app = typer.Typer()

@@ -5,9 +5,9 @@ import pandas as pd
 from prefect import flow, get_run_logger, task
 from sqlalchemy import DDL
 
-from urbaflow.urbaflow.shared_tasks.etl_gpd_utils import load
-from urbaflow.urbaflow.shared_tasks.db_engine import create_engine
-from urbaflow.urbaflow.shared_tasks.file_utils import encode_to_utf8, list_files_at_path
+from shared_tasks.etl_gpd_utils import load
+from shared_tasks.db_engine import create_engine
+from shared_tasks.file_utils import encode_to_utf8, list_files_at_path
 
 # %%
 

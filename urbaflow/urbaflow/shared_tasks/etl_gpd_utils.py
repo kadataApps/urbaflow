@@ -10,14 +10,13 @@ import pandas as pd
 from sqlalchemy import DDL, text
 from sqlalchemy.engine import Connection
 
-from urbaflow.shared_tasks.processing import prepare_df_for_loading
-from urbaflow.urbaflow.shared_tasks.db_utils import (
+from shared_tasks.processing import prepare_df_for_loading
+from shared_tasks.db_utils import (
     get_table,
-    psql_insert_copy,
     delete_rows,
     delete,
 )
-from urbaflow.urbaflow.shared_tasks.db_sql_utils import read_saved_query
+from shared_tasks.db_sql_utils import psql_insert_copy, read_saved_query
 
 
 def extract(

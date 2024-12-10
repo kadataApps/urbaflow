@@ -1,13 +1,11 @@
 import gzip
 import os
-import ast
 import sys
 import urllib.request
 
-from urbaflow.urbaflow.shared_tasks.logging_config import logger
-from utils.dbutils import import_geojson
+from shared_tasks.logging_config import logger
+from shared_tasks.etl_ogr_utils import import_geojson
 from .get_communes_majic import (
-    get_imported_communes_from_file,
     get_imported_communes_from_postgres,
 )
 
@@ -83,19 +81,13 @@ def download_cadastre_for_communes():
 
 def download_bati_for_communes():
     temp_dir = os.path.join(os.getcwd(), "temp/downloads/")
-    config = get_imported_communes_from_file()
-    try:
-        communes = ast.literal_eval(config["communes"])
-    except:
-        logger.error("Aucune commune dans le fichier communes.txt. Rien à télécharger")
-        raise
-    else:
-        logger.info(communes)
-        for commune in communes:
-            logger.info(commune)
-            download_bati(commune, temp_dir)
-            file = os.path.join(temp_dir, "cadastre-%s-batiments.json" % commune)
-            import_geojson(file, "cadastre_bati")
+    communes = get_imported_communes_from_postgres()
+    logger.info(communes)
+    for commune in communes["communes"]:
+        logger.info(commune)
+        download_bati(commune, temp_dir)
+        file = os.path.join(temp_dir, "cadastre-%s-batiments.json" % commune)
+        import_geojson(file, "cadastre_bati")
 
 
 def unzip_cadastre(archive_path):

@@ -1,4 +1,4 @@
-from urbaflow.urbaflow.shared_tasks.file_utils import concat_files, list_files_at_path
+from shared_tasks.file_utils import concat_files, list_files_at_path
 
 
 def import_basias(path):

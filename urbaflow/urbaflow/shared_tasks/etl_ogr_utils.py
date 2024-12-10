@@ -1,6 +1,6 @@
 import os
 from prefect import get_run_logger
-from urbaflow.urbaflow.shared_tasks.config import db_config, db_schema
+from shared_tasks.config import db_config, db_schema
 
 
 def import_shapefile(

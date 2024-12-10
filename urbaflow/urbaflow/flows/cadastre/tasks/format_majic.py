@@ -1,9 +1,9 @@
 import os
 
-from urbaflow.urbaflow.shared_tasks.db_engine import create_engine
-from urbaflow.urbaflow.shared_tasks.db_sql_utils import run_sql_script
-from urbaflow.urbaflow.shared_tasks.logging_config import logger
-from urbaflow.urbaflow.shared_tasks.sql_query_utils import replace_parameters_in_script
+from shared_tasks.db_engine import create_engine
+from shared_tasks.db_sql_utils import run_sql_script
+from shared_tasks.logging_config import logger
+from shared_tasks.sql_query_utils import replace_parameters_in_script
 
 
 def clean_with_drop_db_for_majic_import():

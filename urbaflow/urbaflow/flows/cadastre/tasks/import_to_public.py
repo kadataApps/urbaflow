@@ -5,7 +5,7 @@ from shared_tasks.db_engine import create_engine
 from shared_tasks.db_sql_utils import run_sql_script
 from shared_tasks.logging_config import logger
 from shared_tasks.config import db_schema
-from .get_communes_majic import get_imported_communes_from_file
+from .get_communes_majic import get_imported_communes_from_postgres
 
 
 def create_parcellaire_france():
@@ -200,12 +200,12 @@ def delete_from_public(
 
 
 def flow_import_parcelles():
-    config = get_imported_communes_from_file()
-    codes_insee = config["communes"]
+    communes_df = get_imported_communes_from_postgres()
     table_name = "parcellaire_france"
     create_parcellaire_france()
+    communes = communes_df["commune"].to_list()
     try:
-        delete_from_public(codes_insee, table_name)
+        delete_from_public(communes, table_name)
         insert_parcelles_to_public()
     except psycopg2.DatabaseError as error:
         logger.error(error)
@@ -228,12 +228,12 @@ def flow_import_local():
 
 
 def flow_import_bati():
-    config = get_imported_communes_from_file()
-    codes_insee = config["communes"]
+    communes_df = get_imported_communes_from_postgres()
     table_name = "bati_france"
     create_bati_france()
+    communes = communes_df["commune"].to_list()
     try:
-        delete_from_public(codes_insee, table_name)
+        delete_from_public(communes, table_name)
         insert_bati_to_public()
     except psycopg2.DatabaseError as error:
         logger.error(error)
