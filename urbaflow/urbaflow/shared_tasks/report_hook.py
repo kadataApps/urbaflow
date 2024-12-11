@@ -1,13 +1,17 @@
 import sys
 
+from shared_tasks.logging_config import get_logger
+
 
 def reporthook(blocknum, blocksize, totalsize):
+    logger = get_logger()
     readsofar = blocknum * blocksize
     if totalsize > 0:
         percent = readsofar * 1e2 / totalsize
-        s = "\r%5.1f%% %*d / %d" % (percent, len(str(totalsize)), readsofar, totalsize)
-        sys.stderr.write(s)
+        log_message = f"{percent:5.1f}% {readsofar:{len(str(totalsize))}d} / {totalsize}"
+        if blocknum % 10 == 0 or readsofar >= totalsize:
+            logger.info(log_message)
         if readsofar >= totalsize:  # near the end
-            sys.stderr.write("\n")
+            logger.info("Download completed.")
     else:  # total size is unknown
-        sys.stderr.write("read %d\n" % (readsofar,))
+        logger.info(f"Read {readsofar} bytes so far.")

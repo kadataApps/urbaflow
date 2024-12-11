@@ -26,7 +26,7 @@ def download_and_unzip(url, extract_to_path="."):
 def unzip_file_in_place(archive_path):
     # get directory where archive_path is stored
     dir_path = os.path.dirname(archive_path)
-    file_root, _ = os.path.splitext(archive_path)  # split into file.json and .gz
+    file_root, _ = os.path.splitext(archive_path)  # split into file.ext and .gz
 
     src_name = archive_path
     dest_name = os.path.join(dir_path, file_root)

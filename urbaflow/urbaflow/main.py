@@ -48,7 +48,7 @@ def majic(
 
 @app.command()
 def dvf(
-    departement: str,
+    departements: str,
     dirname: Path = typer.Argument(
         Path("/data/"),
         exists=True,
@@ -59,7 +59,7 @@ def dvf(
         resolve_path=True,
     ),
 ):
-    dvf_flow._run(departement, dirname)
+    dvf_flow._run(departements, dirname)
 
 
 @app.command()

@@ -1,12 +1,12 @@
 import logging
 import os
 from prefect import get_run_logger
-from contextlib import suppress
 
-log_level = os.getenv("LOG_LEVEL", logging.DEBUG)
+from shared_tasks.config import APP_DIR
 
-# Get log file path from environment variable (default None)
-log_filepath = os.path.join(os.getcwd(), "../logs/urbaflow.log")
+log_level = int(os.getenv("LOG_LEVEL", logging.DEBUG))
+
+log_filepath = APP_DIR / "../logs/urbaflow.log"
 
 # Configure logging
 logging.basicConfig(
@@ -23,6 +23,7 @@ console_handler.setLevel(logging.DEBUG)  # Set console log level to DEBUG (alway
 logger.addHandler(console_handler)
 
 def get_logger():
-    with suppress(Exception):
+    try:
         return get_run_logger() 
-    return logger
+    except Exception:
+        return logger
