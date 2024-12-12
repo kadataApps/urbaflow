@@ -22,8 +22,9 @@ console_handler = logging.StreamHandler()
 console_handler.setLevel(logging.DEBUG)  # Set console log level to DEBUG (always print)
 logger.addHandler(console_handler)
 
+
 def get_logger():
     try:
-        return get_run_logger() 
+        return get_run_logger()
     except Exception:
         return logger

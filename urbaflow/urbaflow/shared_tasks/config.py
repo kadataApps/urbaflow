@@ -8,6 +8,7 @@ TEMP_DIR = APP_DIR / "temp"
 
 QUERIES_DIR = APP_DIR / "queries"
 
+
 def db_config():
     return {
         "host": os.getenv("POSTGRES_HOST"),

@@ -42,7 +42,11 @@ STEPS_FLOW_CADASTRE = {
     "step2": {
         "description": "Copy SQL scripts to the temp directory",
         "default": True,
-        "tasks": [lambda: copy_directory(os.path.join(QUERIES_DIR, 'majic'), os.path.join(TEMP_DIR, 'sql'))],
+        "tasks": [
+            lambda: copy_directory(
+                os.path.join(QUERIES_DIR, "majic"), os.path.join(TEMP_DIR, "sql")
+            )
+        ],
     },
     "step3": {
         "description": "Drop existing tables before importing new MAJIC data",

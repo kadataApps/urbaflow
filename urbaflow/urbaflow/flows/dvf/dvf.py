@@ -30,12 +30,13 @@ def download_dvf_by_dep_year(departement: str, year: int, targetDir: Path):
     file_name = f"dvf_{departement}_{year}.csv.gz"
 
     targetDir.mkdir(parents=True, exist_ok=True)
-    
+
     destFileName = targetDir / file_name
     logger.info(f"Downloading {url} to {destFileName}")
     urllib.request.urlretrieve(url, destFileName, reporthook)
     unzip_file_in_place(destFileName)
     return destFileName
+
 
 @task
 def download_dvf_by_dep(dep: str, targetDir: Path):
@@ -45,7 +46,7 @@ def download_dvf_by_dep(dep: str, targetDir: Path):
 
 
 @flow(name="import DVF", task_runner=ConcurrentTaskRunner())
-def dvf_flow(departments:str, targetDir: Path):
+def dvf_flow(departments: str, targetDir: Path):
     departments_list = departments.split(",")
     for dep in departments_list:
         download_dvf_by_dep.submit(dep, targetDir)

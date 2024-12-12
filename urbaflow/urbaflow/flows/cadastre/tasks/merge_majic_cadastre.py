@@ -1,8 +1,6 @@
-import os
-
 from shared_tasks.db_engine import create_engine
 from shared_tasks.db_sql_utils import run_sql_script
-from shared_tasks.logging_config import logger
+from shared_tasks.logging_config import get_logger
 from shared_tasks.sql_query_utils import replace_parameters_in_script
 from shared_tasks.config import TEMP_DIR
 
@@ -12,10 +10,11 @@ def execute_merge_cadastre_majic_scripts():
     Execute dans postgis les scripts permettant de
     fusionner les données MAJIC et cadastre dans une seule table
     """
+    logger = get_logger()
+
     annee = "2019"
     lot = ""
     replace_dict = {"[ANNEE]": annee, "[LOT]": lot}
-
     logger.info("Execution des scripts de fusion Cadastre x MAJIC")
     script_list = [
         "traitements/merge/0-creation_table_parcellaire.sql",

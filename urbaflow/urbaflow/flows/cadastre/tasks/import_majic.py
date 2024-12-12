@@ -9,56 +9,55 @@ from shared_tasks.logging_config import get_logger
 
 
 def chunk(iterable, n=100000, padvalue=None):
-        """
-        Chunks an iterable (file, etc.)
-        into pieces
-        """
-        from itertools import zip_longest
+    """
+    Chunks an iterable (file, etc.)
+    into pieces
+    """
+    from itertools import zip_longest
 
-        return zip_longest(*[iter(iterable)] * n, fillvalue=padvalue)
+    return zip_longest(*[iter(iterable)] * n, fillvalue=padvalue)
 
 
 def get_majic_source_filenames(config):
-        
-        majic_source_filenames = [
-            {
-                "key": "[FICHIER_BATI]",
-                "value": config["bati"],
-                "table": "bati",
-                "required": True,
-            },
-            {
-                "key": "[FICHIER_FANTOIR]",
-                "value": config["fantoir"],
-                "table": "fanr",
-                "required": True,
-            },
-            {
-                "key": "[FICHIER_LOTLOCAL]",
-                "value": config["lotlocal"],
-                "table": "lloc",
-                "required": False,
-            },
-            {
-                "key": "[FICHIER_NBATI]",
-                "value": config["nbati"],
-                "table": "nbat",
-                "required": True,
-            },
-            {
-                "key": "[FICHIER_PDL]",
-                "value": config["pdll"],
-                "table": "pdll",
-                "required": False,
-            },
-            {
-                "key": "[FICHIER_PROP]",
-                "value": config["prop"],
-                "table": "prop",
-                "required": True,
-            },
-        ]
-        return majic_source_filenames
+    majic_source_filenames = [
+        {
+            "key": "[FICHIER_BATI]",
+            "value": config["bati"],
+            "table": "bati",
+            "required": True,
+        },
+        {
+            "key": "[FICHIER_FANTOIR]",
+            "value": config["fantoir"],
+            "table": "fanr",
+            "required": True,
+        },
+        {
+            "key": "[FICHIER_LOTLOCAL]",
+            "value": config["lotlocal"],
+            "table": "lloc",
+            "required": False,
+        },
+        {
+            "key": "[FICHIER_NBATI]",
+            "value": config["nbati"],
+            "table": "nbat",
+            "required": True,
+        },
+        {
+            "key": "[FICHIER_PDL]",
+            "value": config["pdll"],
+            "table": "pdll",
+            "required": False,
+        },
+        {
+            "key": "[FICHIER_PROP]",
+            "value": config["prop"],
+            "table": "prop",
+            "required": True,
+        },
+    ]
+    return majic_source_filenames
 
 
 def import_majic_files(majic_source_dir: Path):
@@ -132,12 +131,7 @@ def import_majic_files(majic_source_dir: Path):
             table = item["table"]
             local_step += 1
             logger.info(
-                "Etape "
-                + str(local_step)
-                + "/"
-                + str(total_steps)
-                + ": "
-                + table
+                "Etape " + str(local_step) + "/" + str(total_steps) + ": " + table
             )
 
             # Drop & create tables where to import data
