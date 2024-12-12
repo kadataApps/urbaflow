@@ -12,15 +12,15 @@ WORKDIR /home/${USER}
 # Install system dependencies
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive  apt-get install -y \
-    libpq-dev \
-    build-essential \
     alien \
-    libaio1 \
-    wget \
-    python3.10-venv \
-    python3-dev \
+    build-essential \
     gcc \
+    libaio1 \
+    libpq-dev \
+    python3-dev \
+    python3.10-venv \
     tzdata \
+    wget \
     && rm -rf /var/lib/apt/lists/*
 ## adding python3-dev + gcc fix error installing with arm64
 ENV TZ=UTC
@@ -44,12 +44,10 @@ RUN pip3 install -e ./urbaflow
 # Make library importable
 ENV PYTHONPATH=/home/${USER}/urbaflow
 
-RUN mkdir /home/${USER}/.prefect/
+RUN mkdir /home/${USER}/.prefect/ \
+   && mkdir /home/${USER}/logs \
+   && chown -R ${USER} .
 
-# create log folder
-RUN mkdir /home/${USER}/logs
-
-RUN chown -R ${USER} .
 USER ${USER}
 WORKDIR /home/${USER}/urbaflow
 

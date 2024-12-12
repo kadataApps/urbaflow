@@ -138,7 +138,6 @@ def transform_lovac_data():
             )
         )
         logger.info("Updated geom column in lovac table from parcellaire_france table")
-    return
 
 
 @task
@@ -180,7 +179,7 @@ def create_extract_lovac_table():
         )
 
 
-@flow(name="Import Locomvac")
+@flow(name="Import Lovac")
 def import_lovac_flow(dirname: Path):
     logger.info(f"Importing lovac data from {dirname}")
     create_table_lovac()

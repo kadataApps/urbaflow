@@ -13,11 +13,13 @@ from flows.locomvac import import_locomvac
 
 app = typer.Typer()
 
+DEFAULT_DIRNAME = Path("/data/")
+
 
 @app.command()
 def majic(
     dirname: Path = typer.Argument(
-        Path("/data/"),
+        DEFAULT_DIRNAME,
         exists=True,
         file_okay=False,
         dir_okay=True,
@@ -50,7 +52,7 @@ def majic(
 def dvf(
     departements: str,
     dirname: Path = typer.Argument(
-        Path("/data/"),
+        DEFAULT_DIRNAME,
         exists=True,
         file_okay=False,
         dir_okay=True,
@@ -65,7 +67,7 @@ def dvf(
 @app.command()
 def locomvac(
     dirname: Path = typer.Argument(
-        Path("/data/"),
+        DEFAULT_DIRNAME,
         exists=True,
         file_okay=False,
         dir_okay=True,

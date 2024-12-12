@@ -139,7 +139,6 @@ def transform_locomvac_data():
         logger.info(
             "Updated geom column in locomvac table from parcellaire_france table"
         )
-    return
 
 
 @flow(name="Import Locomvac")

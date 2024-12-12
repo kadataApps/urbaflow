@@ -3,7 +3,7 @@ import os
 import sys
 import urllib.request
 
-from shared_tasks.logging_config import logger
+from shared_tasks.logging_config import get_logger
 from shared_tasks.etl_ogr_utils import import_geojson
 from .get_communes_majic import (
     get_imported_communes_from_postgres,
@@ -22,23 +22,25 @@ def reporthook(blocknum, blocksize, totalsize):
         sys.stderr.write("read %d\n" % (readsofar,))
 
 
-def download_cadastre(codeinsee: str, target_dir, millesime):
-    param_millesime = "latest" if millesime is None else millesime
+def download_cadastre(codeinsee: str, target_dir, millesime="latest"):
+    """
+    Download cadastre for a given commune
+    Args:
+        codeinsee: str: code insee of the commune
+        target_dir: str: target directory
+        millesime: str: millesime
+
+    cadastral data is available at https://cadastre.data.gouv.fr/data/etalab-cadastre/
+    Shape of url is https://cadastre.data.gouv.fr/data/etalab-cadastre/latest/geojson/communes/77/77111/cadastre-77111-parcelles.json.gz
+    """
+    logger = get_logger()
     logger.info(
-        "Téléchargement du cadastre pour la commune %s, millesime %s",
-        codeinsee,
-        param_millesime,
+        f"Téléchargement du cadastre pour la commune {codeinsee}, millesime {millesime}"
     )
+    base_url = f"https://cadastre.data.gouv.fr/data/etalab-cadastre/{millesime}/geojson/communes/"
     url = (
-        "https://cadastre.data.gouv.fr/data/etalab-cadastre/"
-        + param_millesime
-        + "/geojson/communes/"
+        f"{base_url}{codeinsee[0:2]}/{codeinsee}/cadastre-{codeinsee}-parcelles.json.gz"
     )
-    # url = 'https://cadastre.data.gouv.fr/data/etalab-cadastre/latest/geojson/communes/'
-    url += codeinsee[0:2] + "/" + codeinsee
-    url += "/cadastre-" + codeinsee
-    url += "-parcelles.json.gz"
-    # https://cadastre.data.gouv.fr/data/etalab-cadastre/latest/geojson/communes/77/77111/cadastre-77111-parcelles.json.gz
 
     file_name = url.split("/")[-1]
 
@@ -68,6 +70,10 @@ def download_bati(codeinsee, target_dir):
 
 
 def download_cadastre_for_communes():
+    """
+    Download cadastre (parcelles) for all communes referenced in the imported majic data
+    """
+    logger = get_logger()
     temp_dir = os.path.join(os.getcwd(), "temp/downloads/")
     communes = get_imported_communes_from_postgres()
     millesime = os.getenv("CADASTRE_MILLESIME")
@@ -80,6 +86,10 @@ def download_cadastre_for_communes():
 
 
 def download_bati_for_communes():
+    """
+    Download bati for all communes referenced in the imported majic data
+    """
+    logger = get_logger()
     temp_dir = os.path.join(os.getcwd(), "temp/downloads/")
     communes = get_imported_communes_from_postgres()
     logger.info(communes)
@@ -93,7 +103,6 @@ def download_bati_for_communes():
 def unzip_cadastre(archive_path):
     # get directory where archive_path is stored
     dir = os.path.dirname(archive_path)
-    # filename = os.path.basename(archive_path)  # get filename
     file_json, file_json_ext = os.path.splitext(
         archive_path
     )  # split into file.json and .gz
