@@ -104,7 +104,7 @@ def copy_directory(source, target):
     logger.info(f"Copying ${source} to ${target}")
     try:
         dir_util.copy_tree(source, target)
-        os.chmod(target, 0o777)
+        os.chmod(target, 0o600)
     except IOError as e:
         msg = "Erreur lors de la copie des scripts d'import: %s" % e
         return msg
