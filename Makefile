@@ -12,7 +12,11 @@ urbaflow: ## Run bash environment with available python dependencies for data ur
 
 
 # DEV COMMANDS
-.PHONY: build-urbaflow dev update-python-dependencies
+.PHONY: install build-urbaflow dev update-python-dependencies
+
+install: ## install python dependencies and dev dependencies for urbaflow
+	cd ./urbaflow && poetry install
+	
 build-urbaflow:
 	docker compose build urbaflow
 

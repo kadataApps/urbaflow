@@ -11,8 +11,6 @@ pandas = "^2.0.2"
 GeoAlchemy2 = "^0.13.3"
 simplejson = "^3.19.1"
 pytz = "^2023.3"
-coverage = "^7.2.7"
-pytest = "^7.3.1"
 geopandas = "^0.13.2"
 SQLAlchemy = "^2.0.16"
 psycopg2-binary = "^2.9.6"
@@ -21,7 +19,6 @@ duckdb = "^1.0.0"
 prefect = "^2.19.6"
 typer = "^0.12.3"
 owslib = "^0.31.0"
-ruff = "^0.8.2"
 sqlparse = "^0.5.2"
 
 
@@ -29,7 +26,16 @@ sqlparse = "^0.5.2"
 isort = "^5.12.0"
 pylint = "^2.17.5"
 ipykernel = "^6.29.4"
+sqlfluff = "^3.3.0"
+ruff = "^0.8.2"
+pytest = "^8.3.4"
+coverage = "^7.6.9"
+pre-commit = "^4.0.1"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.sqlfluff.indentation]
+indent_unit = "space"
+tab_space_size = 4
