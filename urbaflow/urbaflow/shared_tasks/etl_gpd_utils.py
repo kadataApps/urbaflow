@@ -3,8 +3,10 @@
 
 import logging
 from pathlib import Path
-from typing import List, Union
-
+from typing import Iterable, List, Union
+from io import StringIO
+import csv
+from pandas.io.sql import SQLTable
 import geopandas as gpd
 import pandas as pd
 from sqlalchemy import DDL, text
@@ -16,7 +18,7 @@ from shared_tasks.db_utils import (
     delete_rows,
     delete,
 )
-from shared_tasks.db_sql_utils import psql_insert_copy, read_saved_query
+from shared_tasks.db_sql_utils import read_saved_query
 
 
 def extract(
@@ -288,9 +290,8 @@ def create_table_from_geodataframe(
         recreate_query = f"DROP TABLE IF EXISTS {schema}.{table_name};"
         connection.execute(text(recreate_query))
 
-    geometry_type = gdf.geom_type.iloc[
-        0
-    ].upper()  # Convert to uppercase (e.g., 'POINT', 'POLYGON')
+    # Convert to uppercase (e.g., 'POINT', 'POLYGON')
+    geometry_type = gdf.geom_type.iloc[0].upper()
     crs = gdf.crs
 
     # Extract the EPSG code from the CRS, if available
@@ -316,3 +317,39 @@ def create_table_from_geodataframe(
     create_table_query = create_table_query.rstrip(",\n") + "\n);"
 
     connection.execute(text(create_table_query))
+
+
+def psql_insert_copy(
+    table: SQLTable, conn: Connection, keys: list[str], data_iter: Iterable
+):
+    """
+    Execute SQL statement inserting data
+
+    Method to be passed to pandas.DataFrame.to_sql method as a parameter `method`
+
+    Parameters
+    ----------
+    table : pandas.io.sql.SQLTable
+    conn : sqlalchemy.engine.Engine or sqlalchemy.engine.Connection
+    keys : list of str
+        Column names
+    data_iter : Iterable that iterates the values to be inserted
+
+    source: https://pandas.pydata.org/pandas-docs/stable/user_guide/io.html#io-sql-method
+    """
+    # gets a DBAPI connection that can provide a cursor
+    dbapi_conn = conn.connection
+    with dbapi_conn.cursor() as cur:
+        s_buf = StringIO()
+        writer = csv.writer(s_buf)
+        writer.writerows(data_iter)
+        s_buf.seek(0)
+
+        columns = ", ".join('"{}"'.format(k) for k in keys)
+        if table.schema:
+            table_name = f'"{table.schema}"."{table.name}"'
+        else:
+            table_name = f'"{table.name}"'
+
+        sql = "COPY {} ({}) FROM STDIN WITH CSV".format(table_name, columns)
+        cur.copy_expert(sql=sql, file=s_buf)
