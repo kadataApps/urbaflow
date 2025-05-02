@@ -6,8 +6,8 @@ CREATE TABLE IF NOT EXISTS public.proprietaire_droit (
     -- Computed fields are marked with *
     -- Numbering is the one as from CEREMA
     -- Fields without numbers are additional fields
-    -- http://doc-datafoncier.cerema.fr/ff/doc_fftp/table/proprietaire_droit/last/
-                         -- # Mod Comment
+    -- http://doc-datafoncier.cerema.fr/ff/doc_fftp/table/proprietaire_droit/last/ --noqa
+    --                      # Mod Comment
     proprietaire text,   --
     annee text,          --
     idprodroit char(13), -- 1  *
@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS public.proprietaire_droit (
     ccodrotxt char(88),  -- 15 *
     typedroit char(1),   -- 16
     ccodem char(1),      -- 17
-                         -- 18   missing ccodemtxt
+                         -- 18   missing ccodemtxt --noqa
     gdesip char(1),      -- 19
     gtoper char(1),      -- 20
     ccoqua char(1),      -- 21
@@ -113,10 +113,10 @@ CREATE TABLE IF NOT EXISTS public.proprietaire_droit (
     nloghlm integer,     --
     gdprop char(1)       --
 ) WITH (
-  OIDS = FALSE
+    oids = FALSE
 )
 TABLESPACE pg_default;
 
 CREATE INDEX IF NOT EXISTS sidx_proprietaire_droit
-    ON public.proprietaire_droit (idprocpte)
+ON public.proprietaire_droit (idprocpte)
 TABLESPACE pg_default;

@@ -36,7 +36,7 @@ CREATE TABLE temp_prop_parcelle AS (
     count(CASE typedroit WHEN 'G'  THEN 1 END) AS ndroitges,
     string_agg(DISTINCT CASE typedroit WHEN 'G' THEN codgrmtxt END, ', ') AS typpropges,
     string_agg(DISTINCT CASE typedroit WHEN 'G' THEN ddenom END, ', ') AS ddenompropges,
-    string_agg(DISTINCT CASE catpro WHEN 'G' THEN ddenom END, ', ') AS catpropges,
+    string_agg(DISTINCT CASE typedroit WHEN 'G' THEN catpro END, ', ') AS catpropges,
     CASE WHEN count(CASE WHEN gdprop = 't' THEN 1 END) > 0 THEN 't' END AS presgdprop,
 
     (
