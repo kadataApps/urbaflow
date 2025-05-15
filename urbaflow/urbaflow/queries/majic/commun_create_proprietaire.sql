@@ -101,13 +101,13 @@ CREATE TABLE IF NOT EXISTS public.proprietaire_droit (
     locprop char(1),     -- 61 *
     locproptxt char(21), -- 62 *
     codnom text,         --
-    catpro text,      --
-    catpro_niv2 text, --
+    catpro text,         --
+    catpro_niv2 text,    --
     nlogh integer,       --
     nloghvac integer,    --
     nloghpp integer,     --
     nloghmeu integer,    --
-    nloghloue integer,    --
+    nloghloue integer,   --
     nloghautre integer,  --
     nloghnonh integer,   --
     nloghlm integer,     --

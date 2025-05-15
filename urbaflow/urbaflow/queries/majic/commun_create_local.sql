@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS public.pb0010_local (
     -- Numbering is the one as from CEREMA
     -- Fields without numbers are additional fields
     -- proprietaire_droit
+    -- noqa: disable=LT02
+    -- (disable LT02 to leave indentation as is)
                            -- # Mod Comment
     local10 text,          --
     annee text,            --
@@ -156,10 +158,10 @@ CREATE TABLE IF NOT EXISTS public.pb0010_local (
                            -- 139 * Missing vecteur
                            -- 140 * Missing idpk
 ) WITH (
-  OIDS = FALSE
+    oids = FALSE
 )
 TABLESPACE pg_default;
 
 CREATE INDEX IF NOT EXISTS sidx_pb0010_local
-    ON public.pb0010_local (idlocal)
+ON public.pb0010_local (idlocal)
 TABLESPACE pg_default;

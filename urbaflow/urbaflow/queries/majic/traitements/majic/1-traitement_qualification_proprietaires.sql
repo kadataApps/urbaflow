@@ -68,9 +68,14 @@ SET
             THEN
                 'G'
         WHEN
-            ccodro = 'G' -- G = GERANT,MANDATAIRE,GESTIONNAIRE, donc pas réellement gestionnaire (pas de droits réels)
-            OR ccodro = 'Q' -- Q = GESTIONNAIRE TAXE SUR LES BUREAUX (ILE DE FRANCE) (pas de droits réels)
-            OR ccodro = 'S' -- S = SYNDIC DE COPROPRIETE (pas de droits réels)
+            -- G = GERANT,MANDATAIRE,GESTIONNAIRE
+            -- donc pas réellement gestionnaire (pas de droits réels)
+            ccodro = 'G'
+            -- Q = GESTIONNAIRE TAXE SUR LES BUREAUX (ILE DE FRANCE) 
+            -- (pas de droits réels)
+            OR ccodro = 'Q'
+            -- S = SYNDIC DE COPROPRIETE (pas de droits réels)
+            OR ccodro = 'S'
             THEN
                 'A' -- Autre propriétaire sans droits réels
         ELSE
