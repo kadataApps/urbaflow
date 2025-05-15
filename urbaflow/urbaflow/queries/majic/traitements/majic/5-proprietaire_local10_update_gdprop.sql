@@ -30,7 +30,7 @@ WITH gdprop_agg AS (
                 WHEN l.logloue = 't' THEN
                     1
             END
-        ) AS nlogloue,
+        ) AS nloghloue,
         SUM(
             CASE
                 WHEN l.loghautre = 't' THEN
@@ -65,7 +65,7 @@ SET
     nloghvac = gdprop_agg.nloghvac,
     nloghpp = gdprop_agg.nloghpp,
     nloghmeu = gdprop_agg.nloghmeu,
-    nlogloue = gdprop_agg.nlogloue,
+    nloghloue = gdprop_agg.nloghloue,
     nloghautre = gdprop_agg.nloghautre,
     nloghnonh = gdprop_agg.nloghnonh,
     nloghlm = gdprop_agg.nloghlm

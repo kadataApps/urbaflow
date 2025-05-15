@@ -112,7 +112,7 @@ def insert_proprietaire_to_public():
       ccmm, topja, datja, anospi, cblpmo, gtodge, gpctf, gpctsb, jmodge,
       jandge, jantfc, jantbc, dformjur, dnomus, dprnus, lot, locprop,
       locproptxt, codnom, catpro, catpro_niv2, nlogh, nloghvac, nloghpp,
-      nloghmeu, nlogloue, nloghautre, nloghnonh, nloghlm, gdprop
+      nloghmeu, nloghloue, nloghautre, nloghnonh, nloghlm, gdprop
       )
     SELECT
       proprietaire, annee, idprodroit, idprocpte, idpersonne, idvoie, idcom,
@@ -126,7 +126,7 @@ def insert_proprietaire_to_public():
       ccmm, topja, datja, anospi, cblpmo, gtodge, gpctf, gpctsb, jmodge,
       jandge, jantfc, jantbc, dformjur, dnomus, dprnus, lot, locprop,
       locproptxt, codnom, catpro, catpro_niv2, nlogh, nloghvac, nloghpp,
-      nloghmeu, nlogloue, nloghautre, nloghnonh, nloghlm, gdprop
+      nloghmeu, nloghloue, nloghautre, nloghnonh, nloghlm, gdprop
     FROM """
     import_query += f"{schema}.proprietaire;"
 

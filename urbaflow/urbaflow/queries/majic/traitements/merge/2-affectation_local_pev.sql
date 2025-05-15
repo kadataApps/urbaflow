@@ -55,7 +55,7 @@ CREATE TABLE temp_local_pev_parcelle AS (
         AND pev.dnupev = '001'
         AND pev.ccoaff = 'H'
         AND pev.ccthp = 'L'
-      THEN '1' END) AS nlogloue,
+      THEN '1' END) AS nloghloue,
 
     count(CASE WHEN
         (local10.dteloc = '1' OR local10.dteloc = '2')
@@ -107,7 +107,7 @@ UPDATE parcellaire SET
   nlogh = t.nlogh,
   nloghvac = t.nloghvac,
   nloghmeu = t.nloghmeu,
-  nlogloue = t.nlogloue,
+  nloghloue = t.nloghloue,
   nloghpp = t.nloghpp,
   nloghautre = t.nloghautre,
   nloghnonh = t.nloghnonh,

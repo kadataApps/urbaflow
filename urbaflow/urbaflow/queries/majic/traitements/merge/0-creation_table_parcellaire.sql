@@ -75,7 +75,7 @@ CREATE TABLE parcellaire AS (
         null::numeric AS nlogh,
         null::numeric AS nloghvac,
         null::numeric AS nloghmeu,
-        null::numeric AS nlogloue,
+        null::numeric AS nloghloue,
         null::numeric AS nloghpp,
         null::numeric AS nloghautre,
         null::numeric AS nloghnonh,

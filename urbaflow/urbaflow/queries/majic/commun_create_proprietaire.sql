@@ -107,7 +107,7 @@ CREATE TABLE IF NOT EXISTS public.proprietaire_droit (
     nloghvac integer,    --
     nloghpp integer,     --
     nloghmeu integer,    --
-    nlogloue integer,    --
+    nloghloue integer,    --
     nloghautre integer,  --
     nloghnonh integer,   --
     nloghlm integer,     --
