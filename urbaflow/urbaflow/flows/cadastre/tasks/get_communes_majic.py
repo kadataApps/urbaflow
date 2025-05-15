@@ -11,7 +11,7 @@ def get_imported_communes_from_postgres():
     logger.info("Liste des code communes importés dans MAJIC")
     schema = db_schema()
     select_communes_query = (
-        "SELECT distinct ccodep || ccocom as communes " "FROM %s.parcelle;" % schema
+        "SELECT distinct ccodep || ccocom as code_insee " "FROM %s.parcelle;" % schema
     )
 
     e = create_engine()

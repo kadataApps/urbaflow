@@ -96,17 +96,32 @@ def move_file(
 
 def copy_directory(source, target):
     """
-    Copy files from source
-    into target
+    Copy files from source to target directory and set appropriate permissions.
+    Creates target directory if it doesn't exist.
     """
-    # copy script directory
     logger = get_logger()
     logger.info(f"Copying ${source} to ${target}")
+
     try:
+        # Create target directory if it doesn't exist
+        os.makedirs(target, exist_ok=True)
+
+        # Copy files from source to target
         dir_util.copy_tree(source, target)
-        os.chmod(target, 0o600)
-    except IOError as e:
-        msg = "Erreur lors de la copie des scripts d'import: %s" % e
+
+        # Set proper permissions recursively
+        for root, dirs, files in os.walk(target):
+            # Set permissions for directories
+            os.chmod(root, 0o755)  # rwxr-xr-x
+
+            # Set permissions for each file
+            for file in files:
+                file_path = os.path.join(root, file)
+                os.chmod(file_path, 0o644)  # rw-r--r--
+
+    except Exception as e:
+        msg = f"Erreur lors de la copie des scripts d'import: {e}"
+        logger.error(msg)
         return msg
 
     return None

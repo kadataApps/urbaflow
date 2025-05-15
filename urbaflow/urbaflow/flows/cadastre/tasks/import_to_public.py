@@ -207,12 +207,12 @@ def delete_from_public(
 
 def flow_import_parcelles():
     logger = get_logger()
-    communes_df = get_imported_communes_from_postgres()
+    communes_imported_df = get_imported_communes_from_postgres()
     table_name = "parcellaire_france"
     create_parcellaire_france()
-    communes = communes_df["commune"].to_list()
+    code_insee_to_be_imported = communes_imported_df["code_insee"].to_list()
     try:
-        delete_from_public(communes, table_name)
+        delete_from_public(code_insee_to_be_imported, table_name)
         insert_parcelles_to_public()
     except psycopg2.DatabaseError as error:
         logger.error(error)

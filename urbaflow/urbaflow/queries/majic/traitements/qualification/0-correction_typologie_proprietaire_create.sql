@@ -4,10 +4,14 @@ CREATE TABLE correction_typologie_proprietaire (
     ddenom text,
     catpro text
 );
--- Création d'une clé primaire pour éviter les doublons et assurer la rapidité de la jointure
+-- Création d'une clé primaire pour éviter les doublons
+-- et assurer la rapidité de la jointure
 ALTER TABLE correction_typologie_proprietaire ADD PRIMARY KEY (ddenom);
 
 -- Insertion des catpros de propriétaires identifiées manuellement
+-- une ligne par propriétaire 
+-- (disable LT05 pour éviter les warnings sur la longueur de la ligne)
+-- noqa: disable=LT05
 INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('ETABLISSEMENT PUBLIC FONCIER IDF', 'EPF');
 INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('FONCIER LANDES FONCIER', 'EPF');
 INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('ETS PUBLIC FONCIER NORD PAS DE CALAIS', 'EPF');
@@ -19,14 +23,14 @@ INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('SA IMMOB
 INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('ETS PUBLIC D AMENAGEMENT DE LA VILLE NOUVELLE DU VAUDREUIL', 'AMENAGEUR_PUB');
 INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('SOCIETE HEROUVILLAISE D''ECONOMIE MIXTE POUR L''AMENAGEMENT', 'AMENAGEUR_PUB');
 INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('NORMANDIE AMENAGEMENT', 'AMENAGEUR_PUB');
-INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('GRAND PARIS SUD',  'EPCI');
-INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('COMMUNAUTE DE COMMUNES DU VAL D ESSONNE',  'EPCI');
-INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('CA DE SENART',  'EPCI');
-INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('CA GRAND PARIS SUD SEINE ESSONNE SENART',  'EPCI');
-INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('COMMUNAUTE AGGLO EVRY CENTRE ESSONNE',  'EPCI');
-INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('COMMUNAUTE AGGLOMERATION SEINE ESSONNE',  'EPCI');
-INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('COMMUNAUTE D AGGLOMERATION LES LACS DE L ESSONNE',  'EPCI');
-INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('SYND AGGLO NOUVELLE DE SENART EN ESSONNE',  'EPCI');
+INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('GRAND PARIS SUD', 'EPCI');
+INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('COMMUNAUTE DE COMMUNES DU VAL D ESSONNE', 'EPCI');
+INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('CA DE SENART', 'EPCI');
+INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('CA GRAND PARIS SUD SEINE ESSONNE SENART', 'EPCI');
+INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('COMMUNAUTE AGGLO EVRY CENTRE ESSONNE', 'EPCI');
+INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('COMMUNAUTE AGGLOMERATION SEINE ESSONNE', 'EPCI');
+INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('COMMUNAUTE D AGGLOMERATION LES LACS DE L ESSONNE', 'EPCI');
+INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('SYND AGGLO NOUVELLE DE SENART EN ESSONNE', 'EPCI');
 INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('COMMUNAUTE DE COMMUNES EURE MADRIE SEINE', 'EPCI');
 INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('CA VAL D''EUROPE AGGLOMERATION', 'EPCI');
 INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('COMMUNAUTE DE COMMUNES MAREMNE ADOUR COTE SUD', 'EPCI');
@@ -128,15 +132,15 @@ INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('SYNDICAT
 INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('SYNDICAT POUR LA VALORISATION ET L''ELIMINATION DES DECHETS D', 'AUTRE_PUB');
 INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('OFFICE PUBLIC DE L HABITAT 87', 'AUTRE_PUB');
 INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('CAISSE ALLOCATIONS FAMILIALE', 'AUTRE_PUB');
-INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('CH  COMMERCE INDUSTRIE LIMOGES HTE VIENN','AUTRE_PUB');
-INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('CHAMBRE D AGRICULTURE DE LA HAUTE VIENNE','AUTRE_PUB');
-INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('CHAMBRE DE COMMERCE ET D INDUSTRIE DE LIMOGES','AUTRE_PUB');
-INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('CHAMBRE DES METIERS DE LA HAUTE VIENNE','AUTRE_PUB');
+INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('CH  COMMERCE INDUSTRIE LIMOGES HTE VIENN', 'AUTRE_PUB');
+INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('CHAMBRE D AGRICULTURE DE LA HAUTE VIENNE', 'AUTRE_PUB');
+INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('CHAMBRE DE COMMERCE ET D INDUSTRIE DE LIMOGES', 'AUTRE_PUB');
+INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('CHAMBRE DES METIERS DE LA HAUTE VIENNE', 'AUTRE_PUB');
 INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('CHAMBRE REG DE METIERS ET DE L''ARTISANAT DU LIMOUSIN', 'AUTRE_PUB');
 INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('COMMUNAUTE D''AGGLOMERATION D''HENIN-CARVIN', 'AUTRE_PUB');
 INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('ETAT', 'AUTRE_PUB');
-INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('DIRECTION DEPARTEMENTALE DE L EQUIPEMENT','AUTRE_PUB');
-INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('MINISTERE DES TRANSPORTS','AUTRE_PUB');
-INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('BPIFRANCE FINANCEMENT','AUTRE_PUB');
-INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('COMMUNAUTE D''AGGLOMERATION DE SAINTES','EPCI');
-INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('SOCIETE ANONYME D''ECONOMIE MIXTE IMMOBILIERE DE LA SAINTONGE','AMENAGEUR_PUB');
+INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('DIRECTION DEPARTEMENTALE DE L EQUIPEMENT', 'AUTRE_PUB');
+INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('MINISTERE DES TRANSPORTS', 'AUTRE_PUB');
+INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('BPIFRANCE FINANCEMENT', 'AUTRE_PUB');
+INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('COMMUNAUTE D''AGGLOMERATION DE SAINTES', 'EPCI');
+INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('SOCIETE ANONYME D''ECONOMIE MIXTE IMMOBILIERE DE LA SAINTONGE', 'AMENAGEUR_PUB');

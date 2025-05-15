@@ -180,7 +180,7 @@ Exemple d'utilisation:
 - import seulement des données brutes dans postgresql:
 
 ```shell
-python main.py majic /data/ --no-step1 --no-step2 --no-step3 --no-step4 --no-step5 --no-step6 --no-step7 --no-step8 --no-step9 --no-step10 --no-step11 --no-step12
+python urbaflow/main.py majic /data/ --no-step1 --no-step2 --no-step3 --no-step4 --no-step5 --no-step6 --no-step7 --no-step8 --no-step9 --no-step10 --no-step11 --no-step12
 ```
 
 ## Licence
