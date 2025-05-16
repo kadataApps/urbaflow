@@ -241,7 +241,7 @@ def flow_import_bati():
     communes_df = get_imported_communes_from_postgres()
     table_name = "bati_france"
     create_bati_france()
-    communes = communes_df["commune"].to_list()
+    communes = communes_df["code_insee"].to_list()
     try:
         delete_from_public(communes, table_name)
         insert_bati_to_public()

@@ -30,11 +30,15 @@ def init_db_for_majic_import():
     )
     script_path_create = TEMP_DIR / "sql/commun_create_metier.sql"
     script_path_nomenclature = TEMP_DIR / "sql/commun_insert_nomenclature.sql"
+    script_path_correspondance_prop = (
+        TEMP_DIR / "sql/table_corresponance_manuelle_proprietaires.sql"
+    )
 
     e = create_engine()
     with e.begin() as conn:
         run_sql_script(sql_filepath=script_path_create, connection=conn)
         run_sql_script(sql_filepath=script_path_nomenclature, connection=conn)
+        run_sql_script(sql_filepath=script_path_correspondance_prop, connection=conn)
     logger.info("Base de données initialisée avec les tables métiers MAJIC.")
 
 

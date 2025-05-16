@@ -78,7 +78,7 @@ def download_cadastre_for_communes():
     communes = get_imported_communes_from_postgres()
     millesime = os.getenv("CADASTRE_MILLESIME")
     logger.debug(communes)
-    for commune in communes["communes"]:
+    for commune in communes["code_insee"]:
         logger.info(commune)
         download_cadastre(commune, temp_dir, millesime)
         file = os.path.join(temp_dir, "cadastre-%s-parcelles.json" % commune)
@@ -93,7 +93,7 @@ def download_bati_for_communes():
     temp_dir = os.path.join(os.getcwd(), "temp/downloads/")
     communes = get_imported_communes_from_postgres()
     logger.info(communes)
-    for commune in communes["communes"]:
+    for commune in communes["code_insee"]:
         logger.info(commune)
         download_bati(commune, temp_dir)
         file = os.path.join(temp_dir, "cadastre-%s-batiments.json" % commune)
