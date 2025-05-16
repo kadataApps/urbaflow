@@ -24,7 +24,7 @@ from .tasks.format_cadastre import (
     execute_init_bati,
 )
 from .tasks.merge_majic_cadastre import execute_merge_cadastre_majic_scripts
-from .tasks.import_to_public import (
+from .tasks.move_data_to_public_schema import (
     flow_import_bati,
     flow_import_parcelles,
     flow_import_proprietaire,
@@ -35,11 +35,6 @@ from .tasks.clean_after_imports import clean_temp_dir, clean_db
 
 STEPS_FLOW_CADASTRE = {
     "step1": {
-        "description": "Import raw MAJIC data into temporary PostgreSQL tables",
-        "default": True,
-        "tasks": [lambda dirname: import_majic_files(dirname)],
-    },
-    "step2": {
         "description": "Copy SQL scripts to the temp directory",
         "default": True,
         "tasks": [
@@ -47,6 +42,11 @@ STEPS_FLOW_CADASTRE = {
                 os.path.join(QUERIES_DIR, "majic"), os.path.join(TEMP_DIR, "sql")
             )
         ],
+    },
+    "step2": {
+        "description": "Import raw MAJIC data into temporary PostgreSQL tables",
+        "default": True,
+        "tasks": [lambda dirname: import_majic_files(dirname)],
     },
     "step3": {
         "description": "Drop existing tables before importing new MAJIC data",

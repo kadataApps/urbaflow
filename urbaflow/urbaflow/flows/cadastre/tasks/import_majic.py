@@ -63,7 +63,7 @@ def get_majic_source_filenames(config):
 def import_majic_files(majic_source_dir: Path):
     """
     Method wich read each majic file
-    and bulk import data intp temp tables
+    and bulk import data into temp tables
     Returns False if no file processed
     """
     logger = get_logger()
@@ -113,7 +113,7 @@ def import_majic_files(majic_source_dir: Path):
 
         majic_files_found[table] = maj_list
 
-    # print result of exploring majic files
+    # log result of exploring majic files
     files_to_proceed_counter = 0
     for table in majic_files_found:
         logger.info(table)

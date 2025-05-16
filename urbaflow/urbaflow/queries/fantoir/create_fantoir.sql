@@ -58,7 +58,7 @@ CREATE TABLE voie_france (
     idvoie text
 );
 
-
+--noqa: disable=LT05
 COMMENT ON TABLE voie_france IS 'Voie (Fantoir)';
 COMMENT ON COLUMN voie_france.ccodep IS 'Code département - Code département INSEE';
 COMMENT ON COLUMN voie_france.ccodir IS 'Code direction - Code direction dge';
