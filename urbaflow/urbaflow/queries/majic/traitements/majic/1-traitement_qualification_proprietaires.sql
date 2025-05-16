@@ -136,18 +136,18 @@ SET
                 'OFFICE HLM'
         WHEN ccogrm = '7'
             THEN
-                'COPROPRIETES'
+                'COPROPRIETE'
         WHEN ccogrm = '9'
             THEN
-                'ETABLISSEMENTS PUBLICS OU ORGANISMES ASSIMILES'
+                'ETABLISSEMENT PUBLIC OU ORGANISME ASSIMILE'
         WHEN
             ccogrm = '0'
             OR ccogrm = '6'
             OR ccogrm = '8'
             THEN
-                'PERSONNES MORALES PRIVEES'
+                'PERSONNE MORALE'
         ELSE
-            'PERSONNES PHYSIQUES'
+            'PERSONNE PHYSIQUE'
     END,
     codgrm = CASE
         WHEN ccogrm IN ('1', '2', '3', '4', '5', '7', '9')
@@ -177,12 +177,12 @@ SET
         WHEN codgrmtxt = 'DEPARTEMENT' THEN 'AUTRE_PUB'
         WHEN codgrmtxt = 'COMMUNE' THEN 'COMMUNE'
         WHEN codgrmtxt = 'OFFICE HLM' THEN 'AUTRE_PUB'
-        WHEN codgrmtxt = 'COPROPRIETES' THEN 'COPROPRIETE'
-        WHEN codgrmtxt = 'ETABLISSEMENTS PUBLICS OU ORGANISMES ASSIMILES'
+        WHEN codgrmtxt = 'COPROPRIETE' THEN codgrmtxt
+        WHEN codgrmtxt = 'ETABLISSEMENT PUBLIC OU ORGANISME ASSIMILE'
             THEN 'AUTRE_PUB'
-        WHEN codgrmtxt = 'PERSONNES MORALES PRIVEES'
+        WHEN codgrmtxt = 'PERSONNE MORALE'
             THEN codgrmtxt
-        WHEN codgrmtxt = 'PERSONNES PHYSIQUES' THEN codgrmtxt
+        WHEN codgrmtxt = 'PERSONNE PHYSIQUE' THEN codgrmtxt
         ELSE 'AUTRE'
     END;
 

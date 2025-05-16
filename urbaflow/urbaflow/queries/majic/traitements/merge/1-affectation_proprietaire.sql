@@ -41,10 +41,11 @@ CREATE TABLE temp_prop_parcelle AS (
     SELECT
         idprocpte,
         string_agg(DISTINCT codgrmtxt, ', ') AS typprop,
+        string_agg(DISTINCT catpro, ', ') AS catpro,
         string_agg(DISTINCT ddenom, ', ') AS ddenomprop,
 
         count(*) AS ndroit,
-        count(CASE ccodem WHEN 'I' THEN 1 END) AS ndroitindi,
+        count(CASE WHEN ccodem IS NOT NULL THEN 1 END) AS ndroitindi,
         string_agg(DISTINCT typedroit, ', ') AS typedroit,
 
         --   droit propriétaire
@@ -78,12 +79,12 @@ CREATE TABLE temp_prop_parcelle AS (
             CASE
                 WHEN count(CASE WHEN codgrm = '7' THEN TRUE END) > 0
                     THEN 'COPROPRIETE'
-                WHEN count(CASE WHEN ccodem = 'I' THEN TRUE END) <= 2
-                    THEN 'INDIVISION SIMPLE'
-                WHEN count(CASE WHEN ccodem = 'I' THEN TRUE END) > 2
-                    THEN 'INDIVISION'
                 WHEN count(CASE WHEN ccodem = 'L' THEN TRUE END) > 0
-                    THEN 'LITIGE'
+                    THEN 'INDIVISION EN LITIGE'
+                WHEN count(CASE WHEN ccodem = 'I' THEN TRUE END) = 2
+                    THEN 'INDIVISION SIMPLE'
+                WHEN count(CASE WHEN ccodem IS NOT NULL THEN TRUE END) >= 2
+                    THEN 'INDIVISION'
                 WHEN
                     count(
                         CASE
@@ -96,7 +97,7 @@ CREATE TABLE temp_prop_parcelle AS (
                     THEN 'BAIL EMPHYTEOTIQUE'
                 WHEN count(CASE WHEN ccodro = 'U' THEN TRUE END) > 0
                     THEN 'SEP. NUE-PROPRIETE / USUFRUIT'
-                WHEN string_agg(DISTINCT ccodro, ', ') = 'P'
+                WHEN count(CASE typedroit WHEN 'P' THEN 1 END) = 1
                     THEN 'PLEINE PROPRIETE'
                 ELSE 'AUTRE'
             END
@@ -116,6 +117,7 @@ UPDATE parcellaire SET
     typedroit = temp_prop_parcelle.typedroit,
     ndroitpro = temp_prop_parcelle.ndroitpro,
     ndroitges = temp_prop_parcelle.ndroitges,
+    catpro = temp_prop_parcelle.catpro,
     typprop = temp_prop_parcelle.typprop,
     typproppro = temp_prop_parcelle.typproppro,
     typpropges = temp_prop_parcelle.typpropges,
@@ -169,23 +171,23 @@ UPDATE parcellaire SET
 FROM ndroitpro_data
 WHERE ndroitpro_data.idpar = parcellaire.idpar;
 
-
+DROP VIEW ndroitpro_data;
 -- Catégorie simmplifiée
 UPDATE
     parcellaire SET catpro_niv2
 = CASE
     WHEN catpro = 'COPROPRIETE'
         THEN 'Copropriétés/ASL'
-    WHEN typproppro = 'PERSONNES PHYSIQUES' AND ndroitindi = 2
+    WHEN typproppro = 'PERSONNE PHYSIQUE' AND ndroitindi = 2
         THEN 'Indivisions simples (2 indivisaires)'
-    WHEN typproppro = 'PERSONNES PHYSIQUES' AND ndroitindi > 2
+    WHEN typproppro = 'PERSONNE PHYSIQUE' AND ndroitindi > 2
         THEN 'Indivisions complexes (3+ indivisaires)'
     WHEN
-        descprop = 'PLEINE PROPRIETE' AND typproppro = 'PERSONNES PHYSIQUES'
+        descprop = 'PLEINE PROPRIETE' AND typproppro = 'PERSONNE PHYSIQUE'
         THEN 'Monopropriétés'
-    WHEN typproppro = 'PERSONNES MORALES PRIVEES' AND ndroitpro = 1
+    WHEN typproppro = 'PERSONNE MORALE' AND ndroitpro = 1
         THEN 'Sociétés'
-    WHEN typproppro = 'PERSONNES MORALES PRIVEES' AND ndroitpro > 1
+    WHEN typproppro = 'PERSONNE MORALE' AND ndroitpro > 1
         THEN 'Groupements de sociétés'
     WHEN
         typproppro = 'ETAT'
@@ -196,7 +198,7 @@ UPDATE
         THEN 'Public'
     WHEN
         typproppro = 'OFFICE HLM'
-        OR typproppro = 'ETABLISSEMENTS PUBLICS OU ORGANISMES ASSIMILES'
+        OR typproppro = 'ETABLISSEMENT PUBLIC OU ORGANISME ASSIMILE'
         OR catpro = 'AUTRE_PUB'
         OR catpro = 'AMENAGEUR_PUB' OR catpro = 'EPF'
         THEN 'Parapublic'
