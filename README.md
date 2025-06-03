@@ -155,37 +155,37 @@ Il est possible de sélectionner les étapes à lancer ou non.
 Par défaut, toutes les étapes sont lancées.
 
 Options:
-  
-- --step1 / --no-step1    Import données brutes (6 fichiers) dans 6 tables
-                            temporaires dans PostgreSQL
-- --step2 / --no-step2    Copie des scripts dans le répertoire temporaire
-                            (pour adaptation des scripts en fonction des
-                            paramètres d'import)
-- --step3 / --no-step3    nettoyage éventuel des tables métiers préexistantes
-- --step4 / --no-step4    Initialisation de la base avec tables métiers
-- --step5 / --no-step5    Formatage des données MAJIC
-- --step6 / --no-step6    Identification des communes importées via MAJIC
-- --step7 / --no-step7    Téléchargement et import des données cadastre
-                             (vecteurs)
-- --step8 / --no-step8    Fusion des données Cadastre et MAJIC
-- --step9 / --no-step9    Intégration des données parcelles,
-                            proprietaires et local dans le schema Public
-- --step10 / --no-step10  Téléchargement et import des données bati
-                             (vecteurs)
-- --step11 / --no-step11  Intégration des données bati dans le schéma Public
-- --step12 / --no-step12  Nettoyage des fichiers temporaires et des tables
+
+- step1  : Copie des scripts dans le répertoire temporaire
+           (pour adaptation des scripts en fonction des
+           paramètres d'import)
+- step2  : Import données brutes (6 fichiers) dans 6 tables
+           temporaires dans PostgreSQL
+- step3  : nettoyage éventuel des tables métiers préexistantes
+- step4  : Initialisation de la base avec tables métiers
+- step5  : Formatage des données MAJIC
+- step6  : Identification des communes pour lesquelles les données
+           MAJIC ont été importées, téléchargement et import 
+           des données cadastre (vecteurs)
+- step7  : Fusion des données Cadastre et MAJIC
+- step8  : Intégration des données parcelles,
+           proprietaires et local dans le schema Public
+- step9 : Téléchargement et import des données bati
+           (vecteurs)
+- step10 : Intégration des données bati dans le schéma Public
+- step11 : Nettoyage des fichiers temporaires et des tables
 
 Exemple d'utilisation:
 
 - import seulement des données brutes dans postgresql:
 
 ```shell
-python urbaflow/main.py majic /data/ --no-step1 --no-step2 --no-step3 --no-step4 --no-step5 --no-step6 --no-step7 --no-step8 --no-step9 --no-step10 --no-step11 --no-step12
+python urbaflow/main.py majic /data/ step1 step2
 ```
 
 ## Licence
 
-© Thomas Brosset - [thoomasbro](https://github.com/thoomasbro) - [KADATA](https://kadata.fr) - 2023
+© Thomas Brosset - [thoomasbro](https://github.com/thoomasbro) - [KADATA](https://kadata.fr) - 2025
 © Pierre Camilleri - [pierrecamilleri](https://github.com/pierrecamilleri) - [Multi](https://multi.coop) - 2023
 
 Ce logiciel est distribué sous la licence CeCILL v2.1, compatible avec le droit français. Vous pouvez utiliser, modifier et distribuer ce logiciel selon les termes de la licence CeCILL. Toute modification ou distribution de ce logiciel doit être soumise aux mêmes conditions. Pour plus de détails, veuillez consulter le texte complet de la licence CeCILL à l'adresse suivante : [http://www.cecill.info/licences/Licence_CeCILL_V2.1-fr.html](http://www.cecill.info/licences/Licence_CeCILL_V2.1-fr.html). English version: [https://spdx.org/licenses/CECILL-2.1.html#licenseText](https://spdx.org/licenses/CECILL-2.1.html#licenseText)
