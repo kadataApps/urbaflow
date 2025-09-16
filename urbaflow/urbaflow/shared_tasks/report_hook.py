@@ -1,8 +1,9 @@
 from shared_tasks.logging_config import get_logger
 
+logger = get_logger(__name__)
+
 
 def reporthook(blocknum, blocksize, totalsize):
-    logger = get_logger()
     readsofar = blocknum * blocksize
     if totalsize > 0:
         percent = readsofar * 1e2 / totalsize

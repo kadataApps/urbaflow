@@ -2,7 +2,7 @@
 from prefect import task
 import requests
 import zipfile
-from shared_tasks.logging_config import logger
+from shared_tasks.logging_config import get_logger
 
 
 @task
@@ -13,6 +13,7 @@ def extract_unite_legale():
     le fichier stock des unités légales (unités légales actives et cessées dans leur état courant au répertoire)
     https://files.data.gouv.fr/insee-sirene/StockUniteLegale_utf8.zip
     """
+    logger = get_logger(__name__)
     logger.info("Downloading and extracting unite legale file")
     url = "https://files.data.gouv.fr/insee-sirene/StockUniteLegale_utf8.zip"
     response = requests.get(url)

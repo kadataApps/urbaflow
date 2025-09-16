@@ -4,9 +4,11 @@ from prefect import task, flow
 import pandas as pd
 from sqlalchemy import DDL, text
 
-from shared_tasks.logging_config import logger
+from shared_tasks.logging_config import get_logger
 from shared_tasks.etl_gpd_utils import load
 from shared_tasks.db_engine import create_engine
+
+logger = get_logger(__name__)
 
 
 @task
@@ -141,7 +143,7 @@ def transform_locomvac_data():
         )
 
 
-@flow(name="Import Locomvac")
+@flow
 def import_locomvac_flow(dirname: Path):
     logger.info(f"Importing locomvac data from {dirname}")
     create_table_locomvac()

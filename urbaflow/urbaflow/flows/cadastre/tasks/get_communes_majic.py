@@ -1,7 +1,10 @@
 from shared_tasks.db_engine import create_engine
 from shared_tasks.db_sql_utils import read_query
-from shared_tasks.logging_config import logger
+from shared_tasks.logging_config import get_logger
 from shared_tasks.config import db_schema
+
+
+logger = get_logger(__name__)
 
 
 def get_imported_communes_from_postgres():

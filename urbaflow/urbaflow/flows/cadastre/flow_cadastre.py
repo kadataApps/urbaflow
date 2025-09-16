@@ -4,7 +4,7 @@ from typing import List
 
 from prefect import flow
 
-from shared_tasks.logging_config import logger
+from shared_tasks.logging_config import get_logger
 from shared_tasks.file_utils import copy_directory
 from shared_tasks.config import QUERIES_DIR, TEMP_DIR
 
@@ -32,6 +32,8 @@ from .tasks.move_data_to_public_schema import (
 )
 from .tasks.clean_after_imports import clean_temp_dir, clean_db
 
+
+logger = get_logger(__name__)
 
 STEPS_FLOW_CADASTRE = {
     "step1": {

@@ -1,6 +1,7 @@
 from typing import List
 import typer
 from pathlib import Path
+from dotenv import load_dotenv
 
 from flows.cadastre.flow_fantoir import import_fantoir_flow
 from flows.dvf.dvf import dvf_flow
@@ -10,7 +11,15 @@ from flows.cadastre.flow_cadastre import (
 )
 
 from flows.locomvac import import_locomvac
+from flows.lovac.import_lovac import import_lovac_flow
+from flows.lovac.import_lovac_fil import import_lovac_fil_flow
 
+from shared_tasks.logging_config import setup_logging
+
+# Load environment variables from .env file in the root directory
+load_dotenv(Path(__file__).parent.parent.parent / ".env")
+
+setup_logging()
 
 app = typer.Typer()
 
@@ -34,6 +43,24 @@ def dvf(
 
 
 @app.command()
+def fantoir(
+    dirname: Path = typer.Argument(
+        DEFAULT_DIRNAME,
+        exists=True,
+        file_okay=False,
+        dir_okay=True,
+        writable=True,
+        readable=True,
+        resolve_path=True,
+    ),
+):
+    """
+    DIRNAME : Chemin du répertoire contenant les fichiers FANTOIR
+    """
+    import_fantoir_flow._run(path=dirname)
+
+
+@app.command()
 def locomvac(
     dirname: Path = typer.Argument(
         DEFAULT_DIRNAME,
@@ -53,7 +80,7 @@ def locomvac(
 
 
 @app.command()
-def fantoir(
+def lovac(
     dirname: Path = typer.Argument(
         DEFAULT_DIRNAME,
         exists=True,
@@ -65,9 +92,45 @@ def fantoir(
     ),
 ):
     """
-    DIRNAME : Chemin du répertoire contenant les fichiers FANTOIR
+    DIRNAME : Chemin du répertoire contenant les fichiers csv LOVAC
     """
-    import_fantoir_flow._run(path=dirname)
+    typer.echo(f"Running Lovac flow in directory: {dirname}")
+    import_lovac_flow(dirname=dirname)
+
+
+@app.command()
+def lovac_fil(
+    dirname: Path = typer.Argument(
+        DEFAULT_DIRNAME,
+        exists=True,
+        file_okay=False,
+        dir_okay=True,
+        writable=True,
+        readable=True,
+        resolve_path=True,
+    ),
+    schema: str = typer.Option("public", help="Database schema name"),
+    table_name: str = typer.Option("lovac_fil", help="Database table name"),
+    recursive: bool = typer.Option(False, help="Search recursively in subdirectories"),
+    recreate: bool = typer.Option(True, help="Drop/recreate table if it exists"),
+):
+    """
+    DIRNAME : Chemin du répertoire contenant les fichiers lovac_fil.csv
+
+    Import des données LOVAC FIL (Locaux Vacants Commerciaux - données détaillées)
+    """
+    typer.echo(f"Running Lovac FIL flow in directory: {dirname}")
+    typer.echo(f"Target: {schema}.{table_name}")
+    typer.echo(f"Recursive search: {recursive}")
+    typer.echo(f"Recreate table: {recreate}")
+    result = import_lovac_fil_flow(
+        dirname=dirname,
+        schema=schema,
+        table_name=table_name,
+        recursive=recursive,
+        recreate=recreate,
+    )
+    typer.echo(f"Import completed successfully: {result}")
 
 
 @app.command()

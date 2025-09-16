@@ -20,7 +20,7 @@ def import_fantoir_flow(path: Path):
     Args:
         path (str): Path to the directory containing Fantoir files.
     """
-    logger = get_logger()
+    logger = get_logger(__name__)
     logger.info("Starting Fantoir import flow")
 
     fantoir_queries_dir = os.path.join(QUERIES_DIR, "fantoir")
