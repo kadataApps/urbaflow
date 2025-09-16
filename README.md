@@ -14,11 +14,16 @@ ETL de traitement des données liées à l'urbanisme :
 L'ETL est composé de scripts python et de fichiers SQL.
 Il a été testé pour les environnements linux et OSX.
 
+UrbaFlow vient avec quelques utilitaires pour faciliter la gestion des bases de données PostgreSQL/PostGIS, notamment `pgmove-table.sh` qui permet de déplacer simplement une table d'une base à une autre en gérant les dépendances (contraintes, index, séquences...) et la destination (nom du schéma et de la table).
+
 ## Prérequis
 
-- Git (installation sur windows: [https://gitforwindows.org/])
-  (git permet de cloner le projet, mais également de disposer facilement de la commande make sous windows, accessible depuis git bash)
-- Docker (installation sur windows: [https://docs.docker.com/desktop/install/windows-install/])
+- Docker : permet de lancer les scripts dans un environnement maitrisé avec les bonnes dépendances.
+  - (installation sur windows: [https://docs.docker.com/desktop/install/windows-install/])
+  - (installation sur mac: [https://docs.docker.com/desktop/install/mac-install/])
+  - (installation sur linux: [https://docs.docker.com/engine/install/])
+- (optionnel) Make (installation sur windows: [https://chocolatey.org/packages/make])
+
 
 ## Principe
 
