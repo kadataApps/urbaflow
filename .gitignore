@@ -19,3 +19,6 @@ bin
 urbaflow/temp/*
 urbaflow/temp/**
 urbaflow/temp
+
+# Prefect
+urbaflow/urbaflow/.prefect
