@@ -3,7 +3,6 @@ import re
 import pandas as pd
 import pathlib
 import shutil
-from distutils import dir_util
 
 from chardet import detect
 from prefect import get_run_logger
@@ -107,7 +106,7 @@ def copy_directory(source, target):
         os.makedirs(target, exist_ok=True)
 
         # Copy files from source to target
-        dir_util.copy_tree(source, target)
+        shutil.copytree(source, target, dirs_exist_ok=True)
 
         # Set proper permissions recursively
         for root, dirs, files in os.walk(target):

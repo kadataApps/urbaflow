@@ -100,7 +100,7 @@ STEPS_FLOW_CADASTRE = {
 }
 
 
-@flow(name="import cadastre et majic")
+@flow
 def import_cadastre_majic_flow(path: Path, enabled_steps: List[str]):
     """
     Execute the cadastre workflow based on the given steps.

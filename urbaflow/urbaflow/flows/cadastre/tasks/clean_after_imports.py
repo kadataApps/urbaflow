@@ -11,8 +11,15 @@ def clean_temp_dir():
 
 
 def clean_db():
+    """
+    Drop the temporary schema used for import
+    and all its content
+    If the schema is "public", do nothing
+    """
     schema = db_schema()
-
+    # Do not drop the public schema
+    if schema == "public":
+        return
     sql = "DROP SCHEMA %s CASCADE;" % schema
     e = create_engine()
     with e.begin() as conn:
