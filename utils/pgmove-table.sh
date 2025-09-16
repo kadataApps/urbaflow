@@ -44,8 +44,8 @@ log() { echo "[$(date +'%F %T')] $*"; }
 vlog() { if [[ "$VERBOSE" == "true" ]]; then echo "[$(date +'%F %T')] $*"; fi; }
 
 # ---- Parse args ----
-SRC_CONN=""; SRC_KIND=""
-DST_CONN=""; DST_KIND=""
+SRC_CONN=""
+DST_CONN=""
 SRC_TABLE=""
 SRC_SCHEMA=""
 DST_SCHEMA=""
@@ -88,8 +88,9 @@ conn_env() {
   fi
 }
 
-SRC_ENV=$(conn_env SRC "$SRC_CONN") || { echo "Connexion source invalide"; exit 1; }
-DST_ENV=$(conn_env DST "$DST_CONN") || { echo "Connexion cible invalide"; exit 1; }
+# Validation précoce des formats de connexion
+conn_env SRC "$SRC_CONN" >/dev/null || { echo "Connexion source invalide"; exit 1; }
+conn_env DST "$DST_CONN" >/dev/null || { echo "Connexion cible invalide"; exit 1; }
 
 # helper: run psql on source/dest
 psql_src() {
