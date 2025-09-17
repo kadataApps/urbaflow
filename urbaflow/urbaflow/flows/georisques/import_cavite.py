@@ -22,13 +22,14 @@ def create_table_cavite(
     e = create_engine()
     with e.begin() as conn:
         if recreate:
-            conn.execute(DDL(f"DROP TABLE IF EXISTS {schema}.{table_name}"))
+            q = conn.engine.dialect.identifier_preparer.quote
+            conn.execute(DDL(f"DROP TABLE IF EXISTS {q(schema)}.{q(table_name)}"))
             logger.info(f"Dropping table {schema}.{table_name} if it exists")
 
         conn.execute(
             DDL(
                 f"""
-                CREATE TABLE IF NOT EXISTS {schema}.{table_name} (
+                CREATE TABLE IF NOT EXISTS {q(schema)}.{q(table_name)} (
                     id text PRIMARY KEY,
                     num_cavite text,
                     indice_bss text,
@@ -192,14 +193,15 @@ def add_geometry_column_to_table(schema="public", table_name="risques_cavite"):
     """
     e = create_engine()
     with e.begin() as conn:
+        q = conn.engine.dialect.identifier_preparer.quote
         conn.execute(
             DDL(
                 f"""
-                ALTER TABLE {schema}.{table_name} 
-                    ADD COLUMN IF NOT EXISTS 
+                ALTER TABLE {q(schema)}.{q(table_name)}
+                    ADD COLUMN IF NOT EXISTS
                     geom geometry(POINT, 2154);
-                CREATE INDEX IF NOT EXISTS sidx_{table_name}_geom
-                    ON {schema}.{table_name} USING GIST (geom);
+                CREATE INDEX IF NOT EXISTS {q(f"sidx_{table_name}_geom")}
+                    ON {q(schema)}.{q(table_name)} USING GIST (geom);
                 """
             )
         )
@@ -211,10 +213,11 @@ def populate_geom(schema="public", table_name="risques_cavite"):
     """
     e = create_engine()
     with e.begin() as conn:
+        q = conn.engine.dialect.identifier_preparer.quote
         conn.execute(
             DDL(
                 f"""
-                UPDATE {schema}.{table_name}
+                UPDATE {q(schema)}.{q(table_name)}
                 SET geom = ST_Transform(
                     ST_SetSRID(ST_MakePoint(xouvl2e, youvl2e),
                     27572), 2154)
