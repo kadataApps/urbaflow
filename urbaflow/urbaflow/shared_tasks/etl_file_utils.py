@@ -4,8 +4,13 @@ import io
 import os
 import gzip
 
+from shared_tasks.config import TEMP_DIR
+from shared_tasks.logging_config import get_logger
 
-def download_and_unzip(url, extract_to_path="."):
+logger = get_logger(__name__)
+
+
+def download_and_unzip(url: str, extract_to_path: str = TEMP_DIR):
     """
     Download a zip file from a URL and unzip it to a specified directory.
 
@@ -18,9 +23,9 @@ def download_and_unzip(url, extract_to_path="."):
     if response.status_code == 200:
         with zipfile.ZipFile(io.BytesIO(response.content)) as zip_ref:
             zip_ref.extractall(extract_to_path)
-        print(f"Successfully extracted to {os.path.abspath(extract_to_path)}")
+        logger.info(f"Successfully extracted to {os.path.abspath(extract_to_path)}")
     else:
-        print(f"Failed to download the file. Status code: {response.status_code}")
+        logger.info(f"Failed to download the file. Status code: {response.status_code}")
 
 
 def unzip_file_in_place(archive_path):

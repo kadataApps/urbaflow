@@ -11,6 +11,7 @@ from flows.cadastre.flow_cadastre import (
 )
 
 from flows.georisques.import_cavite import import_risques_cavite_flow
+from flows.georisques.import_rga import import_rga_flow
 from flows.locomvac import import_locomvac
 from flows.lovac.import_lovac import import_lovac_flow
 from flows.lovac.import_lovac_fil import import_lovac_fil_flow
@@ -25,49 +26,6 @@ setup_logging()
 app = typer.Typer()
 
 DEFAULT_DIRNAME = Path("/data/")
-
-
-@app.command()
-def import_cavite(
-    dirname: Path = typer.Argument(
-        None,
-        exists=True,
-        file_okay=False,
-        dir_okay=True,
-        readable=True,
-        help="Directory path containing CSV files. Optional if --department is provided.",
-    ),
-    department: str = typer.Option(
-        None,
-        "-d",
-        "--department",
-        help="Department code (e.g., '75' for Paris). Required if dirname is not provided.",
-    ),
-    recreate: bool = typer.Option(True, help="Drop/recreate table if it exists"),
-    schema: str = typer.Option("public", help="Database schema name"),
-    table_name: str = typer.Option("risques_cavite", help="Database table name"),
-):
-    """
-    Import des données de risques de cavités.
-
-    DIRNAME : Chemin optionnel du répertoire contenant les fichiers CSV de cavités.
-    Si non fourni, l'option --department (-d) doit être spécifiée.
-    """
-    # Validate that at least one of dirname or department is provided
-    if dirname is None and department is None:
-        typer.echo(
-            "Error: Either provide a dirname argument or use --department (-d) option.",
-            err=True,
-        )
-        raise typer.Exit(1)
-
-    import_risques_cavite_flow(
-        path=dirname,
-        department=department,
-        recreate=recreate,
-        schema=schema,
-        table_name=table_name,
-    )
 
 
 @app.command()
@@ -207,6 +165,89 @@ def majic(
     steps_to_process = steps if steps else STEPS_FLOW_CADASTRE.keys()
 
     import_cadastre_majic_flow._run(path=dirname, enabled_steps=steps_to_process)
+
+
+@app.command()
+def risques_cavite(
+    dirname: Path = typer.Argument(
+        None,
+        exists=True,
+        file_okay=False,
+        dir_okay=True,
+        readable=True,
+        help="Directory path containing CSV files. Optional if --department is provided.",
+    ),
+    department: str = typer.Option(
+        None,
+        "-d",
+        "--department",
+        help="Department code (e.g., '75' for Paris). Required if dirname is not provided.",
+    ),
+    recreate: bool = typer.Option(True, help="Drop/recreate table if it exists"),
+    schema: str = typer.Option("public", help="Database schema name"),
+    table_name: str = typer.Option("risques_cavite", help="Database table name"),
+):
+    """
+    Import des données de risques de cavités.
+
+    DIRNAME : Chemin optionnel du répertoire contenant les fichiers CSV de cavités.
+    Si non fourni, l'option --department (-d) doit être spécifiée.
+    """
+    # Validate that at least one of dirname or department is provided
+    if dirname is None and department is None:
+        typer.echo(
+            "Error: Either provide a dirname argument or use --department (-d) option.",
+            err=True,
+        )
+        raise typer.Exit(1)
+
+    import_risques_cavite_flow(
+        path=dirname,
+        department=department,
+        recreate=recreate,
+        schema=schema,
+        table_name=table_name,
+    )
+
+
+@app.command()
+def risques_rga(
+    dirname: Path = typer.Argument(
+        None,
+        exists=True,
+        file_okay=False,
+        dir_okay=True,
+        readable=True,
+        help="Directory path containing RGA shapefiles. Optional if --departement is provided.",
+    ),
+    departement: str = typer.Option(
+        None,
+        "-d",
+        "--departement",
+        help="Department code (e.g., '75' for Paris). Required if dirname is not provided.",
+    ),
+    schema: str = typer.Option("public", help="Database schema name"),
+    recreate: bool = typer.Option(False, help="Drop/recreate table if it exists"),
+):
+    """
+    Import des données de risques de retrait-gonflement des argiles (RGA).
+
+    Si le répertoire n'est pas fourni, l'option --departement (-d) doit être spécifiée pour télécharger les données.
+    """
+    # Validate that at least one of dirname or departement is provided
+    if dirname is None and departement is None:
+        typer.echo(
+            "Error: Either provide a dirname argument or use --departement (-d) option.",
+            err=True,
+        )
+        raise typer.Exit(1)
+
+    import_rga_flow(
+        dirname=dirname,
+        department=departement,
+        schema=schema,
+        replace=recreate,
+    )
 
 
 if __name__ == "__main__":

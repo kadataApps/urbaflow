@@ -12,12 +12,14 @@ def import_shapefile(
     schema: str,
     destination_srs: str = "EPSG:2154",
     source_srs: str = "EPSG:4326",
+    replace: bool = False,
 ):
     params = db_config()
     # {'host': 'localhost', 'database': 'local_test', 'user': 'postgres', 'password': 'postgres', 'port': '5433'}
     params["table"] = table
     params["file"] = file
     params["schema"] = schema
+    method = "-overwrite" if replace else "-append -update"
 
     # command = ('ogr2ogr -f "PostgreSQL" '
     #     'PG:"host=%(host)s port=%(port)s user=%(user)s password=%(password)s dbname=%(database)s"'
@@ -32,7 +34,8 @@ def import_shapefile(
         f'PG:"host={params["host"]} port={params["port"]} user={params["user"]} dbname={params["database"]} " '
         f'"{params["file"]}" -nln {params["schema"]}.{params["table"]} '
         f'-lco GEOMETRY_NAME=geom '
-        f'-append -update -skipfailures -s_srs "{source_srs}" -t_srs "{destination_srs}" -nlt "PROMOTE_TO_MULTI"'
+        f'{method} '
+        f'-skipfailures -s_srs "{source_srs}" -t_srs "{destination_srs}" -nlt "PROMOTE_TO_MULTI"'
     )
 
     logger.info(command)
