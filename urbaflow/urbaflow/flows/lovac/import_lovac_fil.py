@@ -65,10 +65,6 @@ def extract_lovac_data(file: Path) -> pd.DataFrame:
 
     Returns:
         pd.DataFrame: Cleaned DataFrame with sanitized missing values
-
-    Example content:
-      annee|ff_millesime|dir|sip|cer_local_occ|invariant|ff_idlocal|ff_idbat|ff_idpar|ff_idsec|refcad|loc_num|loc_voie|libvoie|batloc|rnb_id|rnb_id_score|libcom|commune|ff_idcom|cog_2025|intercommunalite|ccodep|ban_result_score|ban_result_label|ban_result_postcode|ban_result_id|ban_latitude|ban_longitude|distance_ban_ff|ff_x|ff_y|ff_x_4326|ff_y_4326|nature|ff_ctpdl|ff_stoth|ff_slocal|ff_npiece_p2|ff_jannath|ff_dnbbai|ff_dnbdou|ff_dnbwc|ff_dcapec2|ff_ndroit|ff_dcntpa|vlcad|vl_revpro|ff_dvltrt|aff|anrefthlv|txtlv|potentiel_tlv_thlv|ff_ccthp|ffh_ccthp|debutvacance|cer_h1767|anmutation|ff_jdatat|ffh_jdatat|dvf_datemut|dvf_nblocmut|dvf_nblog|dvf_valeurfonc|dvf_idmutation|dvf_libnatmut|dvf_vefa|dvf_codtypbien|dvf_libtypbien|dvf_filtre|dvf_codtypprov|dvf_codtypproa|gestre_ppre|proprietaire|cer_propriétaire|cer_gestionnaire|adresse1|adresse2|adresse3|adresse4|groupe|ff_idprocpte|ff_idprodroit_1|ff_idpersonne_1|ff_jdatnss_1|ff_dldnss_1|ff_ddenom_1|ff_dsiren_1|ff_ccogrm_1|ff_catpro2txt_1|ff_catpro3_1|ff_ccodro_1|ff_locprop_1|cer_ff_adresse_1|ff_idprodroit_2|ff_idpersonne_2|ff_jdatnss_2|ff_dldnss_2|ff_ddenom_2|ff_dsiren_2|ff_ccogrm_2|ff_catpro2txt_2|ff_catpro3_2|ff_ccodro_2|ff_locprop_2|cer_ff_adresse_2|ff_idprodroit_3|ff_idpersonne_3|ff_jdatnss_3|ff_dldnss_3|ff_ddenom_3|ff_dsiren_3|ff_ccogrm_3|ff_catpro2txt_3|ff_catpro3_3|ff_ccodro_3|ff_locprop_3|cer_ff_adresse_3|ff_idprodroit_4|ff_idpersonne_4|ff_jdatnss_4|ff_ddenom_4|ff_dldnss_4|ff_dsiren_4|ff_ccogrm_4|ff_catpro2txt_4|ff_catpro3_4|ff_ccodro_4|ff_locprop_4|cer_ff_adresse_4|ff_idprodroit_5|ff_idpersonne_5|ff_jdatnss_5|ff_dldnss_5|ff_ddenom_5|ff_dsiren_5|ff_ccogrm_5|ff_catpro2txt_5|ff_catpro3_5|ff_ccodro_5|ff_locprop_5|cer_ff_adresse_5|ff_idprodroit_6|ff_idpersonne_6|ff_jdatnss_6|ff_dldnss_6|ff_ddenom_6|ff_dsiren_6|ff_ccogrm_6|ff_catpro2txt_6|ff_catpro3_6|ff_ccodro_6|ff_locprop_6|cer_ff_adresse_6
-      2025|2024|760|1080|1|I3770078924L|763770078924|763770000A0750A|763770000A0750|763770000A|A0750|1138|275|1138   RTE DE LA MUETTE|A010001001|Z8DGX3HA2WZ7|3|ISNEAUVILLE|377|76377|76377|U759|76||||||||565175.1396114496|6935840.272408655|1.13906341592369|49.50760332407065|MAISON||84|177|4|1966|1.0|0.0|1.0|5|2|5117|492|0|492|H|2022|||V|P-P-P-P-P-P-P-P-P-P-P-V-P-V-V|2022|O-V-V-O-V-V|2020-12-31|2020-12-31|1970-01-01,2009-01-12,2020-12-31|2019-09-16|1.0|1.0|130000.0|16287940.0|Vente|False|1113.0|UNE MAISON ANCIENNE|0.0|X1||M MEHAMMEDIA DJILALI||M MEHAMMEDIA DJILALI||280 RTE DE DIEPPE|||76250 DEVILLE LES ROUEN| |76377M00220|76377M0022001|76MCWJNF|1980-08-17|99 ALGERIE(GUELMA)|MEHAMMEDIA DJILALI|||PERSONNE PHYSIQUE|X1a|P|2|0280 RTE DE DIEPPE 76250 DEVILLE LES ROUEN|76377M0022002|76MCWJNH|1988-09-06|76 MONT-SAINT-AIGNAN|BEN AHMED SOUAD|||PERSONNE PHYSIQUE|X1a|P|2.0|0280 RTE DE DIEPPE 76250 DEVILLE LES ROUEN||||||||||||||||||||||||||||||||||||||||||||||||
     """
     try:
         logger.info(f"Reading LOVAC file: {file}")
@@ -242,8 +238,10 @@ def create_table_lovac_fil(
 
     e = create_engine()
     with e.begin() as conn:
+        q = conn.engine.dialect.identifier_preparer.quote
+
         if recreate:
-            conn.execute(text(f"DROP TABLE IF EXISTS {schema}.{table_name};"))
+            conn.execute(text(f"DROP TABLE IF EXISTS {q(schema)}.{q(table_name)};"))
             logger.info(f"Successfully dropped table {schema}.{table_name}")
 
         # create table (default behavior or when table doesn't exist)
@@ -251,7 +249,7 @@ def create_table_lovac_fil(
         conn.execute(
             DDL(
                 f"""
-                CREATE TABLE IF NOT EXISTS {schema}.{table_name} (
+                CREATE TABLE IF NOT EXISTS {q(schema)}.{q(table_name)} (
                     annee INTEGER,
                     ff_millesime INTEGER,
                     dir INTEGER,
@@ -457,21 +455,21 @@ def create_centroid_geometry(schema: str = "public", table_name: str = "lovac_fi
 
     e = create_engine()
     with e.begin() as conn:
+        q = conn.engine.dialect.identifier_preparer.quote
+
         # Add geometry column if it doesn't exist
         conn.execute(
-            text(
-                f"""
-            ALTER TABLE {schema}.{table_name}
+            text(f"""
+            ALTER TABLE {q(schema)}.{q(table_name)}
             ADD COLUMN IF NOT EXISTS geom_centroid GEOMETRY(POINT, 2154);
-            """
-            )
+        """)
         )
 
         # Update geometry column with POINT from ff_x_4326 and ff_y_4326
         conn.execute(
             text(
                 f"""
-            UPDATE {schema}.{table_name}
+            UPDATE {q(schema)}.{q(table_name)}
             SET geom_centroid = ST_SetSRID(ST_MakePoint(ff_x, ff_y), 2154)
             WHERE ff_x IS NOT NULL AND ff_y IS NOT NULL;
             """
@@ -482,8 +480,8 @@ def create_centroid_geometry(schema: str = "public", table_name: str = "lovac_fi
         conn.execute(
             text(
                 f"""
-            CREATE INDEX IF NOT EXISTS idx_{table_name}_geom_centroid
-            ON {schema}.{table_name} USING GIST (geom_centroid);
+            CREATE INDEX IF NOT EXISTS {q(f"idx_{table_name}_geom_centroid")}
+            ON {q(schema)}.{q(table_name)} USING GIST (geom_centroid);
             """
             )
         )
@@ -514,7 +512,8 @@ def create_lovac_fil_parcelle_table(
     e = create_engine()
     with e.begin() as conn:
         if recreate:
-            conn.execute(text(f"DROP TABLE IF EXISTS {schema}.{dst_table_name};"))
+            q = conn.engine.dialect.identifier_preparer.quote
+            conn.execute(text(f"DROP TABLE IF EXISTS {q(schema)}.{q(dst_table_name)};"))
             logger.info(f"Successfully dropped table {schema}.{dst_table_name}")
 
             # create table (default behavior or when table doesn't exist)
@@ -522,7 +521,7 @@ def create_lovac_fil_parcelle_table(
             conn.execute(
                 DDL(
                     f"""
-                    CREATE TABLE IF NOT EXISTS {schema}.{dst_table_name} AS 
+                    CREATE TABLE IF NOT EXISTS {q(schema)}.{q(dst_table_name)} AS 
                     SELECT a.ff_idpar,
                       ST_Multi(p.geom)::geometry(MultiPolygon,2154) AS geom,
                       a.nb_logt_vac,
@@ -534,10 +533,10 @@ def create_lovac_fil_parcelle_table(
                             COUNT(*)               AS nb_logt_vac,
                             MIN(l.debutvacance)    AS debut_vacance_min,
                             MAX(l.debutvacance)    AS debut_vacance_max
-                      FROM {schema}.{lovac_fil_table_name} AS l
+                      FROM {q(schema)}.{q(lovac_fil_table_name)} AS l
                       GROUP BY l.ff_idpar
                     ) AS a
-                    JOIN {schema}.{parcelle_table_name} AS p
+                    JOIN {q(schema)}.{q(parcelle_table_name)} AS p
                       ON p.idpar = a.ff_idpar
                     ;
                     """
@@ -547,8 +546,8 @@ def create_lovac_fil_parcelle_table(
             conn.execute(
                 text(
                     f"""
-                ALTER TABLE {schema}.{dst_table_name}
-                ADD CONSTRAINT pk_{dst_table_name} PRIMARY KEY (ff_idpar);
+                ALTER TABLE {q(schema)}.{q(dst_table_name)}
+                ADD CONSTRAINT {q(f"pk_{dst_table_name}")} PRIMARY KEY (ff_idpar);
                 """
                 )
             )
@@ -556,8 +555,8 @@ def create_lovac_fil_parcelle_table(
             conn.execute(
                 text(
                     f"""
-                CREATE INDEX IF NOT EXISTS idx_{dst_table_name}_geom
-                ON {schema}.{dst_table_name} USING GIST (geom);
+                CREATE INDEX IF NOT EXISTS {q(f"idx_{dst_table_name}_geom")}
+                ON {q(schema)}.{q(dst_table_name)} USING GIST (geom);
                 """
                 )
             )
@@ -568,7 +567,7 @@ def create_lovac_fil_parcelle_table(
             conn.execute(
                 text(
                     f"""
-                INSERT INTO {schema}.{dst_table_name}
+                INSERT INTO {q(schema)}.{q(dst_table_name)}
                   (ff_idpar, geom, nb_logt_vac, debut_vacance_min, debut_vacance_max, urbaflow_inserted_at)
                 SELECT a.ff_idpar,
                       ST_Multi(p.geom)::geometry(MultiPolygon,2154) AS geom,
@@ -581,10 +580,10 @@ def create_lovac_fil_parcelle_table(
                         COUNT(*)               AS nb_logt_vac,
                         MIN(l.debutvacance)    AS debut_vacance_min,
                         MAX(l.debutvacance)    AS debut_vacance_max
-                  FROM {schema}.{lovac_fil_table_name} AS l
+                  FROM {q(schema)}.{q(lovac_fil_table_name)} AS l
                   GROUP BY l.ff_idpar
                 ) AS a
-                JOIN {schema}.{parcelle_table_name} AS p
+                JOIN {q(schema)}.{q(parcelle_table_name)} AS p
                   ON p.idpar = a.ff_idpar
                 ON CONFLICT (ff_idpar) DO UPDATE
                 SET geom               = EXCLUDED.geom,
