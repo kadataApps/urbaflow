@@ -5,9 +5,10 @@ import pathlib
 import shutil
 
 from chardet import detect
-from prefect import get_run_logger
 
 from shared_tasks.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 
 def concat_files(files, sep=";"):
@@ -51,7 +52,6 @@ def encode_to_utf8(src_file):
 
     Replaces the file with a new file with the same name but encoded in utf-8
     """
-    logger = get_run_logger()
     logger.info("encode_to_utf8: " + src_file)
     trg_file = src_file + ".swp"
     from_codec = get_encoding_type(src_file)
@@ -98,7 +98,6 @@ def copy_directory(source, target):
     Copy files from source to target directory and set appropriate permissions.
     Creates target directory if it doesn't exist.
     """
-    logger = get_logger()
     logger.info(f"Copying ${source} to ${target}")
 
     try:

@@ -10,6 +10,7 @@ from flows.cadastre.flow_cadastre import (
     import_cadastre_majic_flow,
 )
 
+from flows.georisques.import_cavite import import_risques_cavite_flow
 from flows.locomvac import import_locomvac
 from flows.lovac.import_lovac import import_lovac_flow
 from flows.lovac.import_lovac_fil import import_lovac_fil_flow
@@ -24,6 +25,49 @@ setup_logging()
 app = typer.Typer()
 
 DEFAULT_DIRNAME = Path("/data/")
+
+
+@app.command()
+def import_cavite(
+    dirname: Path = typer.Argument(
+        None,
+        exists=True,
+        file_okay=False,
+        dir_okay=True,
+        readable=True,
+        help="Directory path containing CSV files. Optional if --department is provided.",
+    ),
+    department: str = typer.Option(
+        None,
+        "-d",
+        "--department",
+        help="Department code (e.g., '75' for Paris). Required if dirname is not provided.",
+    ),
+    recreate: bool = typer.Option(True, help="Drop/recreate table if it exists"),
+    schema: str = typer.Option("public", help="Database schema name"),
+    table_name: str = typer.Option("risques_cavite", help="Database table name"),
+):
+    """
+    Import des données de risques de cavités.
+
+    DIRNAME : Chemin optionnel du répertoire contenant les fichiers CSV de cavités.
+    Si non fourni, l'option --department (-d) doit être spécifiée.
+    """
+    # Validate that at least one of dirname or department is provided
+    if dirname is None and department is None:
+        typer.echo(
+            "Error: Either provide a dirname argument or use --department (-d) option.",
+            err=True,
+        )
+        raise typer.Exit(1)
+
+    import_risques_cavite_flow(
+        path=dirname,
+        department=department,
+        recreate=recreate,
+        schema=schema,
+        table_name=table_name,
+    )
 
 
 @app.command()

@@ -1,6 +1,9 @@
 import os
-from prefect import get_run_logger
 from shared_tasks.config import db_config, db_schema
+from shared_tasks.logging_config import get_logger
+
+
+logger = get_logger(__name__)
 
 
 def import_shapefile(
@@ -10,7 +13,6 @@ def import_shapefile(
     destination_srs: str = "EPSG:2154",
     source_srs: str = "EPSG:4326",
 ):
-    logger = get_run_logger()
     params = db_config()
     # {'host': 'localhost', 'database': 'local_test', 'user': 'postgres', 'password': 'postgres', 'port': '5433'}
     params["table"] = table
@@ -41,7 +43,6 @@ def import_shapefile(
 
 
 def import_geojson(file: str, table: str):
-    logger = get_run_logger()
     params = db_config()
     schema = db_schema()
 

@@ -1,24 +1,30 @@
 # %%
+import logging
 import os
 from pathlib import Path
 import pandas as pd
-from prefect import flow, get_run_logger, task
 from sqlalchemy import DDL
 
 from shared_tasks.etl_gpd_utils import load
 from shared_tasks.db_engine import create_engine
 from shared_tasks.file_utils import encode_to_utf8, list_files_at_path
 
-# %%
+
+logger = logging.getLogger(__name__)
 
 
-@task
-def create_table_cavite(schema="public", table_name="risques_cavite"):
+def create_table_cavite(
+    schema: str = "public", table_name: str = "risques_cavite", recreate: bool = True
+):
     """
     Create the table in the database
     """
     e = create_engine()
     with e.begin() as conn:
+        if recreate:
+            conn.execute(DDL(f"DROP TABLE IF EXISTS {schema}.{table_name}"))
+            logger.info(f"Dropping table {schema}.{table_name} if it exists")
+
         conn.execute(
             DDL(
                 f"""
@@ -65,15 +71,14 @@ def create_table_cavite(schema="public", table_name="risques_cavite"):
                 """
             )
         )
+        logger.info(f"Created table {schema}.{table_name} if it did not exist")
 
 
-@task
 def load_cavite(file, schema="public", table_name="risques_cavite"):
     """
     Import des données de mouvements de terrain à partir d'un fichier CSV.
     Les données sont importées par défaut dans la table "risques_cavite" du schéma "public".
     """
-    logger = get_run_logger()
     logger.info("Importing file: " + file)
 
     cavite_df = pd.read_csv(file, sep=";", encoding="UTF-8", low_memory=False)
@@ -171,13 +176,16 @@ def load_cavite(file, schema="public", table_name="risques_cavite"):
             cavite_df,
             connection=conn,
             table_name=table_name,
-            how="replace",
+            how="append",
             schema=schema,
             logger=logger,
         )
 
+    logger.info(f"Import terminé pour le fichier : {file}")
+    row_count = len(cavite_df)
+    logger.info(f"Nombre de lignes importées : {row_count}")
 
-@task
+
 def add_geometry_column_to_table(schema="public", table_name="risques_cavite"):
     """
     Add geometry column and index
@@ -197,7 +205,6 @@ def add_geometry_column_to_table(schema="public", table_name="risques_cavite"):
         )
 
 
-@task
 def populate_geom(schema="public", table_name="risques_cavite"):
     """
     Populate the geom column with the latitude and longitude columns
@@ -220,9 +227,7 @@ def populate_geom(schema="public", table_name="risques_cavite"):
         )
 
 
-@task
 def import_cavite_files(path: Path):
-    logger = get_run_logger()
     files = list_files_at_path(path, r"^cavite.*", extension=".csv")
     logger.info(f"Found {len(files)} files to import")
     for file in files:
@@ -232,11 +237,48 @@ def import_cavite_files(path: Path):
         load_cavite(complete_file_path)
 
 
-@flow(name="import risques cavité")
-def import_risques_cavite_flow(path: Path):
-    logger = get_run_logger()
-    create_table_cavite()
-    add_geometry_column_to_table()
-    logger.info(f"Importing files from {path}")
-    import_cavite_files(path)
-    populate_geom()
+def import_risques_cavite_flow(
+    path: Path,
+    department: str,
+    schema="public",
+    table_name="risques_cavite",
+    recreate: bool = True,
+):
+    """
+    Flow to import cavite data from georisques.gouv.fr for a given department.
+
+    Parameters
+    ----------
+    path : Path
+        Path to the directory where the cavite files will be stored. If provided,
+        no download will be performed. department parameter will be ignored.
+    department : str
+        Department code (e.g., "76" for Seine-Maritime).
+    schema : str, optional
+        Database schema name, by default "public".
+    table_name : str, optional
+        Database table name, by default "risques_cavite".
+    recreate : bool, optional
+        Whether to drop and recreate the table if it exists, by default True.
+    """
+
+    if path is None and department is None:
+        logger.error("Either path or department must be provided")
+        return
+
+    create_table_cavite(schema=schema, table_name=table_name, recreate=recreate)
+    add_geometry_column_to_table(schema=schema, table_name=table_name)
+
+    if path is None:
+        logger.info(f"Downloading cavite data for department {department}")
+        source = f"https://georisques.gouv.fr/webappReport/ws/cavites/departements/{department}/fichecommunes.csv"
+        load_cavite(source, schema=schema, table_name=table_name)
+
+    else:
+        if not path.exists():
+            logger.info(f"Path {path} does not exist.")
+            return
+        logger.info(f"Using existing files in {path}")
+        import_cavite_files(path)
+
+    populate_geom(schema=schema, table_name=table_name)
