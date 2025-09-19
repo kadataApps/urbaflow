@@ -14,9 +14,7 @@ def flow_create_unites_foncieres():
     """
 
     logger.info("Execution des scripts de création des unités foncières")
-    script_path = (
-        QUERIES_DIR / "majic/traitements/unites_foncieres/unites_foncieres.sql"
-    )
+    script_path = QUERIES_DIR / "core/dim_unites_foncieres.sql"
 
     e = create_engine()
     with e.begin() as conn:
