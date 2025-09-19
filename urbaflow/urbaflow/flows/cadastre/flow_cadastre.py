@@ -8,12 +8,8 @@ from shared_tasks.logging_config import get_logger
 from shared_tasks.file_utils import copy_directory
 from shared_tasks.config import QUERIES_DIR, TEMP_DIR
 
-from .tasks.import_majic import import_majic_files
-from .tasks.format_majic import (
-    clean_with_drop_db_for_majic_import,
-    init_db_for_majic_import,
-    execute_format_majic_scripts,
-)
+from .tasks.clean_after_imports import clean_temp_dir, clean_db
+from .tasks.create_unites_foncieres import flow_create_unites_foncieres
 from .tasks.download_cadastre import (
     download_cadastre_for_communes,
     download_bati_for_communes,
@@ -23,6 +19,12 @@ from .tasks.format_cadastre import (
     execute_format_cadastre,
     execute_init_bati,
 )
+from .tasks.format_majic import (
+    clean_with_drop_db_for_majic_import,
+    init_db_for_majic_import,
+    execute_format_majic_scripts,
+)
+from .tasks.import_majic import import_majic_files
 from .tasks.merge_majic_cadastre import execute_merge_cadastre_majic_scripts
 from .tasks.move_data_to_public_schema import (
     flow_import_bati,
@@ -30,7 +32,6 @@ from .tasks.move_data_to_public_schema import (
     flow_import_proprietaire,
     flow_import_local,
 )
-from .tasks.clean_after_imports import clean_temp_dir, clean_db
 
 
 logger = get_logger(__name__)
@@ -80,21 +81,26 @@ STEPS_FLOW_CADASTRE = {
         "tasks": [execute_merge_cadastre_majic_scripts],
     },
     "step8": {
+        "description": "Création des unités foncières",
+        "default": True,
+        "tasks": [flow_create_unites_foncieres],
+    },
+    "step9": {
         "description": "Export parcel, owner, and local data to the public schema",
         "default": True,
         "tasks": [flow_import_parcelles, flow_import_proprietaire, flow_import_local],
     },
-    "step9": {
+    "step10": {
         "description": "Download and import building geometries",
         "default": True,
         "tasks": [execute_init_bati, download_bati_for_communes],
     },
-    "step10": {
+    "step11": {
         "description": "Export building data to the public schema",
         "default": True,
         "tasks": [flow_import_bati],
     },
-    "step11": {
+    "step12": {
         "description": "Clean up temporary files and database tables",
         "default": True,
         "tasks": [clean_temp_dir, clean_db],
