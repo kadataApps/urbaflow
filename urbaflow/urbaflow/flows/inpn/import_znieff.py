@@ -1,10 +1,8 @@
-# %%
-
-from pathlib import Path
-from prefect import flow, get_run_logger, task
+from prefect import flow, task
 from shared_tasks.etl_file_utils import download_and_unzip
 from shared_tasks.etl_ogr_utils import import_shapefile
 from shared_tasks.file_utils import list_files_at_path
+from shared_tasks.logging_config import get_logger
 
 
 # ZNIEFF continentales de métropole
@@ -29,7 +27,7 @@ def download_znieff(url, path, znieff_type):
 def import_znieff_shape(file, schema="public", table=None):
     if table is None:
         raise ValueError("Table name must be provided")
-    logger = get_run_logger()
+    logger = get_logger()
     logger.info(f"Importing file: {file}")
     import_shapefile(
         file=file,
@@ -40,9 +38,9 @@ def import_znieff_shape(file, schema="public", table=None):
     )
 
 
-@flow(name="import INPN Znieff 1 et 2")
+@flow
 def import_znieff_flow(path, schema="public"):
-    logger = get_run_logger()
+    logger = get_logger()
     logger.info(f"Downloading ZNIEFF 1. Url: {url_znieff1}")
     file = download_znieff(url_znieff1, path, "1")
     import_znieff_shape(file, schema, "inpn_znieff1")
@@ -50,8 +48,3 @@ def import_znieff_flow(path, schema="public"):
     logger.info(f"Downloading ZNIEFF 2. Url: {url_znieff2}")
     file = download_znieff(url_znieff2, path, "2")
     import_znieff_shape(file, schema, "inpn_znieff2")
-
-
-# %%
-import_znieff_flow._run(path=Path("/Users/thomasbrosset/Downloads/mvt"))
-# %%

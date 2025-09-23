@@ -1,15 +1,13 @@
-# %%
 import os
 from pathlib import Path
 import pandas as pd
-from prefect import flow, get_run_logger, task
+from prefect import flow, task
 from sqlalchemy import DDL
 
 from shared_tasks.etl_gpd_utils import load
 from shared_tasks.db_engine import create_engine
 from shared_tasks.file_utils import encode_to_utf8, list_files_at_path
-
-# %%
+from shared_tasks.logging_config import get_logger
 
 
 @task
@@ -54,7 +52,7 @@ def load_mvt(file, schema="public", table_name="risques_mvt"):
     Import des données de mouvements de terrain à partir d'un fichier CSV.
     Les données sont importées par défaut dans la table "risques_mvt" du schéma "public".
     """
-    logger = get_run_logger()
+    logger = get_logger()
     logger.info("Importing file: " + file)
 
     mvt_df = pd.read_csv(file, sep=";", encoding="UTF-8", low_memory=False)
@@ -160,7 +158,7 @@ def populate_geom(schema="public", table_name="risques_mvt"):
 
 @task
 def import_mvt_files(path: Path):
-    logger = get_run_logger()
+    logger = get_logger()
     files = list_files_at_path(path, r"^mvt.*", extension=".csv")
     logger.info(f"Found {len(files)} files to import")
     for file in files:
@@ -170,9 +168,9 @@ def import_mvt_files(path: Path):
         load_mvt(complete_file_path)
 
 
-@flow(name="import risques mvt")
+@flow
 def import_risques_mvt_flow(path: Path):
-    logger = get_run_logger()
+    logger = get_logger()
     create_table_mvt()
     add_geometry_column_to_table()
     logger.info(f"Importing files from {path}")

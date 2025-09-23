@@ -1,10 +1,9 @@
-# %%
 from pathlib import Path
 from prefect import task, flow
 import pandas as pd
 from sqlalchemy import DDL, text
 
-from shared_tasks.logging_config import logger
+from shared_tasks.logging_config import get_logger
 from shared_tasks.etl_gpd_utils import load
 from shared_tasks.db_engine import create_engine
 
@@ -32,6 +31,7 @@ def extract_lovac_data(file: Path) -> pd.DataFrame:
     """
     Extract the data from the file
     """
+    logger = get_logger()
     colmun_dtypes_spec = {
         "SIRET DESTINATAIRE": "str",
         "CODE EPCI": "str",
@@ -98,6 +98,7 @@ def load_lovac_data(data: pd.DataFrame):
     """
     Load the data into the database
     """
+    logger = get_logger()
     e = create_engine()
     with e.begin() as conn:
         load(
@@ -115,6 +116,7 @@ def transform_lovac_data():
     """
     Add geometry to lovac table
     """
+    logger = get_logger()
     e = create_engine()
     with e.begin() as conn:
         conn.execute(
@@ -179,8 +181,12 @@ def create_extract_lovac_table():
         )
 
 
-@flow(name="Import Lovac")
+@flow
 def import_lovac_flow(dirname: Path):
+    """
+    Import des données LOVAC
+    """
+    logger = get_logger()
     logger.info(f"Importing lovac data from {dirname}")
     create_table_lovac()
     files = find_lovac_files(dirname)

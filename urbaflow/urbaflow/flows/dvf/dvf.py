@@ -23,7 +23,7 @@ def download_dvf_by_dep_year(departement: str, year: int, tagert_dir: Path):
         year : année sur 4 caractères
         tagert_dir : Path
     """
-    logger = get_logger()
+    logger = get_logger(__name__)
     DVF_BASE_URL = "https://files.data.gouv.fr/geo-dvf/latest/csv/"
     url = f"{DVF_BASE_URL}{year}/departements/{departement}.csv.gz"
 
@@ -45,7 +45,7 @@ def download_dvf_by_dep(dep: str, tagert_dir: Path):
         download_dvf_by_dep_year.submit(dep, year, tagert_dir)
 
 
-@flow(name="import DVF", task_runner=ConcurrentTaskRunner())
+@flow(task_runner=ConcurrentTaskRunner())
 def dvf_flow(departments: str, tagert_dir: Path):
     departments_list = departments.split(",")
     for dep in departments_list:

@@ -15,7 +15,6 @@ from urbaflow.shared_tasks.logging_config import get_logger
 # URL stable département 92
 # https://www.data.gouv.fr/fr/datasets/r/bb1de0fc-9db4-43c7-8308-e23a6459470d
 
-# %%
 RNB_URL = "https://www.data.gouv.fr/fr/datasets/r/bb1de0fc-9db4-43c7-8308-e23a6459470d"
 
 
@@ -121,7 +120,7 @@ def cleanup_chunk_files(chunk_files: list[str]):
         os.remove(cf)
 
 
-@flow(name="Inport RNB")
+@flow
 def import_rnb_flow():
     LINES_PER_CHUNK = 100000
     download_path = TEMP_DIR / "rnb"
