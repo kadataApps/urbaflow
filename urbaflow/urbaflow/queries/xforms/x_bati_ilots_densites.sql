@@ -74,6 +74,7 @@ WITH inter AS (
         i.code_insee,
         i.cid,
         z.libelle,
+        z.typezone,
         i.geom AS geom_ilot,
         z.geom AS geom_zone,
         ST_CollectionExtract(ST_Intersection(i.geom, z.geom), 3) AS geom_inter
@@ -86,6 +87,7 @@ SELECT
     code_insee,
     cid,
     libelle,
+    typezone,
     ST_Multi(geom_inter)::GEOMETRY (MULTIPOLYGON, 2154) AS geom,
     ST_Area(geom_inter) AS area_m2,
     ST_Area(geom_ilot) AS ilot_area_m2,
