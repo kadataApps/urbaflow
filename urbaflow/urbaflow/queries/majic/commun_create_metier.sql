@@ -1409,7 +1409,6 @@ COMMENT ON COLUMN lotslocaux.invloc IS 'Local - Numéro invariant du local - ';
 COMMENT ON COLUMN lotslocaux.dnumql IS 'Local - Numérateur du lot - ';
 COMMENT ON COLUMN lotslocaux.ddenql IS 'Local - Dénominateur du lot - ';
 
--- COMMENT ON TABLE commune IS 'Commune (Fantoir)';
 -- COMMENT ON COLUMN commune.ccodep IS 'Code département - Code département INSEE';
 -- COMMENT ON COLUMN commune.ccodir IS 'Code direction - Code direction dge';
 -- COMMENT ON COLUMN commune.ccocom IS 'Code commune - code commune définie par Majic2';
@@ -1436,7 +1435,6 @@ COMMENT ON COLUMN commune_majic.ccodir IS 'Code direction - Code direction dge';
 COMMENT ON COLUMN commune_majic.ccocom IS 'Code commune - 3 caractères';
 COMMENT ON COLUMN commune_majic.libcom IS 'Libellé de la commune';
 
--- COMMENT ON TABLE voie IS 'Voie (Fantoir)';
 -- COMMENT ON COLUMN voie.ccodep IS 'Code département - Code département INSEE';
 -- COMMENT ON COLUMN voie.ccodir IS 'Code direction - Code direction dge';
 -- COMMENT ON COLUMN voie.ccocom IS 'Code commune - code commune définie par Majic2';

@@ -4,7 +4,7 @@ ETL de traitement des données liées à l'urbanisme :
 
 - MAJIC
 - DVF (données Valeurs Foncières)
-- Fantoir
+- DGFiP TOPO
 - FFPM (Fichiers Fonciers Personnes Morales)
 - Cadastre
 - Bati
@@ -160,10 +160,10 @@ Pour n'exécuter que certaines étapes MAJIC, ajouter leurs identifiants à la c
 docker compose run --rm urbaflow python urbaflow/main.py majic /data/ step1 step2
 ```
 
-Pour initialiser les tables [FANTOIR][fantoir], nécessaires au traitement MAJIC :
+Pour importer les entités topographiques DGFiP, nécessaires au traitement MAJIC, placer le fichier `topo-fichier-des-entites-topographiques.csv` dans le répertoire défini par `PATH_TO_DATA`, puis exécuter :
 
 ```shell
-docker compose run --rm urbaflow python urbaflow/main.py fantoir /data/
+docker compose run --rm urbaflow python urbaflow/main.py dgfip-topo /data/
 ```
 
 Pour ouvrir un shell de diagnostic dans l'image :
@@ -171,8 +171,6 @@ Pour ouvrir un shell de diagnostic dans l'image :
 ```shell
 make urbaflow
 ```
-
-[fantoir]: https://www.data.gouv.fr/fr/datasets/fichier-fantoir-des-voies-et-lieux-dits/
 
 ## Description des étapes de processing des données MAJIC
 

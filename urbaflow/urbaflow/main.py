@@ -3,7 +3,7 @@ import typer
 from pathlib import Path
 from dotenv import load_dotenv
 
-from flows.cadastre.flow_fantoir import import_fantoir_flow
+from flows.cadastre.flow_dgfip_topo import import_dgfip_topo_flow
 from flows.dvf.dvf import dvf_flow
 from flows.cadastre.flow_cadastre import (
     STEPS_FLOW_CADASTRE,
@@ -44,8 +44,8 @@ def dvf(
     dvf_flow._run(departements, dirname)
 
 
-@app.command()
-def fantoir(
+@app.command(name="dgfip-topo")
+def dgfip_topo(
     dirname: Path = typer.Argument(
         DEFAULT_DIRNAME,
         exists=True,
@@ -57,9 +57,9 @@ def fantoir(
     ),
 ):
     """
-    DIRNAME : Chemin du répertoire contenant les fichiers FANTOIR
+    DIRNAME : Chemin du répertoire contenant le fichier des entités topographiques DGFiP
     """
-    import_fantoir_flow._run(path=dirname)
+    import_dgfip_topo_flow(path=dirname)
 
 
 @app.command()

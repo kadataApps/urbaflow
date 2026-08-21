@@ -28,7 +28,6 @@ def majic_config():
         "bati": "BATI",
         "nbati": "NBAT",
         "pdll": "PDLL",
-        "fantoir": "FAN",
         "lotlocal": "LLOC",
         "prop": "PROP",
         "max_insert_rows": "50000",

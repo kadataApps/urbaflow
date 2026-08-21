@@ -27,27 +27,21 @@ def get_majic_source_filenames(config):
             "required": True,
         },
         {
-            "key": "[FICHIER_FANTOIR]",
-            "value": config["fantoir"],
-            "table": "fanr",
-            "required": True,
-        },
-        {
             "key": "[FICHIER_LOTLOCAL]",
             "value": config["lotlocal"],
-            "table": "lloc",
+            "table": "lot_local",
             "required": False,
         },
         {
             "key": "[FICHIER_NBATI]",
             "value": config["nbati"],
-            "table": "nbat",
+            "table": "non_bati",
             "required": True,
         },
         {
             "key": "[FICHIER_PDL]",
             "value": config["pdll"],
-            "table": "pdll",
+            "table": "pdl_lots",
             "required": False,
         },
         {
@@ -99,9 +93,6 @@ def import_majic_files(majic_source_dir: Path):
                     maj_list.append(fpath)
 
                     # Store depdir for this file
-                    # avoid fantoir, as now it is given for the whole country
-                    if table == "fanr":
-                        continue
                     # Get depdir : first line with content
                     with open(fpath) as fin:
                         for a in fin:

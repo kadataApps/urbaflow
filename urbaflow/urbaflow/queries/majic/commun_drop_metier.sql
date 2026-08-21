@@ -20,9 +20,6 @@ DROP TABLE IF EXISTS parcellecomposante;
 DROP TABLE IF EXISTS lots;
 DROP TABLE IF EXISTS lotslocaux;
 DROP TABLE IF EXISTS commune_majic;
--- Tables créées par fantoir
--- DROP TABLE IF EXISTS commune;
--- DROP TABLE IF EXISTS voie;
 DROP TABLE IF EXISTS gpdl;
 DROP TABLE IF EXISTS gnexps;
 DROP TABLE IF EXISTS cgrnum;
