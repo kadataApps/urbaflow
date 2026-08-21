@@ -15,7 +15,7 @@ urbaflow: ## Run bash environment with available python dependencies for data ur
 .PHONY: install build-urbaflow dev update-python-dependencies
 
 install: ## install python dependencies and dev dependencies for urbaflow
-	cd ./urbaflow && poetry install
+	cd ./urbaflow && uv sync
 	
 build-urbaflow:
 	docker compose build urbaflow
@@ -24,11 +24,11 @@ dev: ## mount the urbaflow folder and run bash environment with available python
 	docker compose run --rm urbaflow /bin/bash
 
 lint:
-	cd ./urbaflow && poetry run ruff check
-	cd ./urbaflow && poetry run ruff format
+	cd ./urbaflow && uv run ruff check
+	cd ./urbaflow && uv run ruff format
 
 update-python-dependencies:
-	cd ./urbaflow && poetry export --without-hashes -o requirements.txt
+	cd ./urbaflow && uv lock --upgrade
 
 .PHONY: help 
 help:

@@ -164,7 +164,7 @@ def majic(
 
     steps_to_process = steps if steps else STEPS_FLOW_CADASTRE.keys()
 
-    import_cadastre_majic_flow._run(path=dirname, enabled_steps=steps_to_process)
+    import_cadastre_majic_flow(path=dirname, enabled_steps=steps_to_process)
 
 
 @app.command()

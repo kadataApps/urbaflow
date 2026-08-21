@@ -1,7 +1,10 @@
 FROM ghcr.io/osgeo/gdal:ubuntu-small-3.7.1
 
+COPY --from=ghcr.io/astral-sh/uv:0.11.11 /uv /uvx /bin/
+
 ENV VIRTUAL_ENV=/opt/venv
 ENV USER="urbaflow-user"
+ENV UV_PROJECT_ENVIRONMENT=$VIRTUAL_ENV
 
 # Create non root user
 RUN useradd -m -r ${USER} && \
@@ -27,19 +30,14 @@ ENV TZ=UTC
 
 # Create and "activate" venv by prepending it to PATH then install python dependencies
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
-RUN python3 -m venv "$VIRTUAL_ENV" && \
-    pip install -U \
-    pip \
-    setuptools \
-    wheel
 
-COPY urbaflow/requirements.txt /tmp/requirements.txt
-RUN pip install -r /tmp/requirements.txt
+COPY urbaflow/pyproject.toml urbaflow/uv.lock ./urbaflow/
+RUN cd urbaflow && uv sync --locked --no-dev --no-install-project
 
 
 # Add source
 COPY urbaflow/ ./urbaflow
-RUN pip3 install -e ./urbaflow
+RUN cd urbaflow && uv sync --locked --no-dev
 
 # Make library importable
 ENV PYTHONPATH=/home/${USER}/urbaflow

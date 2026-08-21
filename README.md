@@ -24,12 +24,21 @@ UrbaFlow vient avec quelques utilitaires pour faciliter la gestion des bases de 
   - (installation sur linux: [https://docs.docker.com/engine/install/])
 - (optionnel) Make (installation sur windows: [https://chocolatey.org/packages/make])
 
+Pour le développement local, installer [uv](https://docs.astral.sh/uv/).
+
+```shell
+cd urbaflow
+uv sync
+```
+
+Les commandes locales s'exécutent avec `uv run`, par exemple `uv run ruff check`.
+
 
 ## Principe
 
 Les fichiers SQL sont copiés, puis certaines parties de ces fichiers sont remplacées/réécrites (changement de "variables", notamment les dates, schémas...) avant d'être exécutées.
 
-L'ETL a été dockerisé afin de pouvoir se lancer quelque soit l'environnement en maitrisant les dépendances installées, notamment GDAL (utilisation de l'image de base `osgeo/gdal:ubuntu-small-3.2.1`).
+L'ETL est exécuté dans une image Docker afin d'utiliser un environnement maîtrisé, incluant notamment GEOS et GDAL. Les dépendances Python sont installées dans l'image avec `uv` à partir de `urbaflow/pyproject.toml` et `urbaflow/uv.lock`.
 
 Les scripts sont lancés via une ligne de commande depuis un container docker.
 
@@ -117,40 +126,51 @@ Typologie retenue:
 - Public (regroupant l’ensemble des acteurs publics, pas de nécessité de les distinguer)
 - Parapublics (regroupant organismes HLM, SNCF, SEM etc.)
 
-## Processing
+## Exécuter l'ETL avec Docker
 
-Les étapes suivantes permettent de lancer le processus avec un containeur docker.
+Les commandes d'import sont exécutées dans le conteneur `urbaflow`. Les données définies par `PATH_TO_DATA` sont disponibles dans le conteneur sous `/data`.
 
-1. Créer à la racine du projet le fichier `.env` à partir de `.env.example` et modifier les variables d'environnement suivantes:
+1. Créer le fichier `.env` à la racine du projet à partir de `.env.example`, puis renseigner les variables suivantes :
     - le chemin des fichiers majic à charger avec la variable `PATH_TO_DATA`. Le
-      chemin sera monté dans le container sur `/data/`.
+      chemin sera monté dans le conteneur sur `/data/`.
     - Configuration de la base de données :
       - Si besoin d'une base postgis à la volée, lancer la base PostGIS avec Docker `make start-postgis` (cette base est
-      exposée à l'adresse ip publique du containeur sur le port 5432).
+      exposée sur le port 5432).
       - si la base de données est lancée avec docker-compose, conserver `POSTGRES_HOST=postgis`
       - si la base de données n'est pas lancée avec le même docker compose, utiliser `POSTGRES_HOST=host.docker.internal` pour rediriger vers le host de l'hôte (la machine qui exécute le container)
       - Configurer également : `POSTGRES_USER`, `POSTGRES_PASS`, `POSTGRES_DB`, `POSTGRES_PORT` (les mêmes variables sont utilisées pour le lancement de la base de données avec docker-compose et pour le lancement de l'image de processing)
-      - Configurer également : `POSTGRES_SCHEMA` (schéma de la base de données dans lequel les données seront importées)
-2. Lancer l'image de processing via la commande `make urbaflow`
+      - Configurer également : `IMPORT_SCHEMA` (schéma de la base de données dans lequel les données seront importées)
+2. Construire l'image :
 
-   Cela permet d'accéder à un environnement bash dans lequel les libs pythons
-   sont installées et les scripts python d'import des données peuvent être
-   lancés.
-
-3. Lancer les commandes d'import et de traitement des données
-  
-- Lancer le traitement des données MAJIC avec :
-
-```python
-python main.py majic /data/
+```shell
+make build-urbaflow
 ```
-  
-- Initialiser les tables [FANTOIR][fantoir] (nécessaire pour le traitement
-    des données MAJIC) avec :
 
- ```python
- python src/main.py fantoir
- ```
+3. Lancer le traitement MAJIC complet :
+
+```shell
+docker compose run --rm urbaflow python urbaflow/main.py majic /data/
+```
+
+Cette commande exécute le CLI dans l'image contenant les bibliothèques géospatiales et supprime le conteneur à la fin de l'import.
+
+Pour n'exécuter que certaines étapes MAJIC, ajouter leurs identifiants à la commande :
+
+```shell
+docker compose run --rm urbaflow python urbaflow/main.py majic /data/ step1 step2
+```
+
+Pour initialiser les tables [FANTOIR][fantoir], nécessaires au traitement MAJIC :
+
+```shell
+docker compose run --rm urbaflow python urbaflow/main.py fantoir /data/
+```
+
+Pour ouvrir un shell de diagnostic dans l'image :
+
+```shell
+make urbaflow
+```
 
 [fantoir]: https://www.data.gouv.fr/fr/datasets/fichier-fantoir-des-voies-et-lieux-dits/
 
@@ -185,7 +205,7 @@ Exemple d'utilisation:
 - import seulement des données brutes dans postgresql:
 
 ```shell
-python urbaflow/main.py majic /data/ step1 step2
+docker compose run --rm urbaflow python urbaflow/main.py majic /data/ step1 step2
 ```
 
 ## Licence
