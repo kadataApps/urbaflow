@@ -36,15 +36,14 @@ RUN cd urbaflow && uv sync --locked --no-dev --no-install-project
 
 
 # Add source
-COPY urbaflow/ ./urbaflow
+COPY --chown=${USER}:${USER} urbaflow/ ./urbaflow
 RUN cd urbaflow && uv sync --locked --no-dev
 
 # Make library importable
 ENV PYTHONPATH=/home/${USER}/urbaflow
 
-RUN mkdir /home/${USER}/.prefect/ \
-   && mkdir /home/${USER}/logs \
-   && chown -R ${USER} .
+RUN mkdir -p /home/${USER}/.prefect /home/${USER}/logs /home/${USER}/urbaflow/temp \
+    && chown ${USER}:${USER} /home/${USER}/.prefect /home/${USER}/logs /home/${USER}/urbaflow/temp
 
 USER ${USER}
 WORKDIR /home/${USER}/urbaflow
