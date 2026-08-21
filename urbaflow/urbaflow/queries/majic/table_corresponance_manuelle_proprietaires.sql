@@ -144,3 +144,4 @@ INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('MINISTER
 INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('BPIFRANCE FINANCEMENT', 'AUTRE_PUB');
 INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('COMMUNAUTE D''AGGLOMERATION DE SAINTES', 'EPCI');
 INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('SOCIETE ANONYME D''ECONOMIE MIXTE IMMOBILIERE DE LA SAINTONGE', 'AMENAGEUR_PUB');
+INSERT INTO correction_typologie_proprietaire (ddenom, catpro) VALUES ('COMMUNAUTE DE L''AGGLOMERATION ROUENNAISE', 'EPCI');
