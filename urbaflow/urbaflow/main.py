@@ -9,6 +9,7 @@ from flows.cadastre.flow_cadastre import (
 from flows.cadastre.flow_dgfip_topo import import_dgfip_topo_flow
 from flows.dvf.dvf import dvf_flow
 from flows.georisques.import_cavite import import_risques_cavite_flow
+from flows.georisques.import_mvt import import_risques_mvt_flow
 from flows.georisques.import_remnappes import import_remnappes_flow
 from flows.georisques.import_rga import import_rga_flow
 from flows.locomvac import import_locomvac
@@ -76,12 +77,25 @@ OPTIONAL_DIRNAME_REMNAPPES_ARGUMENT = typer.Argument(
     ),
 )
 
+OPTIONAL_DIRNAME_MVT_ARGUMENT = typer.Argument(
+    None,
+    exists=True,
+    file_okay=False,
+    dir_okay=True,
+    readable=True,
+    help=(
+        "Directory path containing MVT CSV files. "
+        "Optional if --departement is provided."
+    ),
+)
+
 SCHEMA_OPTION = typer.Option("public", help="Database schema name")
 LOVAC_FIL_TABLE_OPTION = typer.Option("lovac_fil", help="Database table name")
 RISQUES_CAVITE_TABLE_OPTION = typer.Option("risques_cavite", help="Database table name")
 RISQUES_REMNAPPES_TABLE_OPTION = typer.Option(
     "risques_remnappes", help="Database table name"
 )
+RISQUES_MVT_TABLE_OPTION = typer.Option("risques_mvt", help="Database table name")
 RECURSIVE_OPTION = typer.Option(False, help="Search recursively in subdirectories")
 RECREATE_TRUE_OPTION = typer.Option(True, help="Drop/recreate table if it exists")
 RECREATE_FALSE_OPTION = typer.Option(False, help="Drop/recreate table if it exists")
@@ -276,6 +290,37 @@ def risques_remnappes(
         schema=schema,
         table=table_name,
         replace=recreate,
+    )
+
+
+@app.command()
+def risques_mvt(
+    dirname: Path = OPTIONAL_DIRNAME_MVT_ARGUMENT,
+    departement: str = DEPARTEMENT_OPTION,
+    schema: str = SCHEMA_OPTION,
+    table_name: str = RISQUES_MVT_TABLE_OPTION,
+    recreate: bool = RECREATE_FALSE_OPTION,
+):
+    """
+    Import des données de mouvements de terrain (MVT).
+
+    Si le répertoire n'est pas fourni, l'option --departement (-d) doit être spécifiée
+    pour télécharger les données.
+    """
+    # Validate that at least one of dirname or departement is provided
+    if dirname is None and departement is None:
+        typer.echo(
+            "Error: Either provide a dirname argument or use --departement/-d option.",
+            err=True,
+        )
+        raise typer.Exit(1)
+
+    import_risques_mvt_flow(
+        path=dirname,
+        department=departement,
+        schema=schema,
+        table_name=table_name,
+        recreate=recreate,
     )
 
 

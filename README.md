@@ -162,6 +162,15 @@ uv run python urbaflow/main.py --help
     - `--table-name TEXT` (défaut: `risques_remnappes`)
     - `--recreate / --no-recreate` (défaut: `--no-recreate`)
 
+- `risques-mvt [dirname] [OPTIONS]`
+  - Importe les données de mouvements de terrain (MVT).
+  - Fournir soit `dirname`, soit `--departement`.
+  - Options :
+    - `-d, --departement TEXT`
+    - `--schema TEXT` (défaut: `public`)
+    - `--table-name TEXT` (défaut: `risques_mvt`)
+    - `--recreate / --no-recreate` (défaut: `--no-recreate`)
+
 ### Exemples
 
 ```shell
