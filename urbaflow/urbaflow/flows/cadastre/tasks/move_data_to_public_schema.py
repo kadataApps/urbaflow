@@ -1,9 +1,9 @@
 import psycopg2
-
+from shared_tasks.config import TEMP_DIR, db_schema
 from shared_tasks.db_engine import create_engine
 from shared_tasks.db_sql_utils import run_sql_script
 from shared_tasks.logging_config import get_logger
-from shared_tasks.config import TEMP_DIR, db_schema
+
 from .get_communes_majic import get_imported_communes_from_postgres
 
 
@@ -174,7 +174,7 @@ def insert_bati_to_public():
         "INSERT INTO public.bati_france "
         "(wkb_geometry, type, nom, code_insee, created, updated ) "
         "SELECT wkb_geometry, type, nom, commune, created, updated "
-        "FROM %(schema)s.cadastre_bati;" % {"schema": schema}
+        f"FROM {schema}.cadastre_bati;"
     )
 
     e = create_engine()
@@ -190,18 +190,14 @@ def delete_from_public(
 ):
     logger = get_logger()
     logger.info(codes_insee)
-    delete_query = "DELETE FROM public.%s WHERE code_insee = ANY(ARRAY%s);" % (
-        table_name,
-        codes_insee,
-    )
+    delete_query = f"DELETE FROM public.{table_name} WHERE code_insee = ANY(ARRAY{codes_insee});"
 
     e = create_engine()
     with e.begin() as conn:
         run_sql_script(sql=delete_query, connection=conn)
 
     logger.info(
-        "Les élémens de la table %s ont été supprimés pour les communes %s;"
-        % (table_name, codes_insee)
+        f"Les élémens de la table {table_name} ont été supprimés pour les communes {codes_insee};"
     )
 
 

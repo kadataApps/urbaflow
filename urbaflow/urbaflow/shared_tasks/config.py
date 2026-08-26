@@ -1,4 +1,3 @@
-#!/usr/bin/python
 import os
 from pathlib import Path
 
@@ -24,11 +23,13 @@ def db_schema() -> str:
 
 
 def majic_config():
-    return {
+
+    MAJIC_FILE_NAMES = {
         "bati": "BATI",
-        "nbati": "NBAT",
-        "pdll": "PDLL",
+        "nbati": "NON_BATI",
+        "pdll": "PDL_LOTS",
         "lotlocal": "LLOC",
         "prop": "PROP",
         "max_insert_rows": "50000",
     }
+    return MAJIC_FILE_NAMES

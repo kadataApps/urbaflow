@@ -176,19 +176,21 @@ DROP VIEW ndroitpro_data;
 UPDATE
     parcellaire SET catpro_niv2
 = CASE
-    WHEN catpro = 'COPROPRIETE'
-        THEN 'Copropriétés/ASL'
+    WHEN catpro = 'COPROPRIETE' and ndroitpro < 5
+        THEN 'Copropriété/ASL simple (1 à 4 copropriétaires/colotis)'
+    WHEN catpro = 'COPROPRIETE' and ndroitpro >= 5
+        THEN 'Copropriété/ASL complexe (5+ copropriétaires/colotis)'
     WHEN typproppro = 'PERSONNE PHYSIQUE' AND ndroitindi = 2
-        THEN 'Indivisions simples (2 indivisaires)'
+        THEN 'Indivision simple (2 indivisaires)'
     WHEN typproppro = 'PERSONNE PHYSIQUE' AND ndroitindi > 2
-        THEN 'Indivisions complexes (3+ indivisaires)'
+        THEN 'Indivision complexe (3+ indivisaires)'
     WHEN
         descprop = 'PLEINE PROPRIETE' AND typproppro = 'PERSONNE PHYSIQUE'
-        THEN 'Monopropriétés'
+        THEN 'Monopropriété (propriétaire physique unique)'
     WHEN typproppro = 'PERSONNE MORALE' AND ndroitpro = 1
-        THEN 'Sociétés'
+        THEN 'Monopropriété (personne morale unique)'
     WHEN typproppro = 'PERSONNE MORALE' AND ndroitpro > 1
-        THEN 'Groupements de sociétés'
+        THEN 'Groupements de personnes morales'
     WHEN
         typproppro = 'ETAT'
         OR typproppro = 'REGION'
@@ -202,5 +204,9 @@ UPDATE
         OR catpro = 'AUTRE_PUB'
         OR catpro = 'AMENAGEUR_PUB' OR catpro = 'EPF'
         THEN 'Parapublic'
+    WHEN
+        descprop = 'SEP. NUE-PROPRIETE / USUFRUIT'
+        OR descprop = 'BAIL EMPHYTEOTIQUE'
+        THEN 'Droits démembrés'
     ELSE 'Autres'
 END;
