@@ -1,9 +1,8 @@
-from prefect import flow
-from sqlalchemy import DDL
 import pandas as pd
+from prefect import flow
 from shared_tasks.db_engine import create_engine
 from shared_tasks.logging_config import get_logger
-
+from sqlalchemy import DDL
 
 URL_ORT_CSV = (
     "https://www.data.gouv.fr/fr/datasets/r/17a6bc80-297a-4dc2-b98c-3edc12161bc0"
@@ -66,7 +65,8 @@ def read_ort_csv():
     Reads the CSV file from the URL and returns a DataFrame.
     Renames the columns to match the database schema.
     Converts the 'pvd' and 'acv' columns to boolean.
-    Converts the 'date_signature', 'date_signature_envisagee', 'date_fin_estimee', and 'derniere_actualisation' columns to datetime.
+    Converts the 'date_signature', 'date_signature_envisagee', 'date_fin_estimee',
+    and 'derniere_actualisation' columns to datetime.
     Converts the 'longitude' and 'latitude' columns to float.
     Remove lines with missing values in the 'code_commune' column.
     Ensure code_commune is unique.

@@ -1,13 +1,11 @@
-from pathlib import Path
 import urllib.request
+from pathlib import Path
 
 from prefect import flow, task
 from prefect.task_runners import ConcurrentTaskRunner
-
 from shared_tasks.etl_file_utils import unzip_file_in_place
-from shared_tasks.report_hook import reporthook
 from shared_tasks.logging_config import get_logger
-
+from shared_tasks.report_hook import reporthook
 
 # https://github.com/ESO-Rennes/Analyse-Donnees-DVF
 

@@ -1,26 +1,24 @@
 # Inspired from (c) Vincent Chery - MonitorEnv
 
 from pathlib import Path
-from typing import Optional, Union
 
 import geopandas as gpd
 import pandas as pd
 import sqlparse
+from shared_tasks.logging_config import get_logger
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
-
-from shared_tasks.logging_config import get_logger
 
 
 def read_saved_query(
     connection: Connection,
-    sql_filepath: Union[str, Path],
-    chunksize: Optional[str] = None,
-    parse_dates: Optional[list | dict] = None,
-    params: Union[None, dict] = None,
+    sql_filepath: str | Path,
+    chunksize: str | None = None,
+    parse_dates: list | dict | None = None,
+    params: None | dict = None,
     backend: str = "pandas",
     geom_col: str = "geom",
-    crs: Union[int, None] = None,
+    crs: int | None = None,
     **kwargs,
 ) -> pd.DataFrame | gpd.GeoDataFrame:
     """Run saved SQLquery on a database.
@@ -53,7 +51,7 @@ def read_saved_query(
     Returns:
         Union[pd.DataFrame, gpd.DataFrame]: Query results
     """
-    with open(sql_filepath, "r") as sql_file:
+    with open(sql_filepath) as sql_file:
         query = text(sql_file.read())
 
     read_query(
@@ -72,21 +70,22 @@ def read_saved_query(
 def read_query(
     connection: Connection,
     query,
-    chunksize: Union[None, str] = None,
-    params: Union[dict, None] = None,
+    chunksize: None | str = None,
+    params: dict | None = None,
     backend: str = "pandas",
     geom_col: str = "geom",
-    crs: Union[int, None] = None,
-    parse_dates: Optional[list | dict] = None,
+    crs: int | None = None,
+    parse_dates: list | dict | None = None,
     **kwargs,
-) -> Union[pd.DataFrame, gpd.GeoDataFrame]:
+) -> pd.DataFrame | gpd.GeoDataFrame:
     """Run SQLquery on a database.
 
     Args:
         connection (Connection): SQLAlchemy connection object
         query (str): Query string or SQLAlchemy Selectable
         chunksize (Union[None, str], optional): If specified, return an iterator where
-            `chunksize` is the number of rows to include in each chunk. Defaults to None.
+            `chunksize` is the number of rows to include in each chunk.
+            Defaults to None.
         params (Union[dict, None], optional): Parameters to pass to execute method.
             Defaults to None.
         backend (str, optional) : 'pandas' to run a SQL query and return a
@@ -97,8 +96,8 @@ def read_query(
             'geom'.
         crs (Union[None, str], optional) : CRS to use for the returned GeoDataFrame;
             if not set, tries to determine CRS from the SRID associated with the first
-            geometry in the database, and assigns that to all geometries. Ignored when `backend`
-            is 'pandas'. Defaults to None.
+            geometry in the database, and assigns that to all geometries.
+            Ignored when `backend` is 'pandas'. Defaults to None.
         parse_dates (Optional[list | dict], optional):
 
           - List of column names to parse as dates.
@@ -163,13 +162,11 @@ def run_sql_script(
             assert isinstance(sql_filepath, Path)
         except AssertionError:
             raise ValueError(
-                (
-                    "`sql_filepath` must be a `pathlib.Path`, "
-                    f"got `{type(sql_filepath)}` instead."
-                )
+                "`sql_filepath` must be a `pathlib.Path`, "
+                f"got `{type(sql_filepath)}` instead."
             )
 
-        with open(sql_filepath, "r") as sql_file:
+        with open(sql_filepath) as sql_file:
             sql = sql_file.read()
             logger.info(f"Executing {sql_filepath}.")
 

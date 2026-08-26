@@ -1,21 +1,18 @@
-from typing import List
-import typer
 from pathlib import Path
-from dotenv import load_dotenv
 
-from flows.cadastre.flow_dgfip_topo import import_dgfip_topo_flow
-from flows.dvf.dvf import dvf_flow
+import typer
+from dotenv import load_dotenv
 from flows.cadastre.flow_cadastre import (
     STEPS_FLOW_CADASTRE,
     import_cadastre_majic_flow,
 )
-
+from flows.cadastre.flow_dgfip_topo import import_dgfip_topo_flow
+from flows.dvf.dvf import dvf_flow
 from flows.georisques.import_cavite import import_risques_cavite_flow
 from flows.georisques.import_rga import import_rga_flow
 from flows.locomvac import import_locomvac
 from flows.lovac.import_lovac import import_lovac_flow
 from flows.lovac.import_lovac_fil import import_lovac_fil_flow
-
 from shared_tasks.logging_config import setup_logging
 
 # Load environment variables from .env file in the root directory
@@ -146,7 +143,7 @@ def majic(
         readable=True,
         resolve_path=True,
     ),
-    steps: List[str] = typer.Argument(
+    steps: list[str] = typer.Argument(
         None,
         help="List of steps to run (e.g., 'step1', 'step2'). If not provided, all steps are run.",
     ),
@@ -159,7 +156,8 @@ def majic(
         for step in steps:
             if step not in STEPS_FLOW_CADASTRE.keys():
                 raise typer.BadParameter(
-                    f"Invalid step name '{step}'. Valid step names are: {STEPS_FLOW_CADASTRE.keys()}"
+                    f"Invalid step name '{step}'. "
+                    f"Valid step names are: {STEPS_FLOW_CADASTRE.keys()}"
                 )
 
     steps_to_process = steps if steps else STEPS_FLOW_CADASTRE.keys()
@@ -232,12 +230,13 @@ def risques_rga(
     """
     Import des données de risques de retrait-gonflement des argiles (RGA).
 
-    Si le répertoire n'est pas fourni, l'option --departement (-d) doit être spécifiée pour télécharger les données.
+    Si le répertoire n'est pas fourni, l'option --departement (-d) doit être spécifiée
+    pour télécharger les données.
     """
     # Validate that at least one of dirname or departement is provided
     if dirname is None and departement is None:
         typer.echo(
-            "Error: Either provide a dirname argument or use --departement (-d) option.",
+            "Error: Either provide a dirname argument or use --departement/-d option.",
             err=True,
         )
         raise typer.Exit(1)

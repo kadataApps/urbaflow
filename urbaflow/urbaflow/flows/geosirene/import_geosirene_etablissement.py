@@ -1,12 +1,10 @@
 # %%
-import pandas as pd
 import numpy as np
-
+import pandas as pd
 from prefect import flow, task
-from sqlalchemy import DDL, text
-
 from shared_tasks.db_engine import create_engine
 from shared_tasks.logging_config import get_logger
+from sqlalchemy import DDL, text
 
 logger = get_logger(__name__)
 
@@ -35,7 +33,8 @@ def make_geosirene_url_for_dept(dep: str) -> str:
 @task
 def extract_geosirene_etablissements(url) -> pd.DataFrame:
     """
-    Download the geosirene data from the given URL and extract it with gzip to the data/geosirene folder.
+    Download the geosirene data from the given URL and extract it with gzip
+    to the data/geosirene folder.
     """
     return pd.read_csv(url, compression="gzip")
 
@@ -238,7 +237,8 @@ def load_geosirene_etablissement(data: pd.DataFrame):
     e = create_engine()
     chunk_size = 10000
     logger.info(
-        f"Loading geosirene data to database. {len(data)} rows, {- (-len(data) // chunk_size)+1} chunks"
+        f"Loading geosirene data to database. "
+        f"{len(data)} rows, {-(-len(data) // chunk_size) + 1} chunks"
     )
     data.to_sql(
         "geosirene_etablissement",
@@ -262,7 +262,8 @@ def transform_after_load_geosirene_etablissement():
                 """
                 ALTER TABLE public.geosirene_etablissement
                 ADD COLUMN IF NOT EXISTS geom geometry(POINT, 2154);
-                CREATE INDEX IF NOT EXISTS sidx_geosirene_etablissement_geom ON public.geosirene_etablissement USING GIST (geom);
+                CREATE INDEX IF NOT EXISTS sidx_geosirene_etablissement_geom 
+                    ON public.geosirene_etablissement USING GIST (geom);
                 """
             )
         )
@@ -271,7 +272,8 @@ def transform_after_load_geosirene_etablissement():
             text(
                 """
                 UPDATE public.geosirene_etablissement
-                SET geom = st_transform(st_setsrid(st_makepoint(longitude, latitude), 4326), 2154)
+                SET geom = st_transform(
+                    st_setsrid(st_makepoint(longitude, latitude), 4326), 2154)
                 WHERE longitude IS NOT NULL AND latitude IS NOT NULL;
                 """
             )

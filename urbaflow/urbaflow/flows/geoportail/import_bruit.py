@@ -1,15 +1,14 @@
 # %%
-from owslib.wfs import WebFeatureService
-import geopandas as gpd
 from io import BytesIO
 
+import geopandas as gpd
+from owslib.wfs import WebFeatureService
 from prefect import flow, get_run_logger, task
-
+from shared_tasks.db_engine import create_engine
 from shared_tasks.etl_gpd_utils import (
     create_table_from_geodataframe,
     load,
 )
-from shared_tasks.db_engine import create_engine
 
 # https://geoservices.ign.fr/services-web-experts-transports#2314
 # Données "transports" en WFS

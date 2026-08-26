@@ -2,13 +2,12 @@
 import logging
 import os
 from pathlib import Path
+
 import pandas as pd
-from sqlalchemy import DDL
-
-from shared_tasks.etl_gpd_utils import load
 from shared_tasks.db_engine import create_engine
+from shared_tasks.etl_gpd_utils import load
 from shared_tasks.file_utils import encode_to_utf8, list_files_at_path
-
+from sqlalchemy import DDL
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +77,8 @@ def create_table_cavite(
 def load_cavite(file, schema="public", table_name="risques_cavite"):
     """
     Import des données de mouvements de terrain à partir d'un fichier CSV.
-    Les données sont importées par défaut dans la table "risques_cavite" du schéma "public".
+    Les données sont importées par défaut dans la table "risques_cavite"
+    du schéma "public".
     """
     logger.info("Importing file: " + file)
 

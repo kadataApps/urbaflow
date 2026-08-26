@@ -2,7 +2,7 @@
 
 import logging
 import sys
-from typing import Sequence
+from collections.abc import Sequence
 
 import geoalchemy2
 import sqlalchemy
@@ -26,7 +26,7 @@ def get_table(
 
     meta = MetaData(schema=schema)
     try:
-        geoalchemy2
+        geoalchemy2  # noqa: B018
         assert "geoalchemy2" in sys.modules
     except (AssertionError, NameError):
         logger.error(

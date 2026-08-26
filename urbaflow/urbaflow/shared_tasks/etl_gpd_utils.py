@@ -1,36 +1,36 @@
 # Inspired by MonitorEnv (c) Vincent Chéry
 
 
-import logging
-from pathlib import Path
-from typing import Iterable, List, Union
-from io import StringIO
 import csv
-from pandas.io.sql import SQLTable
+import logging
+from collections.abc import Iterable
+from io import StringIO
+from pathlib import Path
+
 import geopandas as gpd
 import pandas as pd
+from pandas.io.sql import SQLTable
+from shared_tasks.db_sql_utils import read_saved_query
+from shared_tasks.db_utils import (
+    delete,
+    delete_rows,
+    get_table,
+)
+from shared_tasks.processing import prepare_df_for_loading
 from sqlalchemy import DDL, text
 from sqlalchemy.engine import Connection
-
-from shared_tasks.processing import prepare_df_for_loading
-from shared_tasks.db_utils import (
-    get_table,
-    delete_rows,
-    delete,
-)
-from shared_tasks.db_sql_utils import read_saved_query
 
 
 def extract(
     connection: Connection,
-    query_filepath: Union[Path, str],
-    dtypes: Union[None, dict] = None,
-    parse_dates: Union[list, dict, None] = None,
+    query_filepath: Path | str,
+    dtypes: None | dict = None,
+    parse_dates: list | dict | None = None,
     params=None,
     backend: str = "pandas",
     geom_col: str = "geom",
-    crs: Union[int, None] = None,
-) -> Union[pd.DataFrame, gpd.GeoDataFrame]:
+    crs: int | None = None,
+) -> pd.DataFrame | gpd.GeoDataFrame:
     """Run SQL query against the indicated database and return the result as a
     `pandas.DataFrame`.
 
@@ -85,7 +85,7 @@ def extract(
 
 
 def load(
-    df: Union[pd.DataFrame, gpd.GeoDataFrame],
+    df: pd.DataFrame | gpd.GeoDataFrame,
     *,
     connection: Connection,
     table_name: str,
@@ -100,8 +100,8 @@ def load(
     df_id_column: str = None,
     nullable_integer_columns: list = None,
     timedelta_columns: list = None,
-    init_ddls: List[DDL] = None,
-    end_ddls: List[DDL] = None,
+    init_ddls: list[DDL] = None,
+    end_ddls: list[DDL] = None,
 ):
     """
     Load a DataFrame or GeoDataFrame to a database table using sqlalchemy. The table
@@ -176,17 +176,17 @@ def load(
 
 
 def load_with_connection(
-    df: Union[pd.DataFrame, gpd.GeoDataFrame],
+    df: pd.DataFrame | gpd.GeoDataFrame,
     *,
     connection: Connection,
     table_name: str,
     schema: str,
     logger: logging.Logger,
     how: str = "replace",
-    table_id_column: Union[None, str] = None,
-    df_id_column: Union[None, str] = None,
-    init_ddls: List[DDL] = None,
-    end_ddls: List[DDL] = None,
+    table_id_column: None | str = None,
+    df_id_column: None | str = None,
+    init_ddls: list[DDL] = None,
+    end_ddls: list[DDL] = None,
 ):
     if init_ddls:
         for ddl in init_ddls:
@@ -345,11 +345,11 @@ def psql_insert_copy(
         writer.writerows(data_iter)
         s_buf.seek(0)
 
-        columns = ", ".join('"{}"'.format(k) for k in keys)
+        columns = ", ".join(f'"{k}"' for k in keys)
         if table.schema:
             table_name = f'"{table.schema}"."{table.name}"'
         else:
             table_name = f'"{table.name}"'
 
-        sql = "COPY {} ({}) FROM STDIN WITH CSV".format(table_name, columns)
+        sql = f"COPY {table_name} ({columns}) FROM STDIN WITH CSV"
         cur.copy_expert(sql=sql, file=s_buf)

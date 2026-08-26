@@ -1,8 +1,8 @@
 import logging
 import os
 from pathlib import Path
-from prefect import get_run_logger
 
+from prefect import get_run_logger
 from shared_tasks.config import APP_DIR
 
 

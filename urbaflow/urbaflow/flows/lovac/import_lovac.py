@@ -1,11 +1,11 @@
 from pathlib import Path
-from prefect import task, flow
-import pandas as pd
-from sqlalchemy import DDL, text
 
-from shared_tasks.logging_config import get_logger
-from shared_tasks.etl_gpd_utils import load
+import pandas as pd
+from prefect import flow, task
 from shared_tasks.db_engine import create_engine
+from shared_tasks.etl_gpd_utils import load
+from shared_tasks.logging_config import get_logger
+from sqlalchemy import DDL, text
 
 # https://doc-datafoncier.cerema.fr/doc/lovac/
 # https://doc-datafoncier.cerema.fr/doc/guide/lovac
@@ -124,7 +124,8 @@ def transform_lovac_data():
                 """
                 ALTER TABLE public.lovac
                 ADD COLUMN IF NOT EXISTS geom geometry(MULTIPOLYGON, 2154);
-                CREATE INDEX IF NOT EXISTS sidx_lovac_geom ON public.lovac USING GIST (geom);
+                CREATE INDEX IF NOT EXISTS sidx_lovac_geom ON public.lovac 
+                    USING GIST (geom);
                 """
             )
         )
@@ -154,7 +155,10 @@ def create_extract_lovac_table():
                 """
                 CREATE TABLE IF NOT EXISTS extract_lovac (
                 SELECT nom_site,
-                  nvac || '/'|| nlocal ||' logements vacants depuis '||debvac|| coalesce('  (dont ' || nvach || ' log. vac. de + de 2 ans depuis '||debvach||')', '') as commentaire,
+                  nvac || '/'|| nlocal ||' logements vacants depuis '
+                    ||debvac|| coalesce('  (dont ' || nvach 
+                    || ' log. vac. de + de 2 ans depuis '
+                    ||debvach||')', '') as commentaire,
                   origine_reperage,
                   echeance,
                   vocation,
@@ -173,7 +177,9 @@ def create_extract_lovac_table():
                     min(l1.debutvacan) as debvach
                   FROM :schema.parcellaire p left join :schema.:lovac_ex_table_name l
                     on (p.geom && l.geom AND st_within(l.geom, p.geom)) 
-                    left join :schema.lovac_fil_table_name l1 on (p.geom && l1.geom AND st_within(l1.geom, p.geom)) 
+                    left join :schema.lovac_fil_table_name l1 on (
+                        p.geom && l1.geom AND st_within(l1.geom, p.geom)
+                    ) 
                   WHERE nlogh > 1 AND nloghvac = nlogh 
                   group by 1, 2, 3, 4, 5,6  ) t
                 """

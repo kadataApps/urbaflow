@@ -1,8 +1,7 @@
+from shared_tasks.config import QUERIES_DIR
 from shared_tasks.db_engine import create_engine
 from shared_tasks.db_sql_utils import run_sql_script
 from shared_tasks.logging_config import get_logger
-from shared_tasks.config import QUERIES_DIR
-
 
 logger = get_logger()
 

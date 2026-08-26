@@ -1,12 +1,11 @@
 from pathlib import Path
 
-from prefect import flow
-
 from flows.cadastre.tasks.format_dgfip_topo import (
     create_dgfip_topo_tables,
     format_dgfip_topo_data,
 )
 from flows.cadastre.tasks.import_dgfip_topo import import_dgfip_topo_file
+from prefect import flow
 from shared_tasks.config import QUERIES_DIR, TEMP_DIR
 from shared_tasks.file_utils import copy_directory
 from shared_tasks.logging_config import get_logger

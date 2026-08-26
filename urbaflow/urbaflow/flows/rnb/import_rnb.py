@@ -1,4 +1,5 @@
 import os
+
 from prefect import flow, task
 from sqlalchemy import DDL
 
@@ -8,7 +9,6 @@ from urbaflow.shared_tasks.db_engine import create_engine
 from urbaflow.shared_tasks.db_sql_utils import run_sql_script
 from urbaflow.shared_tasks.etl_file_utils import download_and_unzip, split_csv_file
 from urbaflow.shared_tasks.logging_config import get_logger
-
 
 # https://www.data.gouv.fr/fr/datasets/referentiel-national-des-batiments/
 
@@ -52,11 +52,18 @@ def load_chunk_into_temporary_table(chunk_file: str):
     e = create_engine()
 
     with e.begin() as conn:
-        with open(chunk_file, "r", encoding="utf-8") as f:
+        with open(chunk_file, encoding="utf-8") as f:
             dbapi_cursor = conn.connection.cursor()
             dbapi_cursor.copy_expert(
                 """
-                COPY rnb_temp_table (rnb_id, point_ewkt, shape_ewkt, status, ext_ids, addresses)
+                COPY rnb_temp_table (
+                    rnb_id,
+                    point_ewkt,
+                    shape_ewkt,
+                    status,
+                    ext_ids,
+                    addresses
+                )
                 FROM STDIN CSV HEADER QUOTE '\"' DELIMITER ',';
             """,
                 f,
@@ -92,13 +99,21 @@ def create_final_table():
 @task
 def transform_and_insert_data():
     """
-    Transform the data (EWKT to geometry, text to JSONB) and insert into the final table.
+    Transform the data (EWKT to geometry, text to JSONB)
+    and insert into the final table.
     """
     e = create_engine()
     logger = get_logger()
     with e.begin() as conn:
         sql_query = """
-            INSERT INTO table_finale (rnb_id, point_geom, shape_geom, status, ext_ids, addresses)
+            INSERT INTO table_finale (
+                rnb_id, 
+                point_geom, 
+                shape_geom, 
+                status, 
+                ext_ids, 
+                addresses
+            )
             SELECT rnb_id,
                 ST_GeomFromEWKT(point_ewkt),
                 ST_GeomFromEWKT(shape_ewkt),

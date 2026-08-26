@@ -1,38 +1,35 @@
 import os
 from pathlib import Path
-from typing import List
 
 from prefect import flow
-
-from shared_tasks.logging_config import get_logger
-from shared_tasks.file_utils import copy_directory
 from shared_tasks.config import QUERIES_DIR, TEMP_DIR
+from shared_tasks.file_utils import copy_directory
+from shared_tasks.logging_config import get_logger
 
-from .tasks.clean_after_imports import clean_temp_dir, clean_db
+from .tasks.clean_after_imports import clean_db, clean_temp_dir
 from .tasks.create_unites_foncieres import flow_create_unites_foncieres
 from .tasks.download_cadastre import (
-    download_cadastre_for_communes,
     download_bati_for_communes,
+    download_cadastre_for_communes,
 )
 from .tasks.format_cadastre import (
-    execute_init_cadastre,
     execute_format_cadastre,
     execute_init_bati,
+    execute_init_cadastre,
 )
 from .tasks.format_majic import (
     clean_with_drop_db_for_majic_import,
-    init_db_for_majic_import,
     execute_format_majic_scripts,
+    init_db_for_majic_import,
 )
 from .tasks.import_majic import import_majic_files
 from .tasks.merge_majic_cadastre import execute_merge_cadastre_majic_scripts
 from .tasks.move_data_to_public_schema import (
     flow_import_bati,
+    flow_import_local,
     flow_import_parcelles,
     flow_import_proprietaire,
-    flow_import_local,
 )
-
 
 logger = get_logger(__name__)
 
@@ -109,7 +106,7 @@ STEPS_FLOW_CADASTRE = {
 
 
 @flow
-def import_cadastre_majic_flow(path: Path, enabled_steps: List[str]):
+def import_cadastre_majic_flow(path: Path, enabled_steps: list[str]):
     """
     Execute the cadastre workflow based on the given steps.
 
@@ -120,7 +117,8 @@ def import_cadastre_majic_flow(path: Path, enabled_steps: List[str]):
     # Check if the path exists
     if path is None or not os.path.isdir(path):
         logger.error(
-            "Le chemin spécifié n'est pas un répertoire existant. Veuillez vérifier le chemin et réessayer."
+            "Le chemin spécifié n'est pas un répertoire existant. "
+            "Veuillez vérifier le chemin et réessayer."
         )
         return
 

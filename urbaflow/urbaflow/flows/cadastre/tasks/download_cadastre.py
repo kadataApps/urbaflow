@@ -3,8 +3,9 @@ import os
 import sys
 import urllib.request
 
-from shared_tasks.logging_config import get_logger
 from shared_tasks.etl_ogr_utils import import_geojson
+from shared_tasks.logging_config import get_logger
+
 from .get_communes_majic import (
     get_imported_communes_from_postgres,
 )
@@ -81,7 +82,7 @@ def download_cadastre_for_communes():
     for commune in communes["code_insee"]:
         logger.info(commune)
         download_cadastre(commune, temp_dir, millesime)
-        file = os.path.join(temp_dir, "cadastre-%s-parcelles.json" % commune)
+        file = os.path.join(temp_dir, f"cadastre-{commune}-parcelles.json")
         import_geojson(file, "cadastre_parcelles")
 
 
@@ -96,7 +97,7 @@ def download_bati_for_communes():
     for commune in communes["code_insee"]:
         logger.info(commune)
         download_bati(commune, temp_dir)
-        file = os.path.join(temp_dir, "cadastre-%s-batiments.json" % commune)
+        file = os.path.join(temp_dir, f"cadastre-{commune}-batiments.json")
         import_geojson(file, "cadastre_bati")
 
 

@@ -2,8 +2,9 @@
 
 import datetime
 import logging
+from collections.abc import Hashable
 from functools import partial
-from typing import Any, Hashable, List, Union
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -34,7 +35,7 @@ def get_unused_col_name(col_name: str, df: pd.DataFrame) -> str:
         >>> get_unused_col_name("id", pd.DataFrame({"id": [1, 2, 3]}))
         "id_0"
 
-        >>> get_unused_col_name("id", pd.DataFrame({"id": [1, 2, 3], "id_0": [4, 5, 6]}))
+        >>> get_unused_col_name("id", pd.DataFrame({"id": [1, 2], "id_0": [4, 5]}))
         "id_1"
     """
     df_columns = list(df)
@@ -69,7 +70,7 @@ def is_a_value(x) -> bool:
         return False
 
 
-def concatenate_values(row: pd.Series) -> List:
+def concatenate_values(row: pd.Series) -> list:
     """Filters the input pandas Series to keep only distinct non null values
     and returns the result as a python list.
 
@@ -88,7 +89,7 @@ def concatenate_values(row: pd.Series) -> List:
     return res
 
 
-def concatenate_columns(df: pd.DataFrame, input_col_names: List) -> pd.Series:
+def concatenate_columns(df: pd.DataFrame, input_col_names: list) -> pd.Series:
     """For each row in the input DataFrame, the distinct and non null values contained in
     the columns input_col_names are stored in a list. A pandas Series of the same length
     as the input DataFrame is then constructed with these lists as values.
@@ -131,7 +132,7 @@ def coalesce(df: pd.DataFrame) -> pd.Series:
 
 
 def get_first_non_null_column_name(
-    df: pd.DataFrame, result_labels: Union[None, dict] = None
+    df: pd.DataFrame, result_labels: None | dict = None
 ) -> pd.Series:
     """Returns a Series with the same index as the input DataFrame, whose values are
     the name of the first column (or the corresponding label, if provided) with a
@@ -218,8 +219,8 @@ def df_to_dict_series(
 
 
 def zeros_ones_to_bools(
-    x: Union[pd.Series, pd.DataFrame],
-) -> Union[pd.Series, pd.DataFrame]:
+    x: pd.Series | pd.DataFrame,
+) -> pd.Series | pd.DataFrame:
     """Converts a pandas DataFrame or Series containing `str`, `int` or `float` values,
     possibly including null (`None` and `np.nan`) values to a DataFrame with False,
     True and `np.nan` values respectively.
@@ -239,10 +240,10 @@ def zeros_ones_to_bools(
 
 
 def to_pgarr(
-    x: Union[list, set, np.ndarray],
+    x: list | set | np.ndarray,
     handle_errors: bool = False,
-    value_on_error: Union[str, None] = None,
-) -> Union[str, None]:
+    value_on_error: str | None = None,
+) -> str | None:
     """Converts a python `list`, `set` or `numpy.ndarray` to a string with Postgresql
     array syntax.
 
@@ -295,7 +296,7 @@ def to_pgarr(
 def df_values_to_psql_arrays(
     df: pd.DataFrame,
     handle_errors: bool = False,
-    value_on_error: Union[str, None] = None,
+    value_on_error: str | None = None,
 ) -> pd.DataFrame:
     """Returns a `pandas.DataFrame` with all values serialized as strings
     with Postgresql array syntax. All values must be of type list, set or numpy array.
@@ -450,12 +451,12 @@ def drop_rows_already_in_table(
 def prepare_df_for_loading(
     df: pd.DataFrame,
     logger: logging.Logger,
-    pg_array_columns: Union[None, list] = None,
+    pg_array_columns: None | list = None,
     handle_array_conversion_errors: bool = True,
     value_on_array_conversion_error="{}",
-    jsonb_columns: Union[None, list] = None,
-    nullable_integer_columns: Union[None, list] = None,
-    timedelta_columns: Union[None, list] = None,
+    jsonb_columns: None | list = None,
+    nullable_integer_columns: None | list = None,
+    timedelta_columns: None | list = None,
 ):
     df_ = df.copy(deep=True)
 
@@ -627,7 +628,7 @@ def left_isin_right_by_decreasing_priority(
 
 
 def drop_duplicates_by_decreasing_priority(
-    df: pd.DataFrame, subset: List[str]
+    df: pd.DataFrame, subset: list[str]
 ) -> pd.DataFrame:
     """Similar to `pandas.DataFrame.drop_duplicates(subset=subset)`, with the
     differences that:
@@ -702,9 +703,9 @@ def try_get_factory(key: Hashable, error_value: Any = None):
         Attempt to fetch an element from what is supposed to be dict (but may not be),
         return error_value if it fails (for any reason).
 
-        This is useful to extract values from a series of dictionnaries which may not all
-        contain the searched key. It is faster than checking for the presence of the key
-        each time.
+        This is useful to extract values from a series of dictionnaries which
+        may not all contain the searched key. It is faster than checking for
+        the presence of the key each time.
         """
 
         try:

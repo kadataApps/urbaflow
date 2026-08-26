@@ -1,7 +1,7 @@
 import os
+
 from shared_tasks.config import db_config, db_schema
 from shared_tasks.logging_config import get_logger
-
 
 logger = get_logger(__name__)
 
@@ -15,27 +15,24 @@ def import_shapefile(
     replace: bool = False,
 ):
     params = db_config()
-    # {'host': 'localhost', 'database': 'local_test', 'user': 'postgres', 'password': 'postgres', 'port': '5433'}
     params["table"] = table
     params["file"] = file
     params["schema"] = schema
     method = "-overwrite" if replace else "-append -update"
 
-    # command = ('ogr2ogr -f "PostgreSQL" '
-    #     'PG:"host=%(host)s port=%(port)s user=%(user)s password=%(password)s dbname=%(database)s"'
-    #     '"%(file)s" -nln %(table)s -append -update -skipfailures -a_srs "EPSG:4326"'
-    #     % params)
     password_string = (
-        f'PGPASSWORD=\'{ params["password"] }\'' if params["password"] != "" else ""
+        f"PGPASSWORD='{params['password']}'" if params["password"] != "" else ""
     )
     command = (
-        f'{ password_string } '
+        f"{password_string} "
         f'ogr2ogr -f "PostgreSQL" '
-        f'PG:"host={params["host"]} port={params["port"]} user={params["user"]} dbname={params["database"]} " '
+        f'PG:"host={params["host"]} port={params["port"]} user={params["user"]} '
+        f'dbname={params["database"]} " '
         f'"{params["file"]}" -nln {params["schema"]}.{params["table"]} '
-        f'-lco GEOMETRY_NAME=geom '
-        f'{method} '
-        f'-skipfailures -s_srs "{source_srs}" -t_srs "{destination_srs}" -nlt "PROMOTE_TO_MULTI"'
+        f"-lco GEOMETRY_NAME=geom "
+        f"{method} "
+        f'-skipfailures -s_srs "{source_srs}" -t_srs "{destination_srs}" '
+        f'-nlt "PROMOTE_TO_MULTI"'
     )
 
     logger.info(command)
@@ -49,18 +46,16 @@ def import_geojson(file: str, table: str):
     params = db_config()
     schema = db_schema()
 
-    # command = ('ogr2ogr -f "PostgreSQL" '
-    #     'PG:"host=%(host)s port=%(port)s user=%(user)s password=%(password)s dbname=%(database)s"'
-    #     '"%(file)s" -nln %(table)s -append -update -skipfailures -a_srs "EPSG:4326"'
-    #     % params)
     password_string = (
-        f'PGPASSWORD=\'{ params["password"] }\'' if params["password"] != "" else ""
+        f"PGPASSWORD='{params['password']}'" if params["password"] != "" else ""
     )
     command = (
-        f'{ password_string } '
+        f"{password_string} "
         f'ogr2ogr -f "PostgreSQL" '
-        f'PG:"host={params["host"]} port={params["port"]} user={params["user"]} dbname={params["database"]} " '
-        f'"{file}" -nln {schema}.{table} -append -update -skipfailures -a_srs "EPSG:4326" -nlt "PROMOTE_TO_MULTI"'
+        f'PG:"host={params["host"]} port={params["port"]} user={params["user"]} '
+        f'dbname={params["database"]} " '
+        f'"{file}" -nln {schema}.{table} -append -update -skipfailures '
+        f'-a_srs "EPSG:4326" -nlt "PROMOTE_TO_MULTI"'
     )
     logger.info(command)
     try:

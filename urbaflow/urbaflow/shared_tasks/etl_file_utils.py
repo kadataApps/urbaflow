@@ -1,9 +1,9 @@
-import requests
-import zipfile
+import gzip
 import io
 import os
-import gzip
+import zipfile
 
+import requests
 from shared_tasks.config import TEMP_DIR
 from shared_tasks.logging_config import get_logger
 
@@ -16,7 +16,8 @@ def download_and_unzip(url: str, extract_to_path: str = TEMP_DIR):
 
     Parameters:
     url (str): The URL of the zip file to download.
-    extract_to_path (str): The directory to extract the contents to. Defaults to the current directory.
+    extract_to_path (str): The directory to extract the contents to.
+    Defaults to the current directory.
     """
     response = requests.get(url)
 
@@ -55,7 +56,7 @@ def split_csv_file(input_file: str, output_dir: str, lines_per_chunk: int) -> li
     out_f = open(current_chunk_path, "w", encoding="utf-8")
     chunk_files.append(current_chunk_path)
 
-    with open(input_file, "r", encoding="utf-8") as in_f:
+    with open(input_file, encoding="utf-8") as in_f:
         header = next(in_f)
         out_f.write(header)
 

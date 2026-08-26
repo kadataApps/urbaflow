@@ -41,3 +41,6 @@ build-backend = "hatchling.build"
 [tool.sqlfluff.indentation]
 indent_unit = "space"
 tab_space_size = 4
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]

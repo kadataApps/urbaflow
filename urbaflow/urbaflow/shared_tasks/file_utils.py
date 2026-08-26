@@ -1,11 +1,10 @@
 import os
-import re
-import pandas as pd
 import pathlib
+import re
 import shutil
 
+import pandas as pd
 from chardet import detect
-
 from shared_tasks.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -29,7 +28,7 @@ def concat_files_with_encoding(files, encoding="latin-1"):
 def list_files_at_path(path, regex, extension=".csv"):
     matching_files = []
     pattern = re.compile(regex)
-    for root, dirs, files in os.walk(path):
+    for root, _dirs, files in os.walk(path):
         for file in files:
             if pattern.match(file) and file.endswith(extension):
                 file_path = os.path.join(root, file)
@@ -61,7 +60,7 @@ def encode_to_utf8(src_file):
     try:
         logger.info(f"Converting {src_file} from {from_codec} to utf-8")
         with (
-            open(src_file, "r", encoding=from_codec) as f,
+            open(src_file, encoding=from_codec) as f,
             open(trg_file, "w", encoding="utf-8") as e,
         ):
             text = f.read()
@@ -108,7 +107,7 @@ def copy_directory(source, target):
         shutil.copytree(source, target, dirs_exist_ok=True)
 
         # Set proper permissions recursively
-        for root, dirs, files in os.walk(target):
+        for root, _dirs, files in os.walk(target):
             # Set permissions for directories
             os.chmod(root, 0o755)  # rwxr-xr-x
 

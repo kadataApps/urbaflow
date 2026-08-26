@@ -1,12 +1,12 @@
 # %%
 from pathlib import Path
-from prefect import task, flow
-import pandas as pd
-from sqlalchemy import DDL, text
 
-from shared_tasks.logging_config import get_logger
-from shared_tasks.etl_gpd_utils import load
+import pandas as pd
+from prefect import flow, task
 from shared_tasks.db_engine import create_engine
+from shared_tasks.etl_gpd_utils import load
+from shared_tasks.logging_config import get_logger
+from sqlalchemy import DDL, text
 
 logger = get_logger(__name__)
 
@@ -123,7 +123,8 @@ def transform_locomvac_data():
                 """
                 ALTER TABLE public.locomvac
                 ADD COLUMN IF NOT EXISTS geom geometry(MULTIPOLYGON, 2154);
-                CREATE INDEX IF NOT EXISTS sidx_locomvac_geom ON public.locomvac USING GIST (geom);
+                CREATE INDEX IF NOT EXISTS sidx_locomvac_geom ON public.locomvac 
+                    USING GIST (geom);
                 """
             )
         )

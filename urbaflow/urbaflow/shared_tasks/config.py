@@ -23,7 +23,6 @@ def db_schema() -> str:
 
 
 def majic_config():
-
     MAJIC_FILE_NAMES = {
         "bati": "BATI",
         "nbati": "NON_BATI",

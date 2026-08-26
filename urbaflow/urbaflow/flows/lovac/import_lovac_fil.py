@@ -1,10 +1,10 @@
 import logging
 from pathlib import Path
-import pandas as pd
-from sqlalchemy import DDL, text
 
-from shared_tasks.etl_gpd_utils import load
+import pandas as pd
 from shared_tasks.db_engine import create_engine
+from shared_tasks.etl_gpd_utils import load
+from sqlalchemy import DDL, text
 
 # https://doc-datafoncier.cerema.fr/doc/lovac/
 # https://doc-datafoncier.cerema.fr/doc/guide/lovac
@@ -41,7 +41,8 @@ def find_lovac_files(dirname: Path, recursive: bool = True) -> list[Path]:
     if len(csv_files) == 0:
         search_type = "recursively" if recursive else "in directory"
         raise FileNotFoundError(
-            f"No files found {search_type} in {dirname} that match the pattern 'lovac_fil.CSV|csv'"
+            f"No files found {search_type} in {dirname} "
+            f"that match the pattern 'lovac_fil.CSV|csv'"
         )
 
     logger.info(
@@ -58,7 +59,8 @@ def extract_lovac_data(file: Path) -> pd.DataFrame:
     Extract the data from the lovac_fil.csv file and sanitize missing values.
 
     The file is pipe-delimited (|) and contains data about vacant commercial properties.
-    This function reads the CSV file, loads it into a DataFrame, and cleans missing values.
+    This function reads the CSV file, loads it into a DataFrame,
+    and cleans missing values.
 
     Args:
         file: Path to the lovac_fil.csv file
@@ -73,7 +75,7 @@ def extract_lovac_data(file: Path) -> pd.DataFrame:
         df = pd.read_csv(
             file,
             sep="|",
-            dtype=str,  # Read all columns as strings initially to preserve data integrity
+            dtype=str,  # Read all columns as strings initially for data integrity
             na_values=[
                 "",
                 " ",
@@ -86,7 +88,8 @@ def extract_lovac_data(file: Path) -> pd.DataFrame:
         )
 
         logger.info(
-            f"Successfully loaded {len(df)} rows and {len(df.columns)} columns from {file.name}"
+            f"Successfully loaded {len(df)} rows "
+            f"and {len(df.columns)} columns from {file.name}"
         )
 
         # Clean and sanitize the data
@@ -504,7 +507,8 @@ def create_lovac_fil_parcelle_table(
     Args:
         schema: Database schema name (default: "public")
         table_name: Table name (default: "lovac_fil_parcelle")
-        parcelle_table_name: Name of the parcellaire table to reference (default: "parcellaire")
+        parcelle_table_name: Name of the parcellaire table to reference
+        (default: "parcellaire")
         recreate: If True, drop/recreate table (default: False)
     """
     logger.info(f"Managing table {schema}.{dst_table_name} (recreate={recreate})")
@@ -568,7 +572,13 @@ def create_lovac_fil_parcelle_table(
                 text(
                     f"""
                 INSERT INTO {q(schema)}.{q(dst_table_name)}
-                  (ff_idpar, geom, nb_logt_vac, debut_vacance_min, debut_vacance_max, urbaflow_inserted_at)
+                  (ff_idpar,
+                    geom,
+                    nb_logt_vac,
+                    debut_vacance_min,
+                    debut_vacance_max,
+                    urbaflow_inserted_at
+                )
                 SELECT a.ff_idpar,
                       ST_Multi(p.geom)::geometry(MultiPolygon,2154) AS geom,
                       a.nb_logt_vac,
@@ -652,7 +662,8 @@ def import_lovac_fil_flow(
     load_lovac_fil_data(combined_data, schema=schema, table_name=table_name)
 
     logger.info(
-        f"LOVAC FIL import flow completed successfully. Total rows loaded: {len(combined_data)}"
+        f"LOVAC FIL import flow completed successfully. "
+        f"Total rows loaded: {len(combined_data)}"
     )
 
     # Step 6: Create centroid geometry column

@@ -1,13 +1,13 @@
 import os
 from pathlib import Path
+
 import pandas as pd
 from prefect import flow, task
-from sqlalchemy import DDL
-
-from shared_tasks.etl_gpd_utils import load
 from shared_tasks.db_engine import create_engine
+from shared_tasks.etl_gpd_utils import load
 from shared_tasks.file_utils import encode_to_utf8, list_files_at_path
 from shared_tasks.logging_config import get_logger
+from sqlalchemy import DDL
 
 
 @task

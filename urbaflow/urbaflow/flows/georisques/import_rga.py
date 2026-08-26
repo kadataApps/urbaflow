@@ -1,8 +1,8 @@
 from shared_tasks.config import TEMP_DIR
+from shared_tasks.etl_file_utils import download_and_unzip
 from shared_tasks.etl_ogr_utils import import_shapefile
 from shared_tasks.file_utils import list_files_at_path
 from shared_tasks.logging_config import get_logger
-from shared_tasks.etl_file_utils import download_and_unzip
 
 logger = get_logger(__name__)
 
@@ -27,7 +27,8 @@ def import_rga_flow(
 ):
     """
     Import data from Georisques RGA (Retrait Gonflement des Argiles).
-    Si le répertoire n'est pas fourni, le département doit être spécifié pour télécharger les données.
+    Si le répertoire n'est pas fourni, le département doit être spécifié
+    pour télécharger les données.
 
     https://files.georisques.fr/argiles/AleaRG76_L93.zip
     """

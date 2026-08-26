@@ -4,7 +4,6 @@ from shared_tasks.etl_ogr_utils import import_shapefile
 from shared_tasks.file_utils import list_files_at_path
 from shared_tasks.logging_config import get_logger
 
-
 # ZNIEFF continentales de métropole
 url_znieff1 = "https://inpn.mnhn.fr/docs/Shape/znieff1.zip"
 url_znieff2 = "https://inpn.mnhn.fr/docs/Shape/znieff2.zip"

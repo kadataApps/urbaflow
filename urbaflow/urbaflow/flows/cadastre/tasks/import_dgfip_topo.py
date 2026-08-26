@@ -1,11 +1,9 @@
 import csv
 from pathlib import Path
 
-from sqlalchemy import text
-
 from shared_tasks.db_engine import create_engine
 from shared_tasks.logging_config import get_logger
-
+from sqlalchemy import text
 
 SOURCE_FILENAME = "topo-fichier-des-entites-topographiques.csv"
 EXPECTED_HEADERS = (
@@ -57,7 +55,8 @@ def find_source_file(source_dir: Path) -> Path:
     source_files = list(source_dir.rglob(SOURCE_FILENAME))
     if len(source_files) != 1:
         raise ValueError(
-            f"Le répertoire {source_dir} doit contenir un unique fichier {SOURCE_FILENAME}."
+            f"Le répertoire {source_dir} doit contenir "
+            f"un unique fichier {SOURCE_FILENAME}."
         )
     return source_files[0]
 
@@ -68,7 +67,9 @@ def validate_headers(source_file: Path) -> None:
         headers = next(csv.reader(csv_file, delimiter=";"), None)
 
     if tuple(headers or []) != EXPECTED_HEADERS:
-        raise ValueError("Les colonnes du fichier DGFiP TOPO ne correspondent pas au schéma attendu.")
+        raise ValueError(
+            "Les colonnes du fichier DGFiP TOPO ne correspondent pas au schéma attendu."
+        )
 
 
 def import_dgfip_topo_file(source_dir: Path) -> None:
@@ -84,7 +85,8 @@ def import_dgfip_topo_file(source_dir: Path) -> None:
         connection.execute(text("DROP TABLE IF EXISTS dgfip_topo"))
         connection.execute(
             text(
-                f"CREATE TABLE dgfip_topo ({', '.join(f'{column} text' for column in RAW_TABLE_COLUMNS)})"
+                f"CREATE TABLE dgfip_topo "
+                f"({', '.join(f'{column} text' for column in RAW_TABLE_COLUMNS)})"
             )
         )
         with source_file.open(encoding="utf-8-sig", newline="") as csv_file:

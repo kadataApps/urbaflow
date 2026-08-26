@@ -1,7 +1,8 @@
 # %%
-from prefect import task
-import requests
 import zipfile
+
+import requests
+from prefect import task
 from shared_tasks.logging_config import get_logger
 
 
@@ -10,7 +11,8 @@ def extract_unite_legale():
     """
     Download and extract the unite legale file
 
-    le fichier stock des unités légales (unités légales actives et cessées dans leur état courant au répertoire)
+    le fichier stock des unités légales (unités légales actives et cessées dans leur
+    état courant au répertoire)
     https://files.data.gouv.fr/insee-sirene/StockUniteLegale_utf8.zip
     """
     logger = get_logger(__name__)

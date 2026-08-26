@@ -1,10 +1,10 @@
 import os
-from pathlib import Path
 import re
+from pathlib import Path
 
+from shared_tasks.config import majic_config
 from shared_tasks.db_engine import create_engine
 from shared_tasks.db_sql_utils import run_sql_script
-from shared_tasks.config import majic_config
 from shared_tasks.logging_config import get_logger
 
 
@@ -74,7 +74,8 @@ def import_majic_files(majic_source_dir: Path):
 
     # Loop through all majic files
 
-    # 1st path to build the complete list for each majic source type (nbat, bati, lloc, etc.)
+    # 1st path to build the complete list
+    # for each majic source type (nbat, bati, lloc, etc.)
     # and read 1st line to get departement and direction to compare to inputs
     depdirs = {}
     for item in majic_source_filenames:
@@ -83,7 +84,7 @@ def import_majic_files(majic_source_dir: Path):
         regex_filename = re.compile(r"(" + value + ")", re.IGNORECASE)
         # Get majic files for item
         maj_list = []
-        for root, dirs, files in os.walk(majic_source_dir):
+        for root, _dirs, files in os.walk(majic_source_dir):
             for i in files:
                 # if os.path.split(i)[1] == value:
                 if re.search(regex_filename, os.path.split(i)[1]) is not None:
@@ -110,7 +111,7 @@ def import_majic_files(majic_source_dir: Path):
         logger.info(table)
         files_to_proceed_counter += len(majic_files_found[table])
 
-    logger.info("Majic files found : (%s files)" % files_to_proceed_counter)
+    logger.info(f"Majic files found : ({files_to_proceed_counter} files)")
     logger.info(majic_files_found)
     logger.info("Directions found :")
     logger.info(depdirs)
@@ -126,11 +127,8 @@ def import_majic_files(majic_source_dir: Path):
             )
 
             # Drop & create tables where to import data
-            logger.info("Drop & create table %s" % table)
-            sql = (
-                'DROP TABLE IF EXISTS "%(table)s"; CREATE TABLE "%(table)s" (tmp text);'
-                % {"table": table}
-            )
+            logger.info(f"Drop & create table {table}")
+            sql = f'DROP TABLE IF EXISTS "{table}"; CREATE TABLE "{table}" (tmp text);'
             run_sql_script(sql=sql, connection=conn)
 
             current_file = 0
@@ -149,8 +147,7 @@ def import_majic_files(majic_source_dir: Path):
                         # Build INSERT list
                         sql = "\n".join(
                             [
-                                "INSERT INTO \"%s\" VALUES (E'%s');"
-                                % (
+                                "INSERT INTO \"{}\" VALUES (E'{}');".format(
                                     table,
                                     r_quote_string.sub(
                                         "\\'", r.sub(" ", x.strip("\r\n"))
@@ -161,4 +158,4 @@ def import_majic_files(majic_source_dir: Path):
                             ]
                         )
                         run_sql_script(sql=sql, connection=conn)
-                logger.info("Import done and commited for %s" % fpath)
+                logger.info(f"Import done and commited for {fpath}")

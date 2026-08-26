@@ -74,8 +74,8 @@ def insert_parcelles_to_public():
       libcom, dlibvoi, adressepar, nbat, jdatatan, jannatmin, jannatmax,
       jannatminh, jannatmaxh, dcntarti, dcntnaf, nlocal, spevtot, nloclog,
       nloccom, nloccomsec, nloccomter, nlogh, nloghvac, nloghpp, nloghlm, ncp,
-      ndroit, descprop, ndroitpro, ndroitges, ndroitpro_parcelle_bati, typprop, typproppro, typpropges,
-      catpro, catpro_niv2, presgdprop,
+      ndroit, descprop, ndroitpro, ndroitges, ndroitpro_parcelle_bati, typprop, 
+      typproppro, typpropges, catpro, catpro_niv2, presgdprop,
       ddenomprop, ddenomproppro, ddenompropges
       )
     SELECT
@@ -83,8 +83,8 @@ def insert_parcelles_to_public():
       libcom, dlibvoi, adressepar, nbat, jdatatan, jannatmin, jannatmax,
       jannatminh, jannatmaxh, dcntarti, dcntnaf, nlocal, spevtot, nloclog,
       nloccom, nloccomsec, nloccomter, nlogh, nloghvac, nloghpp, nloghlm, ncp,
-      ndroit, descprop, ndroitpro, ndroitges, ndroitpro_parcelle_bati, typprop, typproppro, typpropges,
-      catpro, catpro_niv2, presgdprop,
+      ndroit, descprop, ndroitpro, ndroitges, ndroitpro_parcelle_bati, typprop, 
+      typproppro, typpropges, catpro, catpro_niv2, presgdprop,
       ddenomprop, ddenomproppro, ddenompropges
     FROM """
     import_query += f"{schema}.parcellaire;"
@@ -120,8 +120,8 @@ def insert_proprietaire_to_public():
       dnuper, ccodro, ccodrotxt, typedroit, ccodem, gdesip, gtoper, ccoqua,
       gnexcf, dtaucf, dnatpr, dnatprtxt, ccogrm, codgrm, ccogrmtxt, dsglpm,
       dforme, ddenom, gtyp3, gtyp4, gtyp5, gtyp6, dlign3, dlign4, dlign5,
-      dlign6, ccopay, ccodep1a2, ccodira, ccocom_adr AS ccocomadr, ccovoi, ccoriv, dnvoiri,
-      dindic, ccopos, dnirpp, dqualp, dnomlp, dprnlp, jdatnss, dldnss, epxnee,
+      dlign6, ccopay, ccodep1a2, ccodira, ccocom_adr AS ccocomadr, ccovoi, ccoriv, 
+      dnvoiri, dindic, ccopos, dnirpp, dqualp, dnomlp, dprnlp, jdatnss, dldnss, epxnee,
       dnomcp, dprncp, topcdi, oriard, fixard, datadr, topdec, datdec, dsiren,
       ccmm, topja, datja, anospi, cblpmo, gtodge, gpctf, gpctsb, jmodge,
       jandge, jantfc, jantbc, dformjur, dnomus, dprnus, lot, locprop,
@@ -190,14 +190,17 @@ def delete_from_public(
 ):
     logger = get_logger()
     logger.info(codes_insee)
-    delete_query = f"DELETE FROM public.{table_name} WHERE code_insee = ANY(ARRAY{codes_insee});"
+    delete_query = (
+        f"DELETE FROM public.{table_name} WHERE code_insee = ANY(ARRAY{codes_insee});"
+    )
 
     e = create_engine()
     with e.begin() as conn:
         run_sql_script(sql=delete_query, connection=conn)
 
     logger.info(
-        f"Les élémens de la table {table_name} ont été supprimés pour les communes {codes_insee};"
+        f"Les élémens de la table {table_name} ont été supprimés "
+        f"pour les communes {codes_insee};"
     )
 
 

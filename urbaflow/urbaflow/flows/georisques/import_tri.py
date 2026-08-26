@@ -8,7 +8,7 @@ def list_shp_files_at_path(path, regex):
     shp_files = []
     pattern = re.compile(regex)
 
-    for root, dirs, files in os.walk(path):
+    for root, _dirs, files in os.walk(path):
         for file in files:
             if pattern.match(file) and file.endswith(".shp"):
                 file_path = os.path.join(root, file)
