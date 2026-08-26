@@ -24,34 +24,76 @@ app = typer.Typer()
 
 DEFAULT_DIRNAME = Path("/data/")
 
+DIRNAME_ARGUMENT = typer.Argument(
+    DEFAULT_DIRNAME,
+    exists=True,
+    file_okay=False,
+    dir_okay=True,
+    writable=True,
+    readable=True,
+    resolve_path=True,
+)
+
+STEPS_ARGUMENT = typer.Argument(
+    None,
+    help=(
+        "List of steps to run (e.g., 'step1', 'step2'). "
+        "If not provided, all steps are run."
+    ),
+)
+
+OPTIONAL_DIRNAME_CAVITE_ARGUMENT = typer.Argument(
+    None,
+    exists=True,
+    file_okay=False,
+    dir_okay=True,
+    readable=True,
+    help="Directory path containing CSV files. Optional if --department is provided.",
+)
+
+OPTIONAL_DIRNAME_RGA_ARGUMENT = typer.Argument(
+    None,
+    exists=True,
+    file_okay=False,
+    dir_okay=True,
+    readable=True,
+    help=(
+        "Directory path containing RGA shapefiles. "
+        "Optional if --departement is provided."
+    ),
+)
+
+SCHEMA_OPTION = typer.Option("public", help="Database schema name")
+LOVAC_FIL_TABLE_OPTION = typer.Option("lovac_fil", help="Database table name")
+RISQUES_CAVITE_TABLE_OPTION = typer.Option("risques_cavite", help="Database table name")
+RECURSIVE_OPTION = typer.Option(False, help="Search recursively in subdirectories")
+RECREATE_TRUE_OPTION = typer.Option(True, help="Drop/recreate table if it exists")
+RECREATE_FALSE_OPTION = typer.Option(False, help="Drop/recreate table if it exists")
+DEPARTMENT_OPTION = typer.Option(
+    None,
+    "-d",
+    "--department",
+    help="Department code (e.g., '75' for Paris). Required if dirname is not provided.",
+)
+DEPARTEMENT_OPTION = typer.Option(
+    None,
+    "-d",
+    "--departement",
+    help="Department code (e.g., '75' for Paris). Required if dirname is not provided.",
+)
+
 
 @app.command()
 def dvf(
     departements: str,
-    dirname: Path = typer.Argument(
-        DEFAULT_DIRNAME,
-        exists=True,
-        file_okay=False,
-        dir_okay=True,
-        writable=True,
-        readable=True,
-        resolve_path=True,
-    ),
+    dirname: Path = DIRNAME_ARGUMENT,
 ):
     dvf_flow._run(departements, dirname)
 
 
 @app.command(name="dgfip-topo")
 def dgfip_topo(
-    dirname: Path = typer.Argument(
-        DEFAULT_DIRNAME,
-        exists=True,
-        file_okay=False,
-        dir_okay=True,
-        writable=True,
-        readable=True,
-        resolve_path=True,
-    ),
+    dirname: Path = DIRNAME_ARGUMENT,
 ):
     """
     DIRNAME : Chemin du répertoire contenant le fichier des entités topographiques DGFiP
@@ -61,15 +103,7 @@ def dgfip_topo(
 
 @app.command()
 def locomvac(
-    dirname: Path = typer.Argument(
-        DEFAULT_DIRNAME,
-        exists=True,
-        file_okay=False,
-        dir_okay=True,
-        writable=True,
-        readable=True,
-        resolve_path=True,
-    ),
+    dirname: Path = DIRNAME_ARGUMENT,
 ):
     """
     DIRNAME : Chemin du répertoire contenant les fichiers LOCOMVAC
@@ -80,15 +114,7 @@ def locomvac(
 
 @app.command()
 def lovac(
-    dirname: Path = typer.Argument(
-        DEFAULT_DIRNAME,
-        exists=True,
-        file_okay=False,
-        dir_okay=True,
-        writable=True,
-        readable=True,
-        resolve_path=True,
-    ),
+    dirname: Path = DIRNAME_ARGUMENT,
 ):
     """
     DIRNAME : Chemin du répertoire contenant les fichiers csv LOVAC
@@ -99,19 +125,11 @@ def lovac(
 
 @app.command()
 def lovac_fil(
-    dirname: Path = typer.Argument(
-        DEFAULT_DIRNAME,
-        exists=True,
-        file_okay=False,
-        dir_okay=True,
-        writable=True,
-        readable=True,
-        resolve_path=True,
-    ),
-    schema: str = typer.Option("public", help="Database schema name"),
-    table_name: str = typer.Option("lovac_fil", help="Database table name"),
-    recursive: bool = typer.Option(False, help="Search recursively in subdirectories"),
-    recreate: bool = typer.Option(True, help="Drop/recreate table if it exists"),
+    dirname: Path = DIRNAME_ARGUMENT,
+    schema: str = SCHEMA_OPTION,
+    table_name: str = LOVAC_FIL_TABLE_OPTION,
+    recursive: bool = RECURSIVE_OPTION,
+    recreate: bool = RECREATE_TRUE_OPTION,
 ):
     """
     DIRNAME : Chemin du répertoire contenant les fichiers lovac_fil.csv
@@ -134,19 +152,8 @@ def lovac_fil(
 
 @app.command()
 def majic(
-    dirname: Path = typer.Argument(
-        DEFAULT_DIRNAME,
-        exists=True,
-        file_okay=False,
-        dir_okay=True,
-        writable=True,
-        readable=True,
-        resolve_path=True,
-    ),
-    steps: list[str] = typer.Argument(
-        None,
-        help="List of steps to run (e.g., 'step1', 'step2'). If not provided, all steps are run.",
-    ),
+    dirname: Path = DIRNAME_ARGUMENT,
+    steps: list[str] = STEPS_ARGUMENT,
 ):
     """
     DIRNAME : Chemin du répertoire contenant les fichiers MAJIC
@@ -167,23 +174,11 @@ def majic(
 
 @app.command()
 def risques_cavite(
-    dirname: Path = typer.Argument(
-        None,
-        exists=True,
-        file_okay=False,
-        dir_okay=True,
-        readable=True,
-        help="Directory path containing CSV files. Optional if --department is provided.",
-    ),
-    department: str = typer.Option(
-        None,
-        "-d",
-        "--department",
-        help="Department code (e.g., '75' for Paris). Required if dirname is not provided.",
-    ),
-    recreate: bool = typer.Option(True, help="Drop/recreate table if it exists"),
-    schema: str = typer.Option("public", help="Database schema name"),
-    table_name: str = typer.Option("risques_cavite", help="Database table name"),
+    dirname: Path = OPTIONAL_DIRNAME_CAVITE_ARGUMENT,
+    department: str = DEPARTMENT_OPTION,
+    recreate: bool = RECREATE_TRUE_OPTION,
+    schema: str = SCHEMA_OPTION,
+    table_name: str = RISQUES_CAVITE_TABLE_OPTION,
 ):
     """
     Import des données de risques de cavités.
@@ -210,22 +205,10 @@ def risques_cavite(
 
 @app.command()
 def risques_rga(
-    dirname: Path = typer.Argument(
-        None,
-        exists=True,
-        file_okay=False,
-        dir_okay=True,
-        readable=True,
-        help="Directory path containing RGA shapefiles. Optional if --departement is provided.",
-    ),
-    departement: str = typer.Option(
-        None,
-        "-d",
-        "--departement",
-        help="Department code (e.g., '75' for Paris). Required if dirname is not provided.",
-    ),
-    schema: str = typer.Option("public", help="Database schema name"),
-    recreate: bool = typer.Option(False, help="Drop/recreate table if it exists"),
+    dirname: Path = OPTIONAL_DIRNAME_RGA_ARGUMENT,
+    departement: str = DEPARTEMENT_OPTION,
+    schema: str = SCHEMA_OPTION,
+    recreate: bool = RECREATE_FALSE_OPTION,
 ):
     """
     Import des données de risques de retrait-gonflement des argiles (RGA).

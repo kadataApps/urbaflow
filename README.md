@@ -87,6 +87,87 @@ make build-urbaflow
 ```shell
 make urbaflow
 ```
+
+## Commandes disponibles (CLI `main.py`)
+
+Le point d'entrée CLI est `urbaflow/main.py` (Typer).
+
+### Lancement de la CLI
+
+- Avec Docker :
+
+```shell
+docker compose run --rm urbaflow python urbaflow/main.py --help
+```
+
+- En local (développement) :
+
+```shell
+uv run python urbaflow/main.py --help
+```
+
+### Commandes
+
+- `dvf <departements> [dirname]`
+  - Importe les données DVF pour un ou plusieurs départements.
+  - `dirname` est optionnel (par défaut: `/data/`).
+
+- `dgfip-topo [dirname]`
+  - Importe les entités topographiques DGFiP.
+  - `dirname` est optionnel (par défaut: `/data/`).
+
+- `locomvac [dirname]`
+  - Importe les fichiers LOCOMVAC.
+  - `dirname` est optionnel (par défaut: `/data/`).
+
+- `lovac [dirname]`
+  - Importe les fichiers LOVAC.
+  - `dirname` est optionnel (par défaut: `/data/`).
+
+- `lovac-fil [dirname] [OPTIONS]`
+  - Importe les données LOVAC FIL.
+  - Options :
+    - `--schema TEXT` (défaut: `public`)
+    - `--table-name TEXT` (défaut: `lovac_fil`)
+    - `--recursive / --no-recursive` (défaut: `--no-recursive`)
+    - `--recreate / --no-recreate` (défaut: `--recreate`)
+
+- `majic [dirname] [steps...]`
+  - Importe MAJIC/Cadastre.
+  - `steps` permet de limiter l'exécution à certaines étapes.
+
+- `risques-cavite [dirname] [OPTIONS]`
+  - Importe les données de risques de cavités.
+  - Fournir soit `dirname`, soit `--department`.
+  - Options :
+    - `-d, --department TEXT`
+    - `--schema TEXT` (défaut: `public`)
+    - `--table-name TEXT` (défaut: `risques_cavite`)
+    - `--recreate / --no-recreate` (défaut: `--recreate`)
+
+- `risques-rga [dirname] [OPTIONS]`
+  - Importe les données de retrait-gonflement des argiles.
+  - Fournir soit `dirname`, soit `--departement`.
+  - Options :
+    - `-d, --departement TEXT`
+    - `--schema TEXT` (défaut: `public`)
+    - `--recreate / --no-recreate` (défaut: `--no-recreate`)
+
+### Exemples
+
+```shell
+# Aide générale
+docker compose run --rm urbaflow python urbaflow/main.py --help
+
+# Commande MAJIC (toutes les étapes)
+docker compose run --rm urbaflow python urbaflow/main.py majic /data/
+
+# Risques cavités pour un département
+docker compose run --rm urbaflow python urbaflow/main.py risques-cavite -d 85
+
+# LOVAC FIL avec options
+docker compose run --rm urbaflow python urbaflow/main.py lovac-fil /data/ --schema public --table-name lovac_fil --recursive --recreate
+```
 ## Licence
 
 © Thomas Brosset - [thoomasbro](https://github.com/thoomasbro) - [KADATA](https://kadata.fr) - 2025
