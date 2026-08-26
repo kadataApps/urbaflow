@@ -153,6 +153,15 @@ uv run python urbaflow/main.py --help
     - `--schema TEXT` (défaut: `public`)
     - `--recreate / --no-recreate` (défaut: `--no-recreate`)
 
+- `risques-remnappes [dirname] [OPTIONS]`
+  - Importe les données de risques d'inondation par remontée de nappe (REMNAPPES).
+  - Fournir soit `dirname`, soit `--departement`.
+  - Options :
+    - `-d, --departement TEXT`
+    - `--schema TEXT` (défaut: `public`)
+    - `--table-name TEXT` (défaut: `risques_remnappes`)
+    - `--recreate / --no-recreate` (défaut: `--no-recreate`)
+
 ### Exemples
 
 ```shell

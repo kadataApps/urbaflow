@@ -9,6 +9,8 @@ from shared_tasks.file_utils import encode_to_utf8, list_files_at_path
 from shared_tasks.logging_config import get_logger
 from sqlalchemy import DDL
 
+# Les données de mouvements de terrain sont disponibles sur le site Georisques
+# https://www.georisques.gouv.fr/webappReport/ws/mvmt/departements/85/fichecommunes.csv
 
 @task
 def create_table_mvt(schema="public", table_name="risques_mvt"):
