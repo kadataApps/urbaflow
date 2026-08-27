@@ -29,7 +29,7 @@ def import_shapefile(
         f'PG:"host={params["host"]} port={params["port"]} user={params["user"]} '
         f'dbname={params["database"]} " '
         f'"{params["file"]}" -nln {params["schema"]}.{params["table"]} '
-        f"-lco GEOMETRY_NAME=geom "
+        f"-lco GEOMETRY_NAME=geom -lco PRECISION=NO "
         f"{method} "
         f'-skipfailures -s_srs "{source_srs}" -t_srs "{destination_srs}" '
         f'-nlt "PROMOTE_TO_MULTI"'
