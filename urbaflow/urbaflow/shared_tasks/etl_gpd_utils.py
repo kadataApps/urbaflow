@@ -230,7 +230,7 @@ def load_with_connection(
     logger.info(f"Loading into {schema}.{table_name}")
 
     if isinstance(df, gpd.GeoDataFrame):
-        logger.info("GeodateFrame detected, using to_postgis")
+        logger.info("GeodataFrame detected, using to_postgis")
         df.to_postgis(
             name=table_name,
             con=connection,

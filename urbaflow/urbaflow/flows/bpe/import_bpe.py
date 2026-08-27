@@ -1,3 +1,4 @@
+import zipfile
 from pathlib import Path
 
 import pandas as pd
@@ -5,7 +6,6 @@ import requests
 from prefect import flow, task
 from shared_tasks.config import TEMP_DIR
 from shared_tasks.db_engine import create_engine
-from shared_tasks.etl_file_utils import download_and_unzip
 from shared_tasks.etl_gpd_utils import load
 from shared_tasks.file_utils import encode_to_utf8, list_files_at_path
 from shared_tasks.logging_config import get_logger
@@ -281,7 +281,9 @@ def import_bpe_flow(
             for chunk in response.iter_content(chunk_size=65536):
                 f.write(chunk)
 
-        download_and_unzip(str(zip_path), extract_to_path=target_dir)
+        with zipfile.ZipFile(zip_path, "r") as zip_ref:
+            zip_ref.extractall(target_dir)
+        logger.info("Extraction réussie dans %s", target_dir)
         dirname = target_dir
 
     csv_files = list_files_at_path(dirname, r".*bpe.*", extension=".csv")
