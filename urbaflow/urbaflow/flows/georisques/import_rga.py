@@ -30,13 +30,19 @@ def import_rga_flow(
     Si le répertoire n'est pas fourni, le département doit être spécifié
     pour télécharger les données.
 
-    https://files.georisques.fr/argiles/AleaRG76_L93.zip
+    Donnée 2020 disponible depuis la page https://www.georisques.gouv.fr/donnees/bases-de-donnees/retrait-gonflement-des-argiles-version-2020
+    https://files.georisques.fr/argiles/AleaRG85_L93.zip
+
+    Donnée 2026 disponible depuis la page https://www.georisques.gouv.fr/donnees/bases-de-donnees/retrait-gonflement-des-argiles-version-2026
+    https://files.georisques.fr/argiles/2025/AleaRG_2025_85_L93.zip
+
     """
     if dirname is None and department is None:
         raise ValueError("Le nom du répertoire ou le département doit être fourni.")
     if department:
         logger.info(f"Downloading RGA data for department {department}")
-        url = f"https://files.georisques.fr/argiles/AleaRG{department}_L93.zip"
+        # url = f"https://files.georisques.fr/argiles/AleaRG{department}_L93.zip"
+        url = f"https://files.georisques.fr/argiles/2025/AleaRG_2025_{department}_L93.zip"
         target_dir = TEMP_DIR / "georisques/rga" / department
         target_dir.mkdir(parents=True, exist_ok=True)
 
