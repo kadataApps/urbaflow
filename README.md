@@ -207,6 +207,14 @@ uv run python urbaflow/main.py --help
     - `--table-name TEXT` (défaut: `risques_tri`)
     - `--recreate / --no-recreate` (défaut: `--no-recreate`)
 
+- `risques-icpe [dirname] [OPTIONS]`
+  - Importe la base nationale des installations classées pour la protection de l'environnement (ICPE).
+  - `dirname` est optionnel (télécharge la base nationale WFS par défaut).
+  - Options :
+    - `--schema TEXT` (défaut: `public`)
+    - `--table-name TEXT` (défaut: `risques_icpe`)
+    - `--recreate / --no-recreate` (défaut: `--no-recreate`)
+
 ### Exemples
 
 ```shell

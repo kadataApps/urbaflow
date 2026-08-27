@@ -10,6 +10,7 @@ from flows.cadastre.flow_dgfip_topo import import_dgfip_topo_flow
 from flows.dvf.dvf import dvf_flow
 from flows.georisques.import_casias import import_risques_casias_flow
 from flows.georisques.import_cavite import import_risques_cavite_flow
+from flows.georisques.import_icpe import import_icpe_flow
 from flows.georisques.import_mvt import import_risques_mvt_flow
 from flows.georisques.import_remnappes import import_remnappes_flow
 from flows.georisques.import_rga import import_rga_flow
@@ -141,6 +142,18 @@ OPTIONAL_DIRNAME_TRI_ARGUMENT = typer.Argument(
     ),
 )
 
+OPTIONAL_DIRNAME_ICPE_ARGUMENT = typer.Argument(
+    None,
+    exists=True,
+    file_okay=False,
+    dir_okay=True,
+    readable=True,
+    help=(
+        "Directory path containing ICPE shapefiles. "
+        "Optional (downloads national base if omitted)."
+    ),
+)
+
 SCHEMA_OPTION = typer.Option("public", help="Database schema name")
 LOVAC_FIL_TABLE_OPTION = typer.Option("lovac_fil", help="Database table name")
 RISQUES_CAVITE_TABLE_OPTION = typer.Option("risques_cavite", help="Database table name")
@@ -152,6 +165,7 @@ RISQUES_CASIAS_TABLE_OPTION = typer.Option("risques_casias", help="Database tabl
 RISQUES_SIS_TABLE_OPTION = typer.Option("risques_sis", help="Database table name")
 RISQUES_SUP_TABLE_OPTION = typer.Option("risques_sup", help="Database table name")
 RISQUES_TRI_TABLE_OPTION = typer.Option("risques_tri", help="Database table name")
+RISQUES_ICPE_TABLE_OPTION = typer.Option("risques_icpe", help="Database table name")
 RECURSIVE_OPTION = typer.Option(False, help="Search recursively in subdirectories")
 RECREATE_TRUE_OPTION = typer.Option(True, help="Drop/recreate table if it exists")
 RECREATE_FALSE_OPTION = typer.Option(False, help="Drop/recreate table if it exists")
@@ -498,6 +512,27 @@ def risques_tri(
     import_tri_flow(
         dirname=dirname,
         department=departement,
+        schema=schema,
+        table=table_name,
+        replace=recreate,
+    )
+
+
+@app.command()
+def risques_icpe(
+    dirname: Path = OPTIONAL_DIRNAME_ICPE_ARGUMENT,
+    schema: str = SCHEMA_OPTION,
+    table_name: str = RISQUES_ICPE_TABLE_OPTION,
+    recreate: bool = RECREATE_FALSE_OPTION,
+):
+    """
+    Import des données des Installations Classées (ICPE).
+
+    Base nationale au format shapefile (WGS84). Si le répertoire n'est pas fourni,
+    les données sont téléchargées automatiquement via le WFS Géorisques.
+    """
+    import_icpe_flow(
+        dirname=dirname,
         schema=schema,
         table=table_name,
         replace=recreate,
