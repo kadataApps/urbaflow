@@ -171,6 +171,15 @@ uv run python urbaflow/main.py --help
     - `--table-name TEXT` (défaut: `risques_mvt`)
     - `--recreate / --no-recreate` (défaut: `--no-recreate`)
 
+- `risques-casias [dirname] [OPTIONS]`
+  - Importe les données de carte des anciens sites industriels et activités de service (CASIAS).
+  - Fournir soit `dirname`, soit `--departement`.
+  - Options :
+    - `-d, --departement TEXT`
+    - `--schema TEXT` (défaut: `public`)
+    - `--table-name TEXT` (défaut: `risques_casias`)
+    - `--recreate / --no-recreate` (défaut: `--no-recreate`)
+
 ### Exemples
 
 ```shell
