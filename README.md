@@ -248,6 +248,14 @@ uv run python urbaflow/main.py --help
     - `--table-name TEXT` (défaut: `banatic_communes`)
     - `--recreate / --no-recreate` (défaut: `--recreate`)
 
+- `epci-gpu <siren> [OPTIONS]`
+  - Intégration des communes et des documents d'urbanisme / servitudes d'un EPCI à partir de son numéro SIREN.
+  - Crée la table `banatic_communes_<SIREN>` enrichie par l'API APICARTO IGN (`is_rnu`, `is_coastline`).
+  - Met à jour les 8 tables PostGIS `gpu_*` (`gpu_zone_urba`, `gpu_secteur_cc`, `gpu_prescription_surf`, `gpu_prescription_lin`, `gpu_prescription_pct`, `gpu_info_surf`, `gpu_info_lin`, `gpu_info_pct`) pour les partitions `DU_<insee>`, `PSMV_<insee>`, `DU_<siren>` et `PSMV_<siren>`.
+  - Options :
+    - `--schema TEXT` (défaut: `public`)
+    - `--banatic-table TEXT` (défaut: `banatic_communes`)
+
 ### Exemples
 
 ```shell

@@ -9,6 +9,7 @@ from flows.cadastre.flow_cadastre import (
 )
 from flows.cadastre.flow_dgfip_topo import import_dgfip_topo_flow
 from flows.dvf.dvf import dvf_flow
+from flows.geoportail.import_epci_gpu import import_epci_gpu_flow
 from flows.geoportail.import_gpu_sup import import_gpu_sup_flow
 from flows.georisques.import_casias import import_risques_casias_flow
 from flows.georisques.import_cavite import import_risques_cavite_flow
@@ -683,6 +684,26 @@ def banatic_communes(
         db_schema=schema,
         table_name=table_name,
         recreate=recreate,
+    )
+
+
+@app.command(name="epci-gpu")
+def epci_gpu(
+    siren: str = typer.Argument(..., help="Numéro SIREN de l'EPCI (ex: 200071629)"),
+    schema: str = SCHEMA_OPTION,
+    banatic_table: str = BANATIC_COMMUNES_TABLE_OPTION,
+):
+    """
+    Intégration des communes et documents GPU d'un EPCI via APICARTO.
+
+    1. Crée la table banatic_communes_<SIREN> enrichie par /api/gpu/municipality.
+    2. Interroge les API APICARTO (zone-urba, secteur-cc, prescription-*, info-*).
+    3. Met à jour les tables PostGIS gpu_* en nettoyant les anciennes partitions.
+    """
+    import_epci_gpu_flow(
+        siren_epci=siren,
+        db_schema=schema,
+        banatic_table=banatic_table,
     )
 
 
