@@ -240,6 +240,14 @@ uv run python urbaflow/main.py --help
     - `--schema TEXT` (défaut: `public`)
     - `--recreate / --no-recreate` (défaut: `--recreate`)
 
+- `banatic-communes [dirname] [OPTIONS]`
+  - Importe la table consolidée des communes BANATIC avec leur raccordement aux EPCI à fiscalité propre (EPCI FP).
+  - `dirname` est optionnel (télécharge automatiquement les fichiers CSV depuis data.gouv.fr par défaut).
+  - Options :
+    - `--schema TEXT` (défaut: `public`)
+    - `--table-name TEXT` (défaut: `banatic_communes`)
+    - `--recreate / --no-recreate` (défaut: `--recreate`)
+
 ### Exemples
 
 ```shell

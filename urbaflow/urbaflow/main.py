@@ -2,6 +2,7 @@ from pathlib import Path
 
 import typer
 from dotenv import load_dotenv
+from flows.banatic.import_banatic_communes import import_banatic_communes_flow
 from flows.cadastre.flow_cadastre import (
     STEPS_FLOW_CADASTRE,
     import_cadastre_majic_flow,
@@ -193,6 +194,18 @@ OPTIONAL_DIRNAME_GPU_SUP_ARGUMENT = typer.Argument(
     ),
 )
 
+OPTIONAL_DIRNAME_BANATIC_ARGUMENT = typer.Argument(
+    None,
+    exists=True,
+    file_okay=False,
+    dir_okay=True,
+    readable=True,
+    help=(
+        "Directory path containing BANATIC CSV files. "
+        "Optional (downloads latest CSV files from data.gouv.fr if omitted)."
+    ),
+)
+
 YEAR_IREP_OPTION = typer.Option(2024, help="Year of the IREP dataset (e.g. 2024)")
 
 SCHEMA_OPTION = typer.Option("public", help="Database schema name")
@@ -209,6 +222,9 @@ RISQUES_TRI_TABLE_OPTION = typer.Option("risques_tri", help="Database table name
 RISQUES_ICPE_TABLE_OPTION = typer.Option("risques_icpe", help="Database table name")
 RISQUES_IREP_TABLE_OPTION = typer.Option("risques_irep", help="Database table name")
 RISQUES_GASPAR_TABLE_OPTION = typer.Option("risques_gaspar", help="Database table name")
+BANATIC_COMMUNES_TABLE_OPTION = typer.Option(
+    "banatic_communes", help="Database table name"
+)
 RECURSIVE_OPTION = typer.Option(False, help="Search recursively in subdirectories")
 RECREATE_TRUE_OPTION = typer.Option(True, help="Drop/recreate table if it exists")
 RECREATE_FALSE_OPTION = typer.Option(False, help="Drop/recreate table if it exists")
@@ -642,6 +658,31 @@ def gpu_sup(
         dirname=dirname,
         schema=schema,
         replace=recreate,
+    )
+
+
+@app.command(name="banatic-communes")
+def banatic_communes(
+    dirname: Path = OPTIONAL_DIRNAME_BANATIC_ARGUMENT,
+    schema: str = SCHEMA_OPTION,
+    table_name: str = BANATIC_COMMUNES_TABLE_OPTION,
+    recreate: bool = RECREATE_TRUE_OPTION,
+):
+    """
+    Import de la table des communes BANATIC avec le raccordement aux EPCI FP.
+
+    Consolide la liste des communes avec les informations de leur EPCI FP.
+    Si le répertoire n'est pas fourni, le téléchargement s'effectue depuis data.gouv.fr.
+    """
+    epci_file = dirname / "epci_fp.csv" if dirname else None
+    communes_file = dirname / "communes_siren.csv" if dirname else None
+
+    import_banatic_communes_flow(
+        epci_fp_file=epci_file,
+        communes_siren_file=communes_file,
+        db_schema=schema,
+        table_name=table_name,
+        recreate=recreate,
     )
 
 
