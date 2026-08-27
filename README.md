@@ -256,6 +256,14 @@ uv run python urbaflow/main.py --help
     - `--schema TEXT` (défaut: `public`)
     - `--banatic-table TEXT` (défaut: `banatic_communes`)
 
+- `bpe [dirname] [OPTIONS]`
+  - Importe la Base Permanente des Équipements (BPE / INSEE) géolocalisée.
+  - `dirname` est optionnel (télécharge le fichier ZIP national BPE depuis l'INSEE par défaut).
+  - Options :
+    - `--schema TEXT` (défaut: `public`)
+    - `--table-name TEXT` (défaut: `insee_bpe`)
+    - `--recreate / --no-recreate` (défaut: `--recreate`)
+
 ### Exemples
 
 ```shell

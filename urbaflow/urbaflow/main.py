@@ -3,6 +3,7 @@ from pathlib import Path
 import typer
 from dotenv import load_dotenv
 from flows.banatic.import_banatic_communes import import_banatic_communes_flow
+from flows.bpe.import_bpe import import_bpe_flow
 from flows.cadastre.flow_cadastre import (
     STEPS_FLOW_CADASTRE,
     import_cadastre_majic_flow,
@@ -207,6 +208,18 @@ OPTIONAL_DIRNAME_BANATIC_ARGUMENT = typer.Argument(
     ),
 )
 
+OPTIONAL_DIRNAME_BPE_ARGUMENT = typer.Argument(
+    None,
+    exists=True,
+    file_okay=False,
+    dir_okay=True,
+    readable=True,
+    help=(
+        "Directory path containing BPE CSV files. "
+        "Optional (downloads national BPE zip if omitted)."
+    ),
+)
+
 YEAR_IREP_OPTION = typer.Option(2024, help="Year of the IREP dataset (e.g. 2024)")
 
 SCHEMA_OPTION = typer.Option("public", help="Database schema name")
@@ -226,6 +239,7 @@ RISQUES_GASPAR_TABLE_OPTION = typer.Option("risques_gaspar", help="Database tabl
 BANATIC_COMMUNES_TABLE_OPTION = typer.Option(
     "banatic_communes", help="Database table name"
 )
+INSEE_BPE_TABLE_OPTION = typer.Option("insee_bpe", help="Database table name")
 RECURSIVE_OPTION = typer.Option(False, help="Search recursively in subdirectories")
 RECREATE_TRUE_OPTION = typer.Option(True, help="Drop/recreate table if it exists")
 RECREATE_FALSE_OPTION = typer.Option(False, help="Drop/recreate table if it exists")
@@ -704,6 +718,27 @@ def epci_gpu(
         siren_epci=siren,
         db_schema=schema,
         banatic_table=banatic_table,
+    )
+
+
+@app.command()
+def bpe(
+    dirname: Path = OPTIONAL_DIRNAME_BPE_ARGUMENT,
+    schema: str = SCHEMA_OPTION,
+    table_name: str = INSEE_BPE_TABLE_OPTION,
+    recreate: bool = RECREATE_TRUE_OPTION,
+):
+    """
+    Import de la Base Permanente des Équipements (BPE / INSEE).
+
+    Base nationale géolocalisée (équipements, commerces, santé, sports, etc.).
+    Si le répertoire n'est pas fourni, le fichier ZIP BPE est téléchargé.
+    """
+    import_bpe_flow(
+        dirname=dirname,
+        db_schema=schema,
+        table_name=table_name,
+        recreate=recreate,
     )
 
 
