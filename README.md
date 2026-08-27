@@ -264,6 +264,14 @@ uv run python urbaflow/main.py --help
     - `--table-name TEXT` (défaut: `insee_bpe`)
     - `--recreate / --no-recreate` (défaut: `--recreate`)
 
+- `mh [dirname] [OPTIONS]`
+  - Importe les immeubles protégés au titre des Monuments Historiques (MH).
+  - `dirname` est optionnel (télécharge le fichier GeoJSON national depuis data.gouv.fr par défaut).
+  - Options :
+    - `--schema TEXT` (défaut: `public`)
+    - `--table-name TEXT` (défaut: `patrimoine_immeubles_proteges_mh`)
+    - `--recreate / --no-recreate` (défaut: `--recreate`)
+
 ### Exemples
 
 ```shell

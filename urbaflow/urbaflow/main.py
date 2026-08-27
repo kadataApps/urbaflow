@@ -26,6 +26,7 @@ from flows.georisques.import_tri import import_tri_flow
 from flows.locomvac import import_locomvac
 from flows.lovac.import_lovac import import_lovac_flow
 from flows.lovac.import_lovac_fil import import_lovac_fil_flow
+from flows.mh.import_mh import import_mh_flow
 from shared_tasks.logging_config import setup_logging
 
 # Load environment variables from .env file in the root directory
@@ -220,6 +221,18 @@ OPTIONAL_DIRNAME_BPE_ARGUMENT = typer.Argument(
     ),
 )
 
+OPTIONAL_DIRNAME_MH_ARGUMENT = typer.Argument(
+    None,
+    exists=True,
+    file_okay=False,
+    dir_okay=True,
+    readable=True,
+    help=(
+        "Directory path containing MH GeoJSON file. "
+        "Optional (downloads national GeoJSON if omitted)."
+    ),
+)
+
 YEAR_IREP_OPTION = typer.Option(2024, help="Year of the IREP dataset (e.g. 2024)")
 
 SCHEMA_OPTION = typer.Option("public", help="Database schema name")
@@ -240,6 +253,9 @@ BANATIC_COMMUNES_TABLE_OPTION = typer.Option(
     "banatic_communes", help="Database table name"
 )
 INSEE_BPE_TABLE_OPTION = typer.Option("insee_bpe", help="Database table name")
+PATRIMOINE_MH_TABLE_OPTION = typer.Option(
+    "patrimoine_immeubles_proteges_mh", help="Database table name"
+)
 RECURSIVE_OPTION = typer.Option(False, help="Search recursively in subdirectories")
 RECREATE_TRUE_OPTION = typer.Option(True, help="Drop/recreate table if it exists")
 RECREATE_FALSE_OPTION = typer.Option(False, help="Drop/recreate table if it exists")
@@ -735,6 +751,27 @@ def bpe(
     Si le répertoire n'est pas fourni, le fichier ZIP BPE est téléchargé.
     """
     import_bpe_flow(
+        dirname=dirname,
+        db_schema=schema,
+        table_name=table_name,
+        recreate=recreate,
+    )
+
+
+@app.command()
+def mh(
+    dirname: Path = OPTIONAL_DIRNAME_MH_ARGUMENT,
+    schema: str = SCHEMA_OPTION,
+    table_name: str = PATRIMOINE_MH_TABLE_OPTION,
+    recreate: bool = RECREATE_TRUE_OPTION,
+):
+    """
+    Import des immeubles protégés au titre des Monuments Historiques (MH).
+
+    Base nationale GeoJSON. Si le répertoire n'est pas fourni, le fichier GeoJSON
+    est téléchargé automatiquement depuis data.gouv.fr.
+    """
+    import_mh_flow(
         dirname=dirname,
         db_schema=schema,
         table_name=table_name,
