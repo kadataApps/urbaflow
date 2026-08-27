@@ -198,6 +198,15 @@ uv run python urbaflow/main.py --help
     - `--table-name TEXT` (défaut: `risques_sup`)
     - `--recreate / --no-recreate` (défaut: `--no-recreate`)
 
+- `risques-tri [dirname] [OPTIONS]`
+  - Importe les territoires à risques important d'inondation (TRI 2020).
+  - Fournir soit `dirname`, soit `--departement`.
+  - Options :
+    - `-d, --departement TEXT`
+    - `--schema TEXT` (défaut: `public`)
+    - `--table-name TEXT` (défaut: `risques_tri`)
+    - `--recreate / --no-recreate` (défaut: `--no-recreate`)
+
 ### Exemples
 
 ```shell
