@@ -13,6 +13,8 @@ from flows.georisques.import_cavite import import_risques_cavite_flow
 from flows.georisques.import_mvt import import_risques_mvt_flow
 from flows.georisques.import_remnappes import import_remnappes_flow
 from flows.georisques.import_rga import import_rga_flow
+from flows.georisques.import_sis import import_risques_sis_flow
+from flows.georisques.import_sup import import_risques_sup_flow
 from flows.locomvac import import_locomvac
 from flows.lovac.import_lovac import import_lovac_flow
 from flows.lovac.import_lovac_fil import import_lovac_fil_flow
@@ -102,6 +104,30 @@ OPTIONAL_DIRNAME_CASIAS_ARGUMENT = typer.Argument(
     ),
 )
 
+OPTIONAL_DIRNAME_SIS_ARGUMENT = typer.Argument(
+    None,
+    exists=True,
+    file_okay=False,
+    dir_okay=True,
+    readable=True,
+    help=(
+        "Directory path containing SIS JSON files. "
+        "Optional if --departement is provided."
+    ),
+)
+
+OPTIONAL_DIRNAME_SUP_ARGUMENT = typer.Argument(
+    None,
+    exists=True,
+    file_okay=False,
+    dir_okay=True,
+    readable=True,
+    help=(
+        "Directory path containing SUP JSON files. "
+        "Optional if --departement is provided."
+    ),
+)
+
 SCHEMA_OPTION = typer.Option("public", help="Database schema name")
 LOVAC_FIL_TABLE_OPTION = typer.Option("lovac_fil", help="Database table name")
 RISQUES_CAVITE_TABLE_OPTION = typer.Option("risques_cavite", help="Database table name")
@@ -110,6 +136,8 @@ RISQUES_REMNAPPES_TABLE_OPTION = typer.Option(
 )
 RISQUES_MVT_TABLE_OPTION = typer.Option("risques_mvt", help="Database table name")
 RISQUES_CASIAS_TABLE_OPTION = typer.Option("risques_casias", help="Database table name")
+RISQUES_SIS_TABLE_OPTION = typer.Option("risques_sis", help="Database table name")
+RISQUES_SUP_TABLE_OPTION = typer.Option("risques_sup", help="Database table name")
 RECURSIVE_OPTION = typer.Option(False, help="Search recursively in subdirectories")
 RECREATE_TRUE_OPTION = typer.Option(True, help="Drop/recreate table if it exists")
 RECREATE_FALSE_OPTION = typer.Option(False, help="Drop/recreate table if it exists")
@@ -361,6 +389,68 @@ def risques_casias(
         raise typer.Exit(1)
 
     import_risques_casias_flow(
+        path=dirname,
+        department=departement,
+        schema=schema,
+        table_name=table_name,
+        recreate=recreate,
+    )
+
+
+@app.command()
+def risques_sis(
+    dirname: Path = OPTIONAL_DIRNAME_SIS_ARGUMENT,
+    departement: str = DEPARTEMENT_OPTION,
+    schema: str = SCHEMA_OPTION,
+    table_name: str = RISQUES_SIS_TABLE_OPTION,
+    recreate: bool = RECREATE_FALSE_OPTION,
+):
+    """
+    Import des données SIS (Secteurs d'Information sur les Sols).
+
+    Si le répertoire n'est pas fourni, l'option --departement (-d) doit être spécifiée
+    pour télécharger les données.
+    """
+    # Validate that at least one of dirname or departement is provided
+    if dirname is None and departement is None:
+        typer.echo(
+            "Error: Either provide a dirname argument or use --departement/-d option.",
+            err=True,
+        )
+        raise typer.Exit(1)
+
+    import_risques_sis_flow(
+        path=dirname,
+        department=departement,
+        schema=schema,
+        table_name=table_name,
+        recreate=recreate,
+    )
+
+
+@app.command()
+def risques_sup(
+    dirname: Path = OPTIONAL_DIRNAME_SUP_ARGUMENT,
+    departement: str = DEPARTEMENT_OPTION,
+    schema: str = SCHEMA_OPTION,
+    table_name: str = RISQUES_SUP_TABLE_OPTION,
+    recreate: bool = RECREATE_FALSE_OPTION,
+):
+    """
+    Import des données SUP (Servitudes d'Utilité Publique).
+
+    Si le répertoire n'est pas fourni, l'option --departement (-d) doit être spécifiée
+    pour télécharger les données.
+    """
+    # Validate that at least one of dirname or departement is provided
+    if dirname is None and departement is None:
+        typer.echo(
+            "Error: Either provide a dirname argument or use --departement/-d option.",
+            err=True,
+        )
+        raise typer.Exit(1)
+
+    import_risques_sup_flow(
         path=dirname,
         department=departement,
         schema=schema,

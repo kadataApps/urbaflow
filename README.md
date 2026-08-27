@@ -180,6 +180,24 @@ uv run python urbaflow/main.py --help
     - `--table-name TEXT` (défaut: `risques_casias`)
     - `--recreate / --no-recreate` (défaut: `--no-recreate`)
 
+- `risques-sis [dirname] [OPTIONS]`
+  - Importe les secteurs d'information sur les sols (SIS). Cf. [INFOSOLS_SIS_SUP.md](INFOSOLS_SIS_SUP.md).
+  - Fournir soit `dirname`, soit `--departement`.
+  - Options :
+    - `-d, --departement TEXT`
+    - `--schema TEXT` (défaut: `public`)
+    - `--table-name TEXT` (défaut: `risques_sis`)
+    - `--recreate / --no-recreate` (défaut: `--no-recreate`)
+
+- `risques-sup [dirname] [OPTIONS]`
+  - Importe les servitudes d'utilité publique (SUP). Cf. [INFOSOLS_SIS_SUP.md](INFOSOLS_SIS_SUP.md).
+  - Fournir soit `dirname`, soit `--departement`.
+  - Options :
+    - `-d, --departement TEXT`
+    - `--schema TEXT` (défaut: `public`)
+    - `--table-name TEXT` (défaut: `risques_sup`)
+    - `--recreate / --no-recreate` (défaut: `--no-recreate`)
+
 ### Exemples
 
 ```shell
