@@ -187,7 +187,7 @@ def import_casias_files(
 def import_risques_casias_flow(
     path: Path | None = None,
     department: str | None = None,
-    schema: str = "public",
+    db_schema: str = "public",
     table_name: str = "risques_casias",
     recreate: bool = False,
 ):
@@ -199,8 +199,8 @@ def import_risques_casias_flow(
     if path is None and department is None:
         raise ValueError("Le chemin du répertoire ou le département doit être fourni.")
 
-    create_table_casias(schema=schema, table_name=table_name, recreate=recreate)
-    add_geometry_column_to_table(schema=schema, table_name=table_name)
+    create_table_casias(schema=db_schema, table_name=table_name, recreate=recreate)
+    add_geometry_column_to_table(schema=db_schema, table_name=table_name)
 
     if path is None:
         logger.info(
@@ -220,7 +220,7 @@ def import_risques_casias_flow(
                 f.write(response.content)
             logger.info("Téléchargement réussi dans %s", target_file)
             encode_to_utf8(str(target_file))
-            load_casias(str(target_file), schema=schema, table_name=table_name)
+            load_casias(str(target_file), schema=db_schema, table_name=table_name)
         else:
             logger.error(
                 "Échec du téléchargement des données CASIAS. Code de statut : %d",
@@ -229,6 +229,6 @@ def import_risques_casias_flow(
             return
     else:
         logger.info("Importation des fichiers CASIAS depuis le répertoire %s", path)
-        import_casias_files(path, schema=schema, table_name=table_name)
+        import_casias_files(path, schema=db_schema, table_name=table_name)
 
-    populate_geom(schema=schema, table_name=table_name)
+    populate_geom(schema=db_schema, table_name=table_name)

@@ -302,7 +302,7 @@ def import_sis_files(
 def import_risques_sis_flow(
     path: Path | None = None,
     department: str | None = None,
-    schema: str = "public",
+    db_schema: str = "public",
     table_name: str = "risques_sis",
     recreate: bool = False,
 ):
@@ -314,8 +314,8 @@ def import_risques_sis_flow(
     if path is None and department is None:
         raise ValueError("Le chemin du répertoire ou le département doit être fourni.")
 
-    create_table_sis(schema=schema, table_name=table_name, recreate=recreate)
-    add_geometry_column_to_table(schema=schema, table_name=table_name)
+    create_table_sis(schema=db_schema, table_name=table_name, recreate=recreate)
+    add_geometry_column_to_table(schema=db_schema, table_name=table_name)
 
     if path is None:
         logger.info(
@@ -330,9 +330,9 @@ def import_risques_sis_flow(
         with open(target_file, "w", encoding="utf-8") as f:
             json.dump(records, f, ensure_ascii=False, indent=2)
 
-        load_sis(records, schema=schema, table_name=table_name)
+        load_sis(records, schema=db_schema, table_name=table_name)
     else:
         logger.info("Importation des fichiers SIS depuis le répertoire %s", path)
-        import_sis_files(path, schema=schema, table_name=table_name)
+        import_sis_files(path, schema=db_schema, table_name=table_name)
 
-    populate_geom(schema=schema, table_name=table_name)
+    populate_geom(schema=db_schema, table_name=table_name)

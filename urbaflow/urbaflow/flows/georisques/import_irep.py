@@ -368,7 +368,7 @@ def populate_geom(schema: str = "public", table_name: str = "risques_irep"):
 def import_risques_irep_flow(
     dirname: Path | None = None,
     year: int = 2024,
-    schema: str = "public",
+    db_schema: str = "public",
     table_name: str = "risques_irep",
     recreate: bool = False,
 ):
@@ -378,8 +378,8 @@ def import_risques_irep_flow(
 
     Exemple d'URL : https://files.georisques.fr/irep/2024.zip
     """
-    create_table_irep(schema=schema, table_name=table_name, recreate=recreate)
-    add_geometry_column_to_table(schema=schema, table_name=table_name)
+    create_table_irep(schema=db_schema, table_name=table_name, recreate=recreate)
+    add_geometry_column_to_table(schema=db_schema, table_name=table_name)
 
     if dirname is None:
         logger.info("Téléchargement des données IREP pour le millésime %d", year)
@@ -393,7 +393,7 @@ def import_risques_irep_flow(
     logger.info("Consolidation et agrégation des tables IREP depuis %s", dirname)
     df_consolidated = consolidate_irep_data(dirname, year=year)
 
-    logger.info("Chargement dans la table PostGIS %s.%s", schema, table_name)
-    load_irep(df_consolidated, schema=schema, table_name=table_name)
+    logger.info("Chargement dans la table PostGIS %s.%s", db_schema, table_name)
+    load_irep(df_consolidated, schema=db_schema, table_name=table_name)
 
-    populate_geom(schema=schema, table_name=table_name)
+    populate_geom(schema=db_schema, table_name=table_name)

@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-from typing import Optional
 
 import pandas as pd
 import requests
@@ -194,9 +193,9 @@ def import_mvt_files(
 
 @flow
 def import_risques_mvt_flow(
-    path: Optional[Path] = None,
-    department: Optional[str] = None,
-    schema: str = "public",
+    path: Path | None = None,
+    department: str | None = None,
+    db_schema: str = "public",
     table_name: str = "risques_mvt",
     recreate: bool = False,
 ):
@@ -208,8 +207,8 @@ def import_risques_mvt_flow(
     if path is None and department is None:
         raise ValueError("Le chemin du répertoire ou le département doit être fourni.")
 
-    create_table_mvt(schema=schema, table_name=table_name, recreate=recreate)
-    add_geometry_column_to_table(schema=schema, table_name=table_name)
+    create_table_mvt(schema=db_schema, table_name=table_name, recreate=recreate)
+    add_geometry_column_to_table(schema=db_schema, table_name=table_name)
 
     if path is None:
         logger.info(f"Downloading MVT data for department {department}")
@@ -224,7 +223,7 @@ def import_risques_mvt_flow(
                 f.write(response.content)
             logger.info(f"Successfully downloaded to {target_file}")
             encode_to_utf8(str(target_file))
-            load_mvt(str(target_file), schema=schema, table_name=table_name)
+            load_mvt(str(target_file), schema=db_schema, table_name=table_name)
         else:
             logger.error(
                 f"Failed to download MVT data. Status code: {response.status_code}"
@@ -232,6 +231,6 @@ def import_risques_mvt_flow(
             return
     else:
         logger.info(f"Importing MVT files from {path}")
-        import_mvt_files(path, schema=schema, table_name=table_name)
+        import_mvt_files(path, schema=db_schema, table_name=table_name)
 
-    populate_geom(schema=schema, table_name=table_name)
+    populate_geom(schema=db_schema, table_name=table_name)

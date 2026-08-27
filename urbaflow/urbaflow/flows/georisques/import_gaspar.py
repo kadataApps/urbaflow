@@ -323,7 +323,7 @@ def load_gaspar(
 @flow
 def import_risques_gaspar_flow(
     dirname: Path | None = None,
-    schema: str = "public",
+    db_schema: str = "public",
     table_name: str = "risques_gaspar",
     recreate: bool = False,
 ):
@@ -333,7 +333,7 @@ def import_risques_gaspar_flow(
 
     URL : https://files.georisques.fr/GASPAR/gaspar.zip
     """
-    create_table_gaspar(schema=schema, table_name=table_name, recreate=recreate)
+    create_table_gaspar(schema=db_schema, table_name=table_name, recreate=recreate)
 
     if dirname is None:
         logger.info("Téléchargement de la base nationale GASPAR")
@@ -347,5 +347,5 @@ def import_risques_gaspar_flow(
     logger.info("Consolidation des procédures GASPAR depuis %s", dirname)
     df_consolidated = consolidate_gaspar_data(dirname)
 
-    logger.info("Insertion des données dans la table %s.%s", schema, table_name)
-    load_gaspar(df_consolidated, schema=schema, table_name=table_name)
+    logger.info("Insertion des données dans la table %s.%s", db_schema, table_name)
+    load_gaspar(df_consolidated, schema=db_schema, table_name=table_name)

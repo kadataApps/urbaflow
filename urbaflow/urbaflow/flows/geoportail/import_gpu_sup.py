@@ -123,7 +123,7 @@ def import_gpu_sup_files(
 @flow
 def import_gpu_sup_flow(
     dirname: Path | None = None,
-    schema: str = "public",
+    db_schema: str = "public",
     replace: bool = True,
 ) -> None:
     """
@@ -156,4 +156,4 @@ def import_gpu_sup_flow(
             if table_name:
                 files_mapping[table_name] = file_path
 
-    import_gpu_sup_files(files_mapping, schema=schema, replace=replace)
+    import_gpu_sup_files(files_mapping, schema=db_schema, replace=replace)
