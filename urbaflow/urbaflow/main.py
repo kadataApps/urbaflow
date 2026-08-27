@@ -10,6 +10,7 @@ from flows.cadastre.flow_dgfip_topo import import_dgfip_topo_flow
 from flows.dvf.dvf import dvf_flow
 from flows.georisques.import_casias import import_risques_casias_flow
 from flows.georisques.import_cavite import import_risques_cavite_flow
+from flows.georisques.import_gaspar import import_risques_gaspar_flow
 from flows.georisques.import_icpe import import_icpe_flow
 from flows.georisques.import_irep import import_risques_irep_flow
 from flows.georisques.import_mvt import import_risques_mvt_flow
@@ -167,6 +168,18 @@ OPTIONAL_DIRNAME_IREP_ARGUMENT = typer.Argument(
     ),
 )
 
+OPTIONAL_DIRNAME_GASPAR_ARGUMENT = typer.Argument(
+    None,
+    exists=True,
+    file_okay=False,
+    dir_okay=True,
+    readable=True,
+    help=(
+        "Directory path containing GASPAR CSV files. "
+        "Optional (downloads national zip if omitted)."
+    ),
+)
+
 YEAR_IREP_OPTION = typer.Option(2024, help="Year of the IREP dataset (e.g. 2024)")
 
 SCHEMA_OPTION = typer.Option("public", help="Database schema name")
@@ -182,6 +195,7 @@ RISQUES_SUP_TABLE_OPTION = typer.Option("risques_sup", help="Database table name
 RISQUES_TRI_TABLE_OPTION = typer.Option("risques_tri", help="Database table name")
 RISQUES_ICPE_TABLE_OPTION = typer.Option("risques_icpe", help="Database table name")
 RISQUES_IREP_TABLE_OPTION = typer.Option("risques_irep", help="Database table name")
+RISQUES_GASPAR_TABLE_OPTION = typer.Option("risques_gaspar", help="Database table name")
 RECURSIVE_OPTION = typer.Option(False, help="Search recursively in subdirectories")
 RECREATE_TRUE_OPTION = typer.Option(True, help="Drop/recreate table if it exists")
 RECREATE_FALSE_OPTION = typer.Option(False, help="Drop/recreate table if it exists")
@@ -572,6 +586,27 @@ def risques_irep(
     import_risques_irep_flow(
         dirname=dirname,
         year=year,
+        schema=schema,
+        table_name=table_name,
+        recreate=recreate,
+    )
+
+
+@app.command()
+def risques_gaspar(
+    dirname: Path = OPTIONAL_DIRNAME_GASPAR_ARGUMENT,
+    schema: str = SCHEMA_OPTION,
+    table_name: str = RISQUES_GASPAR_TABLE_OPTION,
+    recreate: bool = RECREATE_FALSE_OPTION,
+):
+    """
+    Import des procédures administratives de gestion des risques (GASPAR).
+
+    Base nationale CSV (PPRN, PPRM, PPRT, CatNat, AZI, DICRIM, TIM). Si le répertoire
+    n'est pas fourni, l'archive nationale est téléchargée automatiquement.
+    """
+    import_risques_gaspar_flow(
+        dirname=dirname,
         schema=schema,
         table_name=table_name,
         recreate=recreate,

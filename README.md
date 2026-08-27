@@ -224,6 +224,14 @@ uv run python urbaflow/main.py --help
     - `--table-name TEXT` (défaut: `risques_irep`)
     - `--recreate / --no-recreate` (défaut: `--no-recreate`)
 
+- `risques-gaspar [dirname] [OPTIONS]`
+  - Importe les procédures administratives relatives aux risques (GASPAR consolidé).
+  - `dirname` est optionnel (télécharge l'archive nationale par défaut).
+  - Options :
+    - `--schema TEXT` (défaut: `public`)
+    - `--table-name TEXT` (défaut: `risques_gaspar`)
+    - `--recreate / --no-recreate` (défaut: `--no-recreate`)
+
 ### Exemples
 
 ```shell
