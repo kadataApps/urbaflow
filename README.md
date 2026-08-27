@@ -215,6 +215,15 @@ uv run python urbaflow/main.py --help
     - `--table-name TEXT` (défaut: `risques_icpe`)
     - `--recreate / --no-recreate` (défaut: `--no-recreate`)
 
+- `risques-irep [dirname] [OPTIONS]`
+  - Importe le registre national des émissions polluantes (IREP) consolidé par établissement.
+  - `dirname` est optionnel (télécharge l'archive annuelle nationale par défaut).
+  - Options :
+    - `--year INTEGER` (défaut: `2024`)
+    - `--schema TEXT` (défaut: `public`)
+    - `--table-name TEXT` (défaut: `risques_irep`)
+    - `--recreate / --no-recreate` (défaut: `--no-recreate`)
+
 ### Exemples
 
 ```shell
