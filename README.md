@@ -232,6 +232,14 @@ uv run python urbaflow/main.py --help
     - `--table-name TEXT` (défaut: `risques_gaspar`)
     - `--recreate / --no-recreate` (défaut: `--no-recreate`)
 
+- `gpu-sup [dirname] [OPTIONS]`
+  - Importe les servitudes d'utilité publique (SUP) du Géoportail de l'Urbanisme (fichiers GeoPackage d'extraction nationale).
+  - `dirname` est optionnel (télécharge les fichiers GPKG depuis l'API Géoportail `download-latest` par défaut).
+  - Les tables créées dans PostGIS sont préfixées par `gp_` (`gp_acte_sup`, `gp_assiette_sup_l`, `gp_assiette_sup_p`, `gp_assiette_sup_s`, `gp_generateur_sup_l`, `gp_generateur_sup_p`, `gp_generateur_sup_s`, `gp_gestionnaire_sup`, `gp_servitude`, `gp_servitude_acte_sup`).
+  - Options :
+    - `--schema TEXT` (défaut: `public`)
+    - `--recreate / --no-recreate` (défaut: `--recreate`)
+
 ### Exemples
 
 ```shell

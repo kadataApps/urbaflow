@@ -8,6 +8,7 @@ from flows.cadastre.flow_cadastre import (
 )
 from flows.cadastre.flow_dgfip_topo import import_dgfip_topo_flow
 from flows.dvf.dvf import dvf_flow
+from flows.geoportail.import_gpu_sup import import_gpu_sup_flow
 from flows.georisques.import_casias import import_risques_casias_flow
 from flows.georisques.import_cavite import import_risques_cavite_flow
 from flows.georisques.import_gaspar import import_risques_gaspar_flow
@@ -177,6 +178,18 @@ OPTIONAL_DIRNAME_GASPAR_ARGUMENT = typer.Argument(
     help=(
         "Directory path containing GASPAR CSV files. "
         "Optional (downloads national zip if omitted)."
+    ),
+)
+
+OPTIONAL_DIRNAME_GPU_SUP_ARGUMENT = typer.Argument(
+    None,
+    exists=True,
+    file_okay=False,
+    dir_okay=True,
+    readable=True,
+    help=(
+        "Directory path containing SUP GeoPackage files. "
+        "Optional (downloads latest GPKG files from Géoportail if omitted)."
     ),
 )
 
@@ -610,6 +623,25 @@ def risques_gaspar(
         schema=schema,
         table_name=table_name,
         recreate=recreate,
+    )
+
+
+@app.command(name="gpu-sup")
+def gpu_sup(
+    dirname: Path = OPTIONAL_DIRNAME_GPU_SUP_ARGUMENT,
+    schema: str = SCHEMA_OPTION,
+    recreate: bool = RECREATE_TRUE_OPTION,
+):
+    """
+    Import des Servitudes d'Utilité Publique (SUP) du Géoportail de l'Urbanisme (GPU).
+
+    Fichiers GeoPackage nationaux issus de l'API download-latest du Géoportail.
+    Importe les tables préfixées par gp_ (gp_acte_sup, gp_servitude, etc.).
+    """
+    import_gpu_sup_flow(
+        dirname=dirname,
+        schema=schema,
+        replace=recreate,
     )
 
 
