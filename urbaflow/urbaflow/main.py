@@ -23,6 +23,7 @@ from flows.georisques.import_rga import import_rga_flow
 from flows.georisques.import_sis import import_risques_sis_flow
 from flows.georisques.import_sup import import_risques_sup_flow
 from flows.georisques.import_tri import import_tri_flow
+from flows.geosirene.import_geosirene_etablissement import import_geosirene_data
 from flows.locomvac import import_locomvac
 from flows.lovac.import_lovac import import_lovac_flow
 from flows.lovac.import_lovac_fil import import_lovac_fil_flow
@@ -233,6 +234,18 @@ OPTIONAL_DIRNAME_MH_ARGUMENT = typer.Argument(
     ),
 )
 
+OPTIONAL_DIRNAME_GEOSIRENE_ARGUMENT = typer.Argument(
+    None,
+    exists=True,
+    file_okay=False,
+    dir_okay=True,
+    readable=True,
+    help=(
+        "Directory path containing GeoSirene GeoParquet file. "
+        "Optional (downloads national GeoParquet if omitted)."
+    ),
+)
+
 YEAR_IREP_OPTION = typer.Option(2024, help="Year of the IREP dataset (e.g. 2024)")
 
 SCHEMA_OPTION = typer.Option("public", help="Database schema name")
@@ -253,6 +266,9 @@ BANATIC_COMMUNES_TABLE_OPTION = typer.Option(
     "banatic_communes", help="Database table name"
 )
 INSEE_BPE_TABLE_OPTION = typer.Option("insee_bpe", help="Database table name")
+GEOSIRENE_TABLE_OPTION = typer.Option(
+    "geosirene_etablissement", help="Database table name"
+)
 PATRIMOINE_MH_TABLE_OPTION = typer.Option(
     "patrimoine_immeubles_proteges_mh", help="Database table name"
 )
@@ -772,6 +788,29 @@ def mh(
     est téléchargé automatiquement depuis data.gouv.fr.
     """
     import_mh_flow(
+        dirname=dirname,
+        db_schema=schema,
+        table_name=table_name,
+        recreate=recreate,
+    )
+
+
+@app.command()
+def geosirene(
+    dirname: Path = OPTIONAL_DIRNAME_GEOSIRENE_ARGUMENT,
+    department: str = DEPARTEMENT_OPTION,
+    schema: str = SCHEMA_OPTION,
+    table_name: str = GEOSIRENE_TABLE_OPTION,
+    recreate: bool = RECREATE_TRUE_OPTION,
+):
+    """
+    Import de la base Sirene des établissements géolocalisés (GeoSirene - GeoParquet).
+
+    Base nationale au format GeoParquet. Filtrable par département (-d/--departement).
+    Si le répertoire n'est pas fourni, le fichier GeoParquet est téléchargé.
+    """
+    import_geosirene_data(
+        department=department,
         dirname=dirname,
         db_schema=schema,
         table_name=table_name,

@@ -272,6 +272,15 @@ uv run python urbaflow/main.py --help
     - `--table-name TEXT` (défaut: `patrimoine_immeubles_proteges_mh`)
     - `--recreate / --no-recreate` (défaut: `--recreate`)
 
+- `geosirene [dirname] [OPTIONS]`
+  - Importe les établissements géolocalisés GeoSirene au format GeoParquet.
+  - `dirname` est optionnel (télécharge le fichier GeoParquet national depuis data.gouv.fr par défaut).
+  - Options :
+    - `-d, --departement TEXT` (optionnel : limite l'import au département spécifié)
+    - `--schema TEXT` (défaut: `public`)
+    - `--table-name TEXT` (défaut: `geosirene_etablissement`)
+    - `--recreate / --no-recreate` (défaut: `--recreate`)
+
 ### Exemples
 
 ```shell

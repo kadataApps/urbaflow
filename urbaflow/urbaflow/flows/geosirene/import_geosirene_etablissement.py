@@ -1,302 +1,273 @@
-# %%
-import numpy as np
+from pathlib import Path
+
+import duckdb
 import pandas as pd
+import requests
 from prefect import flow, task
+from shared_tasks.config import TEMP_DIR
 from shared_tasks.db_engine import create_engine
+from shared_tasks.etl_gpd_utils import load
+from shared_tasks.file_utils import list_files_at_path
 from shared_tasks.logging_config import get_logger
 from sqlalchemy import DDL, text
 
+# Base Sirene géolocalisée (GeoSirene - GeoParquet)
+# URL stable data.gouv.fr : https://www.data.gouv.fr/api/1/datasets/r/672007af-0146-491f-835c-8314d63fa44e
+
 logger = get_logger(__name__)
 
-# Fichier de géolocalisation des établissements réalisé par data.gouv.fr
-# https://files.data.gouv.fr/geo-sirene/last/dep/
-# https://files.data.gouv.fr/geo-sirene/last/dep/geo_siret_88.csv.gz
-
-# Fichier StockEtablissement non géolocalisé
-# (établissements actifs et fermés dans leur état courant au répertoire)
-# https://files.data.gouv.fr/insee-sirene/StockEtablissement_utf8.zip
-
-# Fichier de géolocalisation des établissements réalisé par l'INSEE
-# base peu fiable concernant la geoloc
-# "https://files.data.gouv.fr/insee-sirene-geo/GeolocalisationEtablissement_Sirene_pour_etudes_statistiques_utf8.zip"
-
-
-def make_geosirene_url_for_dept(dep: str) -> str:
-    """
-    Return the URL of the geosirene data for the given department.
-    Resource: https://www.data.gouv.fr/fr/datasets/base-sirene-des-etablissements-siret-geolocalisee-avec-la-base-dadresse-nationale-ban/
-    """
-    # "https://files.data.gouv.fr/geo-sirene/last/dep/geo_siret_88.csv.gz"
-    return f"https://files.data.gouv.fr/geo-sirene/last/dep/geo_siret_{dep}.csv.gz"
+GEOSIRENE_PARQUET_URL = (
+    "https://www.data.gouv.fr/api/1/datasets/r/672007af-0146-491f-835c-8314d63fa44e"
+)
 
 
 @task
-def extract_geosirene_etablissements(url) -> pd.DataFrame:
+def fetch_geosirene_parquet(dirname: Path | None = None) -> Path:
     """
-    Download the geosirene data from the given URL and extract it with gzip
-    to the data/geosirene folder.
+    Télécharge le fichier GeoParquet GeoSirene s'il n'est pas fourni localement.
     """
-    return pd.read_csv(url, compression="gzip")
+    if dirname is None:
+        target_dir = TEMP_DIR / "geosirene"
+        target_dir.mkdir(parents=True, exist_ok=True)
+        parquet_path = target_dir / "geosirene.parquet"
+
+        if not parquet_path.exists():
+            logger.info(
+                "Téléchargement du fichier GeoParquet GeoSirene depuis %s",
+                GEOSIRENE_PARQUET_URL,
+            )
+            headers = {"User-Agent": "Mozilla/5.0"}
+            response = requests.get(
+                GEOSIRENE_PARQUET_URL, headers=headers, stream=True
+            )
+            response.raise_for_status()
+            with open(parquet_path, "wb") as f:
+                for chunk in response.iter_content(chunk_size=65536):
+                    f.write(chunk)
+            logger.info(
+                "Téléchargement du fichier GeoParquet terminé : %s", parquet_path
+            )
+        else:
+            logger.info(
+                "Fichier GeoParquet GeoSirene trouvé en cache local : %s",
+                parquet_path,
+            )
+        return parquet_path
+    else:
+        logger.info("Recherche du fichier parquet GeoSirene dans %s", dirname)
+        files = list_files_at_path(dirname, r".*", extension=".parquet")
+        if not files:
+            raise ValueError(f"Aucun fichier .parquet trouvé dans {dirname}")
+        return Path(files[0])
 
 
 @task
-def transform_before_load_geosirene_etablissement(data: pd.DataFrame, dep: str):
-    column_mapping = {
-        "siren": "siren",
-        "nic": "nic",
-        "siret": "siret",
-        "statutDiffusionEtablissement": "statut_diffusion_etablissement",
-        "dateCreationEtablissement": "date_creation_etablissement",
-        "trancheEffectifsEtablissement": "tranche_effectifs_etablissement",
-        "anneeEffectifsEtablissement": "annee_effectifs_etablissement",
-        "activitePrincipaleRegistreMetiersEtablissement": "activite_principale_registre_metiers_etablissement",
-        "dateDernierTraitementEtablissement": "date_dernier_traitement_etablissement",
-        "etablissementSiege": "etablissement_siege",
-        "nombrePeriodesEtablissement": "nombre_periodes_etablissement",
-        "complementAdresseEtablissement": "complement_adresse_etablissement",
-        "numeroVoieEtablissement": "numero_voie_etablissement",
-        "indiceRepetitionEtablissement": "indice_repetition_etablissement",
-        "dernierNumeroVoieEtablissement": "dernier_numero_voie_etablissement",
-        "indiceRepetitionDernierNumeroVoieEtablissement": "indice_repetition_dernier_numero_voie_etablissement",
-        "typeVoieEtablissement": "type_voie_etablissement",
-        "libelleVoieEtablissement": "libelle_voie_etablissement",
-        "codePostalEtablissement": "code_postal_etablissement",
-        "libelleCommuneEtablissement": "libelle_commune_etablissement",
-        "libelleCommuneEtrangerEtablissement": "libelle_commune_etranger_etablissement",
-        "distributionSpecialeEtablissement": "distribution_speciale_etablissement",
-        "codeCommuneEtablissement": "code_commune_etablissement",
-        "codeCedexEtablissement": "code_cedex_etablissement",
-        "libelleCedexEtablissement": "libelle_cedex_etablissement",
-        "codePaysEtrangerEtablissement": "code_pays_etranger_etablissement",
-        "libellePaysEtrangerEtablissement": "libelle_pays_etranger_etablissement",
-        "identifiantAdresseEtablissement": "identifiant_adresse_etablissement",
-        "coordonneeLambertAbscisseEtablissement": "coordonnee_lambert_abscisse_etablissement",
-        "coordonneeLambertOrdonneeEtablissement": "coordonnee_lambert_ordonnee_etablissement",
-        "complementAdresse2Etablissement": "complement_adresse2_etablissement",
-        "numeroVoie2Etablissement": "numero_voie2_etablissement",
-        "indiceRepetition2Etablissement": "indice_repetition2_etablissement",
-        "typeVoie2Etablissement": "type_voie2_etablissement",
-        "libelleVoie2Etablissement": "libelle_voie2_etablissement",
-        "codePostal2Etablissement": "code_postal2_etablissement",
-        "libelleCommune2Etablissement": "libelle_commune2_etablissement",
-        "libelleCommuneEtranger2Etablissement": "libelle_commune_etranger2_etablissement",
-        "distributionSpeciale2Etablissement": "distribution_speciale2_etablissement",
-        "codeCommune2Etablissement": "code_commune2_etablissement",
-        "codeCedex2Etablissement": "code_cedex2_etablissement",
-        "libelleCedex2Etablissement": "libelle_cedex2_etablissement",
-        "codePaysEtranger2Etablissement": "code_pays_etranger2_etablissement",
-        "libellePaysEtranger2Etablissement": "libelle_pays_etranger2_etablissement",
-        "dateDebut": "date_debut",
-        "etatAdministratifEtablissement": "etat_administratif_etablissement",
-        "enseigne1Etablissement": "enseigne1_etablissement",
-        "enseigne2Etablissement": "enseigne2_etablissement",
-        "enseigne3Etablissement": "enseigne3_etablissement",
-        "denominationUsuelleEtablissement": "denomination_usuelle_etablissement",
-        "activitePrincipaleEtablissement": "activite_principale_etablissement",
-        "nomenclatureActivitePrincipaleEtablissement": "nomenclature_activite_principale_etablissement",
-        "caractereEmployeurEtablissement": "caractere_employeur_etablissement",
-        "longitude": "longitude",
-        "latitude": "latitude",
-        "geo_score": "geo_score",
-        "geo_type": "geo_type",
-        "geo_adresse": "geo_adresse",
-        "geo_id": "geo_id",
-        "geo_ligne": "geo_ligne",
-        "geo_l4": "geo_l4",
-        "geo_l5": "geo_l5",
-    }
-    data.rename(columns=column_mapping, inplace=True)
-    columns_to_clean = [
-        "complement_adresse_etablissement",
-        "numero_voie_etablissement",
-        "indice_repetition_etablissement",
-        "dernier_numero_voie_etablissement",
-        "indice_repetition_dernier_numero_voie_etablissement",
-        "type_voie_etablissement",
-        "libelle_voie_etablissement",
-        "code_postal_etablissement",
-        "distribution_speciale_etablissement",
-        "code_cedex_etablissement",
-        "libelle_cedex_etablissement",
-        "identifiant_adresse_etablissement",
-        "coordonnee_lambert_abscisse_etablissement",
-        "coordonnee_lambert_ordonnee_etablissement",
-        "numero_voie2_etablissement",
-        "indice_repetition2_etablissement",
-        "type_voie2_etablissement",
-        "libelle_voie2_etablissement",
-        "code_postal2_etablissement",
-        "distribution_speciale2_etablissement",
-        "libelle_cedex2_etablissement",
-        "enseigne1_etablissement",
-        "enseigne2_etablissement",
-        "enseigne3_etablissement",
-        "denomination_usuelle_etablissement",
-    ]
-    data[columns_to_clean] = data[columns_to_clean].replace("[ND]", np.nan)
-    data["urbaflow_departement"] = dep
-    data["urbaflow_inserted_at"] = pd.Timestamp.now()
-    return data
-
-
-@task
-def create_geosirene_etablissement_table():
+def create_geosirene_etablissement_table(
+    db_schema: str = "public",
+    table_name: str = "geosirene_etablissement",
+    recreate: bool = True,
+):
+    """
+    Crée la table geosirene_etablissement dans PostGIS.
+    """
     e = create_engine()
     with e.begin() as conn:
+        q = conn.engine.dialect.identifier_preparer.quote
+        if recreate:
+            conn.execute(DDL(f"DROP TABLE IF EXISTS {q(db_schema)}.{q(table_name)}"))
+            logger.info(
+                "Suppression de la table %s.%s si elle existe", db_schema, table_name
+            )
+
         conn.execute(
             DDL(
-                """
-                DROP TABLE IF EXISTS geosirene_etablissement;
-                CREATE TABLE geosirene_etablissement (
-                    siren text,
-                    nic text,
+                f"""
+                CREATE TABLE IF NOT EXISTS {q(db_schema)}.{q(table_name)} (
                     siret text PRIMARY KEY,
-                    statut_diffusion_etablissement text,
-                    date_creation_etablissement DATE,
-                    tranche_effectifs_etablissement text,
-                    annee_effectifs_etablissement INTEGER,
-                    activite_principale_registre_metiers_etablissement text,
-                    date_dernier_traitement_etablissement DATE,
-                    etablissement_siege text,
-                    nombre_periodes_etablissement INTEGER,
-                    complement_adresse_etablissement text,
-                    numero_voie_etablissement text,
-                    indice_repetition_etablissement text,
-                    dernier_numero_voie_etablissement text,
-                    indice_repetition_dernier_numero_voie_etablissement text,
-                    type_voie_etablissement text,
-                    libelle_voie_etablissement text,
-                    code_postal_etablissement text,
-                    libelle_commune_etablissement text,
-                    libelle_commune_etranger_etablissement text,
-                    distribution_speciale_etablissement text,
-                    code_commune_etablissement text,
-                    code_cedex_etablissement text,
-                    libelle_cedex_etablissement text,
-                    code_pays_etranger_etablissement text,
-                    libelle_pays_etranger_etablissement text,
-                    identifiant_adresse_etablissement text,
-                    coordonnee_lambert_abscisse_etablissement DOUBLE PRECISION,
-                    coordonnee_lambert_ordonnee_etablissement DOUBLE PRECISION,
-                    complement_adresse2_etablissement text,
-                    numero_voie2_etablissement text,
-                    indice_repetition2_etablissement text,
-                    type_voie2_etablissement text,
-                    libelle_voie2_etablissement text,
-                    code_postal2_etablissement text,
-                    libelle_commune2_etablissement text,
-                    libelle_commune_etranger2_etablissement text,
-                    distribution_speciale2_etablissement text,
-                    code_commune2_etablissement text,
-                    code_cedex2_etablissement text,
-                    libelle_cedex2_etablissement text,
-                    code_pays_etranger2_etablissement text,
-                    libelle_pays_etranger2_etablissement text,
-                    date_debut DATE,
-                    etat_administratif_etablissement text,
-                    enseigne1_etablissement text,
-                    enseigne2_etablissement text,
-                    enseigne3_etablissement text,
-                    denomination_usuelle_etablissement text,
-                    activite_principale_etablissement text,
-                    nomenclature_activite_principale_etablissement text,
-                    caractere_employeur_etablissement text,
-                    longitude DOUBLE PRECISION,
-                    latitude DOUBLE PRECISION,
-                    geo_score DOUBLE PRECISION,
-                    geo_type text,
-                    geo_adresse text,
-                    geo_id text,
-                    geo_ligne text,
-                    geo_l4 text,
-                    geo_l5 text,
+                    x double precision,
+                    y double precision,
+                    qualite_xy text,
+                    epsg text,
+                    plg_qp24 text,
+                    plg_iris text,
+                    plg_zus text,
+                    plg_qp15 text,
+                    plg_qva text,
+                    plg_code_commune text,
+                    distance_precision double precision,
+                    qualite_qp24 text,
+                    qualite_iris text,
+                    qualite_zus text,
+                    qualite_qp15 text,
+                    qualite_qva text,
+                    y_latitude double precision,
+                    x_longitude double precision,
                     urbaflow_departement text,
-                    urbaflow_inserted_at TIMESTAMP
-                );
-                """
-            )
-        )
-
-
-@task
-def delete_geosirene_etablissement_for_dep(dep: str):
-    e = create_engine()
-    with e.begin() as conn:
-        conn.execute(
-            text(
-                """
-                DELETE FROM geosirene_etablissement WHERE urbaflow_departement = :dep;
-                """
-            ),
-            {"dep": dep},
-        )
-
-
-@task
-def load_geosirene_etablissement(data: pd.DataFrame):
-    e = create_engine()
-    chunk_size = 10000
-    logger.info(
-        f"Loading geosirene data to database. "
-        f"{len(data)} rows, {-(-len(data) // chunk_size) + 1} chunks"
-    )
-    data.to_sql(
-        "geosirene_etablissement",
-        con=e,
-        if_exists="append",
-        index=False,
-        method="multi",
-        chunksize=chunk_size,
-    )
-
-
-@task
-def transform_after_load_geosirene_etablissement():
-    """
-    Add geometry to geosirene_etablissement table
-    """
-    e = create_engine()
-    with e.begin() as conn:
-        conn.execute(
-            DDL(
-                """
-                ALTER TABLE public.geosirene_etablissement
-                ADD COLUMN IF NOT EXISTS geom geometry(POINT, 2154);
-                CREATE INDEX IF NOT EXISTS sidx_geosirene_etablissement_geom 
-                    ON public.geosirene_etablissement USING GIST (geom);
-                """
-            )
-        )
-        logger.info("Added geom column to geosirene_etablissement table")
-        conn.execute(
-            text(
-                """
-                UPDATE public.geosirene_etablissement
-                SET geom = st_transform(
-                    st_setsrid(st_makepoint(longitude, latitude), 4326), 2154)
-                WHERE longitude IS NOT NULL AND latitude IS NOT NULL;
+                    urbaflow_inserted_at timestamp
+                )
                 """
             )
         )
         logger.info(
-            "Updated geom column in locomvac table from parcellaire_france table"
+            "Table %s.%s créée si elle n'existait pas auparavant",
+            db_schema,
+            table_name,
         )
-    return
+
+
+@task
+def extract_and_load_geosirene(
+    parquet_path: Path,
+    department: str | None = None,
+    db_schema: str = "public",
+    table_name: str = "geosirene_etablissement",
+    recreate: bool = False,
+):
+    """
+    Extrait les enregistrements GeoSirene (filtrés par département si spécifié)
+    et les insère dans la table PostGIS.
+    """
+    con = duckdb.connect()
+    where_clause = ""
+    dep_str = None
+
+    if department:
+        dep_str = str(department).strip()
+        where_clause = f"WHERE plg_code_commune LIKE '{dep_str}%'"
+        logger.info(
+            "Extraction des établissements GeoSirene pour le département %s", dep_str
+        )
+    else:
+        logger.info("Extraction de la totalité des établissements GeoSirene")
+
+    query = f"""
+        SELECT 
+            siret, x, y, qualite_xy, epsg, plg_qp24, plg_iris, plg_zus,
+            plg_qp15, plg_qva, plg_code_commune, distance_precision,
+            qualite_qp24, qualite_iris, qualite_zus, qualite_qp15,
+            qualite_qva, y_latitude, x_longitude
+        FROM '{parquet_path.as_posix()}'
+        {where_clause}
+    """
+
+    df = con.execute(query).df()
+    if df.empty:
+        logger.warning(
+            "Aucun établissement GeoSirene trouvé avec la requête : %s", query
+        )
+        return
+
+    df["siret"] = df["siret"].astype(str)
+    df = df.drop_duplicates(subset=["siret"])
+    df["urbaflow_departement"] = dep_str
+    df["urbaflow_inserted_at"] = pd.Timestamp.now()
+
+    e = create_engine()
+    with e.begin() as conn:
+        q = conn.engine.dialect.identifier_preparer.quote
+        if not recreate and dep_str:
+            logger.info(
+                "Suppression des anciens établissements du département %s dans %s.%s",
+                dep_str,
+                db_schema,
+                table_name,
+            )
+            conn.execute(
+                text(
+                    f"DELETE FROM {q(db_schema)}.{q(table_name)} "
+                    "WHERE plg_code_commune LIKE :dep_pattern "
+                    "OR urbaflow_departement = :dep"
+                ),
+                {"dep_pattern": f"{dep_str}%", "dep": dep_str},
+            )
+
+        logger.info(
+            "Insertion de %d établissements dans %s.%s", len(df), db_schema, table_name
+        )
+        load(
+            df,
+            connection=conn,
+            table_name=table_name,
+            schema=db_schema,
+            how="append",
+            logger=logger,
+        )
+
+
+@task
+def add_geometry_column_to_table(
+    db_schema: str = "public", table_name: str = "geosirene_etablissement"
+):
+    """
+    Ajoute la colonne de géométrie geom (Lambert 93 / EPSG:2154) et l'index GIST.
+    """
+    e = create_engine()
+    with e.begin() as conn:
+        q = conn.engine.dialect.identifier_preparer.quote
+        conn.execute(
+            DDL(
+                f"""
+                ALTER TABLE {q(db_schema)}.{q(table_name)} 
+                    ADD COLUMN IF NOT EXISTS 
+                    geom geometry(POINT, 2154);
+                CREATE INDEX IF NOT EXISTS {q(f"sidx_{table_name}_geom")}
+                    ON {q(db_schema)}.{q(table_name)} USING GIST (geom);
+                """
+            )
+        )
+
+
+@task
+def populate_geom(
+    db_schema: str = "public", table_name: str = "geosirene_etablissement"
+):
+    """
+    Calcul des géométries Lambert 93 à partir des coordonnées (x_longitude, y_latitude).
+    """
+    e = create_engine()
+    with e.begin() as conn:
+        q = conn.engine.dialect.identifier_preparer.quote
+        logger.info("Mise à jour des géométries geom dans %s.%s", db_schema, table_name)
+        conn.execute(
+            text(
+                f"""
+                UPDATE {q(db_schema)}.{q(table_name)}
+                SET geom = ST_Transform(
+                    ST_SetSRID(ST_MakePoint(x_longitude, y_latitude), 4326),
+                    2154
+                )
+                WHERE x_longitude IS NOT NULL AND y_latitude IS NOT NULL;
+                """
+            )
+        )
 
 
 @flow
-def import_geosirene_data(dep: str, recreate_table: bool = True):
-    if recreate_table:
-        create_geosirene_etablissement_table()
-    logger.info(f"Importing geosirene data for department {dep}")
-    url = make_geosirene_url_for_dept(dep)
-    logger.info(f"Downloading geosirene data from {url}")
-    data = extract_geosirene_etablissements(url=url)
-    data = transform_before_load_geosirene_etablissement(data, dep)
-    delete_geosirene_etablissement_for_dep(dep)
-    logger.info(data)
-    load_geosirene_etablissement(data)
-    transform_after_load_geosirene_etablissement()
+def import_geosirene_data(
+    department: str | None = None,
+    dirname: Path | None = None,
+    db_schema: str = "public",
+    table_name: str = "geosirene_etablissement",
+    recreate: bool = True,
+):
+    """
+    Flow d'importation des établissements géolocalisés GeoSirene (format GeoParquet).
+    """
+    logger.info("Début de l'import GeoSirene")
+    parquet_path = fetch_geosirene_parquet(dirname=dirname)
+    create_geosirene_etablissement_table(
+        db_schema=db_schema, table_name=table_name, recreate=recreate
+    )
+    add_geometry_column_to_table(db_schema=db_schema, table_name=table_name)
+    extract_and_load_geosirene(
+        parquet_path=parquet_path,
+        department=department,
+        db_schema=db_schema,
+        table_name=table_name,
+        recreate=recreate,
+    )
+    populate_geom(db_schema=db_schema, table_name=table_name)
+    logger.info("Import GeoSirene terminé avec succès !")
 
 
 # %%
