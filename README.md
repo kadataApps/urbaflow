@@ -260,6 +260,7 @@ uv run python urbaflow/main.py --help
   - Importe la Base Permanente des Équipements (BPE / INSEE) géolocalisée.
   - `dirname` est optionnel (télécharge le fichier ZIP national BPE depuis l'INSEE par défaut).
   - Options :
+    - `-d, --departement TEXT` (optionnel : limite l'import au département spécifié)
     - `--schema TEXT` (défaut: `public`)
     - `--table-name TEXT` (défaut: `insee_bpe`)
     - `--recreate / --no-recreate` (défaut: `--recreate`)

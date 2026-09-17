@@ -147,14 +147,59 @@ def create_table_bpe(
 
 @task
 def process_and_load_bpe(
-    file_path: Path, schema: str = "public", table_name: str = "insee_bpe"
+    file_path: Path,
+    department: str | None = None,
+    schema: str = "public",
+    table_name: str = "insee_bpe",
+    recreate: bool = False,
 ):
     """
-    Lit le fichier CSV BPE, génère l'identifiant unique
-    et l'insère par morceaux (chunks) dans PostGIS.
+    Lit le fichier CSV BPE, filtre par département si spécifié,
+    génère l'identifiant unique et l'insère par morceaux dans PostGIS.
     """
     logger.info("Traitement et chargement du fichier BPE %s", file_path)
     encode_to_utf8(str(file_path))
+
+    dep_str = str(department).strip() if department else None
+    dep_zfill = (
+        dep_str.zfill(2)
+        if dep_str and dep_str.isdigit() and len(dep_str) == 1
+        else dep_str
+    )
+
+    e = create_engine()
+
+    if not recreate and dep_str:
+        with e.begin() as conn:
+            q = conn.engine.dialect.identifier_preparer.quote
+            table_exists = conn.execute(
+                text(
+                    "SELECT EXISTS (SELECT FROM information_schema.tables "
+                    "WHERE table_schema = :schema AND table_name = :table)"
+                ),
+                {"schema": schema, "table": table_name},
+            ).scalar()
+
+            if table_exists:
+                logger.info(
+                    "Suppression des anciens équipements du département %s dans %s.%s",
+                    dep_str,
+                    schema,
+                    table_name,
+                )
+                conn.execute(
+                    text(
+                        f"DELETE FROM {q(schema)}.{q(table_name)} "
+                        "WHERE dep = :dep OR dep = :dep_zfill "
+                        "OR depcom LIKE :dep_pat OR depcom LIKE :dep_zfill_pat"
+                    ),
+                    {
+                        "dep": dep_str,
+                        "dep_zfill": dep_zfill,
+                        "dep_pat": f"{dep_str}%",
+                        "dep_zfill_pat": f"{dep_zfill}%",
+                    },
+                )
 
     # Détection du séparateur
     with open(file_path, encoding="utf-8") as fp:
@@ -171,14 +216,35 @@ def process_and_load_bpe(
         low_memory=False,
     )
 
-    e = create_engine()
     total_inserted = 0
 
     for i, chunk in enumerate(reader):
         # Renommage des colonnes en minuscules
         chunk.columns = [c.lower() for c in chunk.columns]
 
-        # Génération d'une clé primaire unique pour chaque équipement (ex: 1, 2, 3...)
+        # Filtrage par département si spécifié
+        if dep_str:
+            dep_col = (
+                chunk["dep"].astype(str).str.strip()
+                if "dep" in chunk.columns
+                else pd.Series(dtype=str)
+            )
+            depcom_col = (
+                chunk["depcom"].astype(str).str.strip()
+                if "depcom" in chunk.columns
+                else pd.Series(dtype=str)
+            )
+            mask = (
+                (dep_col == dep_str)
+                | (dep_col == dep_zfill)
+                | (depcom_col.str.startswith(dep_str))
+                | (depcom_col.str.startswith(dep_zfill))
+            )
+            chunk = chunk[mask]
+            if chunk.empty:
+                continue
+
+        # Génération d'une clé primaire unique pour chaque équipement
         chunk["id"] = [(i * chunk_size + j + 1) for j in range(len(chunk))]
         chunk["id"] = chunk["id"].astype(str)
 
@@ -254,6 +320,7 @@ def populate_geom(schema: str = "public", table_name: str = "insee_bpe"):
 
 @flow
 def import_bpe_flow(
+    department: str | None = None,
     dirname: Path | None = None,
     db_schema: str = "public",
     table_name: str = "insee_bpe",
@@ -262,6 +329,7 @@ def import_bpe_flow(
     """
     Flow d'importation de la Base Permanente des Équipements (BPE / INSEE).
     Télécharge et intègre l'ensemble de la base géolocalisée de l'INSEE dans PostGIS.
+    Optionnellement filtrable par département.
     """
     create_table_bpe(schema=db_schema, table_name=table_name, recreate=recreate)
     add_geometry_column_to_table(schema=db_schema, table_name=table_name)
@@ -295,7 +363,11 @@ def import_bpe_flow(
 
     for file_path in csv_files:
         process_and_load_bpe(
-            file_path=Path(file_path), schema=db_schema, table_name=table_name
+            file_path=Path(file_path),
+            department=department,
+            schema=db_schema,
+            table_name=table_name,
+            recreate=recreate,
         )
 
     populate_geom(schema=db_schema, table_name=table_name)

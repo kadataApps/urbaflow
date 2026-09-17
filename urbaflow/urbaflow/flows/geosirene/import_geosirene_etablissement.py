@@ -268,6 +268,3 @@ def import_geosirene_data(
     )
     populate_geom(db_schema=db_schema, table_name=table_name)
     logger.info("Import GeoSirene terminé avec succès !")
-
-
-# %%

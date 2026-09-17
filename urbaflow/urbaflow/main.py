@@ -756,6 +756,7 @@ def epci_gpu(
 @app.command()
 def bpe(
     dirname: Path = OPTIONAL_DIRNAME_BPE_ARGUMENT,
+    departement: str = DEPARTEMENT_OPTION,
     schema: str = SCHEMA_OPTION,
     table_name: str = INSEE_BPE_TABLE_OPTION,
     recreate: bool = RECREATE_TRUE_OPTION,
@@ -764,9 +765,11 @@ def bpe(
     Import de la Base Permanente des Équipements (BPE / INSEE).
 
     Base nationale géolocalisée (équipements, commerces, santé, sports, etc.).
-    Si le répertoire n'est pas fourni, le fichier ZIP BPE est téléchargé.
+    Filtrable par département (-d/--departement). Si le répertoire n'est pas fourni,
+    le fichier ZIP BPE est téléchargé.
     """
     import_bpe_flow(
+        department=departement,
         dirname=dirname,
         db_schema=schema,
         table_name=table_name,
