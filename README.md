@@ -328,6 +328,14 @@ uv run python urbaflow/main.py --help
     - `--table-name TEXT` (défaut: `geosirene_etablissement`)
     - `--recreate / --no-recreate` (défaut: `--recreate`)
 
+- `cartofriches [dirname] [OPTIONS]`
+  - Importe les sites référencés dans Cartofriches (friches industrielles, commerciales, etc.).
+  - `dirname` est optionnel (télécharge le fichier GeoPackage national depuis data.gouv.fr par défaut).
+  - Options :
+    - `--schema TEXT` (défaut: `public`)
+    - `--table-name TEXT` (défaut: `friches_cartofriches`)
+    - `--recreate / --no-recreate` (défaut: `--recreate`)
+
 ### Exemples
 
 ```shell

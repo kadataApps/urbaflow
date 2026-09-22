@@ -9,6 +9,7 @@ from flows.cadastre.flow_cadastre import (
     import_cadastre_majic_flow,
 )
 from flows.cadastre.flow_dgfip_topo import import_dgfip_topo_flow
+from flows.cartofriches.import_cartofriches import import_cartofriches_flow
 from flows.dvf.dvf import dvf_flow
 from flows.geoportail.import_epci_gpu import import_epci_gpu_flow
 from flows.geoportail.import_gpu_sup import import_gpu_sup_flow
@@ -246,6 +247,18 @@ OPTIONAL_DIRNAME_GEOSIRENE_ARGUMENT = typer.Argument(
     ),
 )
 
+OPTIONAL_DIRNAME_CARTOFRICHES_ARGUMENT = typer.Argument(
+    None,
+    exists=True,
+    file_okay=False,
+    dir_okay=True,
+    readable=True,
+    help=(
+        "Directory path containing Cartofriches GeoPackage file. "
+        "Optional (downloads national GeoPackage if omitted)."
+    ),
+)
+
 YEAR_IREP_OPTION = typer.Option(2024, help="Year of the IREP dataset (e.g. 2024)")
 
 SCHEMA_OPTION = typer.Option("public", help="Database schema name")
@@ -271,6 +284,9 @@ GEOSIRENE_TABLE_OPTION = typer.Option(
 )
 PATRIMOINE_MH_TABLE_OPTION = typer.Option(
     "patrimoine_immeubles_proteges_mh", help="Database table name"
+)
+FRICHES_CARTOFRICHES_TABLE_OPTION = typer.Option(
+    "friches_cartofriches", help="Database table name"
 )
 RECURSIVE_OPTION = typer.Option(False, help="Search recursively in subdirectories")
 RECREATE_TRUE_OPTION = typer.Option(True, help="Drop/recreate table if it exists")
@@ -814,6 +830,28 @@ def geosirene(
     """
     import_geosirene_data(
         department=department,
+        dirname=dirname,
+        db_schema=schema,
+        table_name=table_name,
+        recreate=recreate,
+    )
+
+
+@app.command()
+def cartofriches(
+    dirname: Path = OPTIONAL_DIRNAME_CARTOFRICHES_ARGUMENT,
+    schema: str = SCHEMA_OPTION,
+    table_name: str = FRICHES_CARTOFRICHES_TABLE_OPTION,
+    recreate: bool = RECREATE_TRUE_OPTION,
+):
+    """
+    Import des sites référencés dans Cartofriches (friches industrielles,
+    commerciales, etc.).
+
+    Base nationale GeoPackage. Si le répertoire n'est pas fourni, le fichier
+    GeoPackage est téléchargé automatiquement depuis data.gouv.fr.
+    """
+    import_cartofriches_flow(
         dirname=dirname,
         db_schema=schema,
         table_name=table_name,
