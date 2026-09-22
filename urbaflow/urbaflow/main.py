@@ -572,7 +572,7 @@ def risques_sis(
     import_risques_sis_flow(
         path=dirname,
         department=departement,
-        schema=schema,
+        db_schema=schema,
         table_name=table_name,
         recreate=recreate,
     )
@@ -603,7 +603,7 @@ def risques_sup(
     import_risques_sup_flow(
         path=dirname,
         department=departement,
-        schema=schema,
+        db_schema=schema,
         table_name=table_name,
         recreate=recreate,
     )
