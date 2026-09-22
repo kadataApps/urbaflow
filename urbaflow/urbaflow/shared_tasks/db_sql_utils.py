@@ -149,22 +149,24 @@ def run_sql_script(
     if sql:
         try:
             assert sql_filepath is None
-        except AssertionError:
-            raise ValueError("Cannot pass both `sql` and `sql_filepath`.")
+        except AssertionError as err:
+            raise ValueError("Cannot pass both `sql` and `sql_filepath`.") from err
 
         try:
             assert isinstance(sql, str)
-        except AssertionError:
-            raise ValueError(f"`sql` must be `str`, got `{type(sql)}` instead.")
+        except AssertionError as err:
+            raise ValueError(
+                f"`sql` must be `str`, got `{type(sql)}` instead."
+            ) from err
 
     else:
         try:
             assert isinstance(sql_filepath, Path)
-        except AssertionError:
+        except AssertionError as err:
             raise ValueError(
                 "`sql_filepath` must be a `pathlib.Path`, "
                 f"got `{type(sql_filepath)}` instead."
-            )
+            ) from err
 
         with open(sql_filepath) as sql_file:
             sql = sql_file.read()

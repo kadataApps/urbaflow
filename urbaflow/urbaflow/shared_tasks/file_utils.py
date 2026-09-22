@@ -82,14 +82,16 @@ def move_file(
         os.makedirs(dest_dirpath)
     try:
         shutil.move(src_fp.as_posix(), dest_dirpath.as_posix())
-    except shutil.Error:
+    except shutil.Error as err:
         if if_exists == "raise":
-            raise
+            raise RuntimeError("Move operation failed") from err
         elif if_exists == "replace":
             os.remove(dest_dirpath / src_fp.name)
             shutil.move(src_fp.as_posix(), dest_dirpath.as_posix())
         else:
-            raise ValueError(f"if_exists must be 'raise' or 'replace', got {if_exists}")
+            raise ValueError(
+                f"if_exists must be 'raise' or 'replace', got {if_exists}"
+            ) from err
 
 
 def copy_directory(source, target):

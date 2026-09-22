@@ -202,12 +202,12 @@ def load_with_connection(
 
         try:
             assert df_id_column is not None
-        except AssertionError:
-            raise ValueError("df_id_column cannot be null if how='upsert'")
+        except AssertionError as err:
+            raise ValueError("df_id_column cannot be null if how='upsert'") from err
         try:
             assert table_id_column is not None
-        except AssertionError:
-            raise ValueError("table_id_column cannot be null if how='upsert'")
+        except AssertionError as err:
+            raise ValueError("table_id_column cannot be null if how='upsert'") from err
 
         ids_to_delete = set(df[df_id_column].unique())
 

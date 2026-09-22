@@ -90,9 +90,10 @@ def concatenate_values(row: pd.Series) -> list:
 
 
 def concatenate_columns(df: pd.DataFrame, input_col_names: list) -> pd.Series:
-    """For each row in the input DataFrame, the distinct and non null values contained in
-    the columns input_col_names are stored in a list. A pandas Series of the same length
-    as the input DataFrame is then constructed with these lists as values.
+    """For each row in the input DataFrame, the distinct and non null values
+    contained in the columns input_col_names are stored in a list. A pandas
+    Series of the same length as the input DataFrame is then constructed with
+    these lists as values.
 
     Args:
         df (pd.DataFrame): input DataFrame
@@ -282,11 +283,11 @@ def to_pgarr(
     try:
         assert isinstance(x, (list, set, np.ndarray))
 
-    except AssertionError:
+    except AssertionError as err:
         if handle_errors:
             return value_on_error
         else:
-            raise ValueError(f"Unexpected type for x: {type(x)}.")
+            raise ValueError(f"Unexpected type for x: {type(x)}.") from err
 
     return (
         "{" + ",".join(filter(lambda x: len(x) > 0, map(str.strip, map(str, x)))) + "}"
@@ -666,13 +667,13 @@ def drop_duplicates_by_decreasing_priority(
     """
     try:
         assert isinstance(subset, list)
-    except AssertionError:
-        raise TypeError("`subset` must be a list.")
+    except AssertionError as err:
+        raise TypeError("`subset` must be a list.") from err
 
     try:
         assert len(subset) >= 1
-    except AssertionError:
-        raise TypeError("`subset` must not be empty.")
+    except AssertionError as err:
+        raise TypeError("`subset` must not be empty.") from err
 
     if len(subset) == 1:
         res = df.dropna(subset=subset).drop_duplicates(subset=subset)
