@@ -29,9 +29,7 @@ def fetch_mh_geodataframe(dirname: Path | None = None) -> gpd.GeoDataFrame:
     et retourne un GeoDataFrame avec géométrie 'geom' reprojetée en EPSG:2154.
     """
     if dirname is None:
-        logger.info(
-            "Téléchargement du fichier GeoJSON des MH depuis %s", MH_URL
-        )
+        logger.info("Téléchargement du fichier GeoJSON des MH depuis %s", MH_URL)
         headers = {"User-Agent": "Mozilla/5.0"}
         target_dir = TEMP_DIR / "mh"
         target_dir.mkdir(parents=True, exist_ok=True)

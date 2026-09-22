@@ -132,9 +132,7 @@ def import_gpu_sup_flow(
     par gp_ dans PostGIS (ex: gp_acte_sup, gp_assiette_sup_s, gp_servitude, etc.).
     """
     if dirname is None:
-        logger.info(
-            "Récupération de la liste des fichiers SUP via l'API Géoportail"
-        )
+        logger.info("Récupération de la liste des fichiers SUP via l'API Géoportail")
         sup_urls = fetch_sup_gpkg_urls()
         target_dir = TEMP_DIR / "geoportail/sup"
         target_dir.mkdir(parents=True, exist_ok=True)

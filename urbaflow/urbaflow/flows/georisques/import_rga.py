@@ -42,7 +42,9 @@ def import_rga_flow(
     if department:
         logger.info(f"Downloading RGA data for department {department}")
         # url = f"https://files.georisques.fr/argiles/AleaRG{department}_L93.zip"
-        url = f"https://files.georisques.fr/argiles/2025/AleaRG_2025_{department}_L93.zip"
+        url = (
+            f"https://files.georisques.fr/argiles/2025/AleaRG_2025_{department}_L93.zip"
+        )
         target_dir = TEMP_DIR / "georisques/rga" / department
         target_dir.mkdir(parents=True, exist_ok=True)
 

@@ -273,9 +273,7 @@ def process_and_load_bpe(
 
 
 @task
-def add_geometry_column_to_table(
-    schema: str = "public", table_name: str = "insee_bpe"
-):
+def add_geometry_column_to_table(schema: str = "public", table_name: str = "insee_bpe"):
     """
     Ajoute la colonne géométrique geom (Lambert 93 / EPSG:2154) et l'index spatial GIST.
     """
@@ -336,9 +334,7 @@ def import_bpe_flow(
 
     if dirname is None:
         logger.info("Téléchargement de la base BPE INSEE depuis %s", BPE_2025_URL)
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"
-        }
+        headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"}
         target_dir = TEMP_DIR / "bpe"
         target_dir.mkdir(parents=True, exist_ok=True)
         zip_path = target_dir / "BPE.zip"

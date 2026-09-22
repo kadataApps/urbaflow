@@ -106,13 +106,15 @@ def consolidate_gaspar_data(dir_path: Path) -> pd.DataFrame:
             risques = ", ".join(dict.fromkeys(risques_list)) or None
 
             nom_proc = (
-                str(row.get("LIBELLE PROCEDURE") or row.get("LIBELLE MODELE") or "")
-                .strip()
+                str(
+                    row.get("LIBELLE PROCEDURE") or row.get("LIBELLE MODELE") or ""
+                ).strip()
                 or None
             )
             statut = (
-                str(row.get("LIBELLE ETAT") or row.get("LIBELLE SOUS-ETAT") or "")
-                .strip()
+                str(
+                    row.get("LIBELLE ETAT") or row.get("LIBELLE SOUS-ETAT") or ""
+                ).strip()
                 or None
             )
 
@@ -128,16 +130,18 @@ def consolidate_gaspar_data(dir_path: Path) -> pd.DataFrame:
             if d_proc and (d_proc.lower() == "nan" or len(d_proc) < 8):
                 d_proc = None
 
-            records.append({
-                "code_insee": c_insee,
-                "nom_commune": row.get("NOM COMMUNE"),
-                "code_procedure": c_proc,
-                "type_procedure": ppr_type,
-                "nom_procedure": nom_proc,
-                "risques": risques,
-                "statut": statut,
-                "date_procedure": d_proc,
-            })
+            records.append(
+                {
+                    "code_insee": c_insee,
+                    "nom_commune": row.get("NOM COMMUNE"),
+                    "code_procedure": c_proc,
+                    "type_procedure": ppr_type,
+                    "nom_procedure": nom_proc,
+                    "risques": risques,
+                    "statut": statut,
+                    "date_procedure": d_proc,
+                }
+            )
 
     # 2. CatNat
     matched_catnat = next(
@@ -165,24 +169,22 @@ def consolidate_gaspar_data(dir_path: Path) -> pd.DataFrame:
             if d_proc and (d_proc.lower() == "nan" or len(d_proc) < 8):
                 d_proc = None
 
-            nom_catnat = (
-                f"Arrêté CatNat - {r_label}" if r_label else "Arrêté CatNat"
+            nom_catnat = f"Arrêté CatNat - {r_label}" if r_label else "Arrêté CatNat"
+            records.append(
+                {
+                    "code_insee": c_insee,
+                    "nom_commune": row.get("libelle_commune"),
+                    "code_procedure": c_proc,
+                    "type_procedure": "CATNAT",
+                    "nom_procedure": nom_catnat,
+                    "risques": r_label,
+                    "statut": "Publié JO",
+                    "date_procedure": d_proc,
+                }
             )
-            records.append({
-                "code_insee": c_insee,
-                "nom_commune": row.get("libelle_commune"),
-                "code_procedure": c_proc,
-                "type_procedure": "CATNAT",
-                "nom_procedure": nom_catnat,
-                "risques": r_label,
-                "statut": "Publié JO",
-                "date_procedure": d_proc,
-            })
 
     # 3. AZI (Atlas des Zones Inondables)
-    matched_azi = next(
-        (fname for fname in csv_files if fname.startswith("azi")), None
-    )
+    matched_azi = next((fname for fname in csv_files if fname.startswith("azi")), None)
     if matched_azi is not None:
         df_azi = csv_files[matched_azi]
         for _, row in df_azi.iterrows():
@@ -195,25 +197,25 @@ def consolidate_gaspar_data(dir_path: Path) -> pd.DataFrame:
             c_proc = str(row.get("id_gaspar") or "").strip() or None
             d_proc = (
                 str(
-                    row.get("dat_diffusion")
-                    or row.get("dat_program_deb")
-                    or ""
+                    row.get("dat_diffusion") or row.get("dat_program_deb") or ""
                 ).strip()[:10]
                 or None
             )
             if d_proc and (d_proc.lower() == "nan" or len(d_proc) < 8):
                 d_proc = None
 
-            records.append({
-                "code_insee": c_insee,
-                "nom_commune": row.get("lib_commune"),
-                "code_procedure": c_proc,
-                "type_procedure": "AZI",
-                "nom_procedure": row.get("libelle"),
-                "risques": row.get("list_risques"),
-                "statut": "Diffusé",
-                "date_procedure": d_proc,
-            })
+            records.append(
+                {
+                    "code_insee": c_insee,
+                    "nom_commune": row.get("lib_commune"),
+                    "code_procedure": c_proc,
+                    "type_procedure": "AZI",
+                    "nom_procedure": row.get("libelle"),
+                    "risques": row.get("list_risques"),
+                    "statut": "Diffusé",
+                    "date_procedure": d_proc,
+                }
+            )
 
     # 4. DICRIM
     matched_dicrim = next(
@@ -232,23 +234,23 @@ def consolidate_gaspar_data(dir_path: Path) -> pd.DataFrame:
             if d_proc and (d_proc.lower() == "nan" or len(d_proc) < 8):
                 d_proc = None
 
-            records.append({
-                "code_insee": c_insee,
-                "nom_commune": row.get("lib_commune"),
-                "code_procedure": None,
-                "type_procedure": "DICRIM",
-                "nom_procedure": (
-                    "Document d'Information Communal sur les Risques Majeurs"
-                ),
-                "risques": "Information préventive",
-                "statut": "Publié",
-                "date_procedure": d_proc,
-            })
+            records.append(
+                {
+                    "code_insee": c_insee,
+                    "nom_commune": row.get("lib_commune"),
+                    "code_procedure": None,
+                    "type_procedure": "DICRIM",
+                    "nom_procedure": (
+                        "Document d'Information Communal sur les Risques Majeurs"
+                    ),
+                    "risques": "Information préventive",
+                    "statut": "Publié",
+                    "date_procedure": d_proc,
+                }
+            )
 
     # 5. TIM (Transmission d'Information au Maire)
-    matched_tim = next(
-        (fname for fname in csv_files if fname.startswith("tim")), None
-    )
+    matched_tim = next((fname for fname in csv_files if fname.startswith("tim")), None)
     if matched_tim is not None:
         df_tim = csv_files[matched_tim]
         for _, row in df_tim.iterrows():
@@ -260,22 +262,22 @@ def consolidate_gaspar_data(dir_path: Path) -> pd.DataFrame:
 
             d_proc = str(row.get("date_transmission") or "").strip()[:10] or None
             if d_proc and (
-                d_proc.lower() == "nan"
-                or len(d_proc) < 8
-                or d_proc.startswith("1900")
+                d_proc.lower() == "nan" or len(d_proc) < 8 or d_proc.startswith("1900")
             ):
                 d_proc = None
 
-            records.append({
-                "code_insee": c_insee,
-                "nom_commune": row.get("libelle_commune"),
-                "code_procedure": None,
-                "type_procedure": "TIM",
-                "nom_procedure": "Transmission d'Information au Maire",
-                "risques": "Information préventive",
-                "statut": "Transmis",
-                "date_procedure": d_proc,
-            })
+            records.append(
+                {
+                    "code_insee": c_insee,
+                    "nom_commune": row.get("libelle_commune"),
+                    "code_procedure": None,
+                    "type_procedure": "TIM",
+                    "nom_procedure": "Transmission d'Information au Maire",
+                    "risques": "Information préventive",
+                    "statut": "Transmis",
+                    "date_procedure": d_proc,
+                }
+            )
 
     df_consolidated = pd.DataFrame(records)
 

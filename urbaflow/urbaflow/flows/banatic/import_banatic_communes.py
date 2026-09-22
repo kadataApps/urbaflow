@@ -141,9 +141,7 @@ def consolidate_banatic_communes(
     df_epci = df_epci.drop_duplicates(subset=["insee"])
 
     # Fusion des données communes avec les données EPCI FP
-    merged = df_insee.merge(
-        df_epci, left_on="code_insee", right_on="insee", how="left"
-    )
+    merged = df_insee.merge(df_epci, left_on="code_insee", right_on="insee", how="left")
 
     merged["code_departement"] = merged["dep_com"].fillna(merged["dept"])
     merged["code_region"] = merged["dept"].fillna("")

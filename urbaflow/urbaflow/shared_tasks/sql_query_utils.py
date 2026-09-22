@@ -36,5 +36,5 @@ def replace_parameters_in_script(script_path, replace_dict):
             fout.write(data)
 
     except OSError as e:
-        msg = "<b>Erreur lors du paramétrage des scripts d'import: %s</b>" % e
+        msg = f"<b>Erreur lors du paramétrage des scripts d'import: {e}</b>"
         return msg

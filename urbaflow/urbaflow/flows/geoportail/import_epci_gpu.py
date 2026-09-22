@@ -1,4 +1,3 @@
-
 import geopandas as gpd
 import pandas as pd
 import requests
@@ -124,7 +123,7 @@ def create_epci_communes_table(
         q = conn.engine.dialect.identifier_preparer.quote
         conn.execute(DDL(f"DROP TABLE IF EXISTS {q(schema)}.{q(table_name)}"))
         logger.info("Création de la table %s.%s", schema, table_name)
-        
+
         conn.execute(
             DDL(
                 f"""
@@ -149,7 +148,7 @@ def create_epci_communes_table(
                 """
             )
         )
-        
+
         load(
             df,
             connection=conn,
@@ -340,20 +339,22 @@ def update_gpu_table_for_epci(
             recreate=False,
             srs=2154,
         )
-        existing_cols = conn.execute(
-            text(
-                "SELECT column_name FROM information_schema.columns "
-                "WHERE table_schema = :schema AND table_name = :table"
-            ),
-            {"schema": schema, "table": table_name},
-        ).scalars().all()
+        existing_cols = (
+            conn.execute(
+                text(
+                    "SELECT column_name FROM information_schema.columns "
+                    "WHERE table_schema = :schema AND table_name = :table"
+                ),
+                {"schema": schema, "table": table_name},
+            )
+            .scalars()
+            .all()
+        )
 
         missing_cols = [c for c in gdf.columns if c not in existing_cols]
         for col in missing_cols:
             q = conn.engine.dialect.identifier_preparer.quote
-            col_type = (
-                "numeric" if pd.api.types.is_numeric_dtype(gdf[col]) else "text"
-            )
+            col_type = "numeric" if pd.api.types.is_numeric_dtype(gdf[col]) else "text"
             logger.info(
                 "Ajout de la colonne %s (%s) dans %s.%s",
                 col,
@@ -408,9 +409,7 @@ def import_epci_gpu_flow(
     df_enriched = enrich_communes_with_apicarto(df_communes)
 
     # Step 3: Création de la table banatic_communes_{siren_epci}
-    create_epci_communes_table(
-        df=df_enriched, siren_epci=siren_epci, schema=db_schema
-    )
+    create_epci_communes_table(df=df_enriched, siren_epci=siren_epci, schema=db_schema)
 
     # Step 4: Mise à jour des tables GPU (zone-urba, secteur-cc, prescriptions, infos)
     insee_list = [

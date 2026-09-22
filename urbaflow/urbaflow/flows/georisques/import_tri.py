@@ -39,13 +39,13 @@ def import_tri_flow(
     Importe les données des Territoires à Risques Important d'Inondation (TRI 2020).
     Si le répertoire n'est pas fourni, le département doit être spécifié
     pour télécharger les données.
-    Consolide les tables des surfaces inondables (zone qui sera inondée en cas 
+    Consolide les tables des surfaces inondables (zone qui sera inondée en cas
     d’occurrence d’une inondation d’un certain type selon un certain scénario)
     dans une seule table PostGIS.
 
-    Nommage des fichiers consolidés : 
+    Nommage des fichiers consolidés :
     N_[prefixTri]_INONDABLE_[Alea]_[Scenario]_[NomCoursEau]_S_ddd
-    simplifié à n_tri_*_inondable_*_s_* 
+    simplifié à n_tri_*_inondable_*_s_*
 
     Exemple d'URL : https://files.georisques.fr/di_2020/tri_2020_sig_di_85.zip
     """

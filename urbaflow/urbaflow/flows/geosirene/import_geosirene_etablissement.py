@@ -37,9 +37,7 @@ def fetch_geosirene_parquet(dirname: Path | None = None) -> Path:
                 GEOSIRENE_PARQUET_URL,
             )
             headers = {"User-Agent": "Mozilla/5.0"}
-            response = requests.get(
-                GEOSIRENE_PARQUET_URL, headers=headers, stream=True
-            )
+            response = requests.get(GEOSIRENE_PARQUET_URL, headers=headers, stream=True)
             response.raise_for_status()
             with open(parquet_path, "wb") as f:
                 for chunk in response.iter_content(chunk_size=65536):

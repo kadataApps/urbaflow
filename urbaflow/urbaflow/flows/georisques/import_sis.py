@@ -1,6 +1,6 @@
 import json
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pandas as pd
@@ -114,9 +114,9 @@ def parse_sis_item(item: dict, default_department: str | None = None) -> dict:
     date_maj_raw = item.get("dateMaj")
     date_maj = None
     if isinstance(date_maj_raw, (int, float)):
-        date_maj = datetime.fromtimestamp(
-            date_maj_raw / 1000.0, tz=timezone.utc
-        ).strftime("%Y-%m-%d")
+        date_maj = datetime.fromtimestamp(date_maj_raw / 1000.0, tz=UTC).strftime(
+            "%Y-%m-%d"
+        )
 
     url_fiche = (
         f"https://fiches-risques.brgm.fr/georisques/infosols/classification/{identifiant_ssp}"

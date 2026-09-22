@@ -204,9 +204,7 @@ def consolidate_irep_data(dir_path: Path, year: int = 2024) -> pd.DataFrame:
             .rename("quantite_prod_dechets_dangereux_t")
         )
     else:
-        pdd_tot = pd.Series(
-            name="quantite_prod_dechets_dangereux_t", dtype="float64"
-        )
+        pdd_tot = pd.Series(name="quantite_prod_dechets_dangereux_t", dtype="float64")
 
     df_tdnd = csv_files.get("trait_dechets_non_dangereux.csv")
     if df_tdnd is not None and not df_tdnd.empty:
@@ -230,9 +228,7 @@ def consolidate_irep_data(dir_path: Path, year: int = 2024) -> pd.DataFrame:
             .rename("quantite_trait_dechets_dangereux_t")
         )
     else:
-        tdd_tot = pd.Series(
-            name="quantite_trait_dechets_dangereux_t", dtype="float64"
-        )
+        tdd_tot = pd.Series(name="quantite_trait_dechets_dangereux_t", dtype="float64")
 
     # Fusion sur l'établissement
     merged = (
@@ -250,15 +246,15 @@ def consolidate_irep_data(dir_path: Path, year: int = 2024) -> pd.DataFrame:
 
     merged["annee"] = int(year)
     merged["url_fiche"] = merged["identifiant"].apply(
-        lambda id_val: f"https://www.georisques.gouv.fr/dossiers/irep/donnees/etablissement/{id_val}/donnees"
+        lambda id_val: (
+            f"https://www.georisques.gouv.fr/dossiers/irep/donnees/etablissement/{id_val}/donnees"
+        )
     )
 
     int_cols = ["annee", "nb_emissions_air", "nb_emissions_eau", "nb_emissions_sol"]
     for col in int_cols:
         if col in merged.columns:
-            merged[col] = (
-                merged[col].fillna(0).astype(float).astype(int)
-            )
+            merged[col] = merged[col].fillna(0).astype(float).astype(int)
 
     # Nettoyage des colonnes attendues
     expected_cols = [
