@@ -3,6 +3,7 @@ from pathlib import Path
 import typer
 from dotenv import load_dotenv
 from flows.banatic.import_banatic_communes import import_banatic_communes_flow
+from flows.bdtopo.import_bdtopo_batiment import import_bdtopo_batiment_flow
 from flows.bpe.import_bpe import import_bpe_flow
 from flows.cadastre.flow_cadastre import (
     STEPS_FLOW_CADASTRE,
@@ -302,6 +303,49 @@ DEPARTEMENT_OPTION = typer.Option(
     "-d",
     "--departement",
     help="Department code (e.g., '75' for Paris). Required if dirname is not provided.",
+)
+BDTOPO_DEPARTEMENTS_OPTION = typer.Option(
+    None,
+    "-d",
+    "--departement",
+    help=(
+        "Code(s) de département séparés par des virgules (ex: '35' ou '35,22'). "
+        "Exclusif avec --epci et --communes."
+    ),
+)
+BDTOPO_EPCI_OPTION = typer.Option(
+    None,
+    "-e",
+    "--epci",
+    help=(
+        "Numéro SIREN de l'EPCI dont les communes doivent être importées. "
+        "Exclusif avec --departement et --communes."
+    ),
+)
+BDTOPO_COMMUNES_OPTION = typer.Option(
+    None,
+    "-c",
+    "--communes",
+    help=(
+        "Codes INSEE de communes séparés par des virgules (ex: '35238,35047'). "
+        "Exclusif avec --departement et --epci."
+    ),
+)
+BDTOPO_MILLESIME_OPTION = typer.Option(
+    None,
+    "--millesime",
+    help=(
+        "Millésime BD TOPO souhaité (ex: '2026-06-15'). "
+        "Par défaut, la dernière édition disponible."
+    ),
+)
+BDTOPO_BATIMENT_TABLE_OPTION = typer.Option(
+    "bdtopo_batiment", help="Database table name"
+)
+BDTOPO_KEEP_FILES_OPTION = typer.Option(
+    False,
+    "--keep-files/--no-keep-files",
+    help="Conserver l'archive téléchargée et le GeoPackage extrait",
 )
 
 
@@ -746,6 +790,36 @@ def banatic_communes(
         db_schema=schema,
         table_name=table_name,
         recreate=recreate,
+    )
+
+
+@app.command(name="bdtopo-batiment")
+def bdtopo_batiment(
+    departement: str = BDTOPO_DEPARTEMENTS_OPTION,
+    epci: str = BDTOPO_EPCI_OPTION,
+    communes: str = BDTOPO_COMMUNES_OPTION,
+    millesime: str = BDTOPO_MILLESIME_OPTION,
+    schema: str = SCHEMA_OPTION,
+    table_name: str = BDTOPO_BATIMENT_TABLE_OPTION,
+    recreate: bool = RECREATE_FALSE_OPTION,
+    keep_files: bool = BDTOPO_KEEP_FILES_OPTION,
+):
+    """
+    Import des bâtiments de la BD TOPO® IGN depuis la Géoplateforme.
+
+    Le périmètre est défini par un ou plusieurs départements (--departement),
+    un EPCI (--epci) ou une liste de codes INSEE de communes (--communes).
+    Les bâtiments déjà présents sur le périmètre sont supprimés avant l'import.
+    """
+    import_bdtopo_batiment_flow(
+        departements=departement,
+        epci=epci,
+        communes=communes,
+        edition_date=millesime,
+        db_schema=schema,
+        table_name=table_name,
+        recreate=recreate,
+        keep_files=keep_files,
     )
 
 

@@ -302,6 +302,27 @@ uv run python urbaflow/main.py --help
     - `--schema TEXT` (défaut: `public`)
     - `--banatic-table TEXT` (défaut: `banatic_communes`)
 
+- `bdtopo-batiment [OPTIONS]`
+  - Télécharge et importe les bâtiments de la BD TOPO® de l'IGN dans la table `bdtopo_batiment`.
+  - Les archives départementales GeoPackage sont téléchargées depuis la Géoplateforme (`data.geopf.fr`), puis seule la couche `batiment` est importée (géométries `MultiPolygon` en Lambert 93).
+  - Le périmètre est défini par **une seule** des options `--departement`, `--epci` ou `--communes` :
+    - `--departement` : un ou plusieurs départements entiers ;
+    - `--epci` : toutes les communes de l'EPCI, résolues via l'API Découpage administratif (`geo.api.gouv.fr`) ;
+    - `--communes` : une liste de codes INSEE.
+  - Chaque bâtiment est rattaché à une commune (et donc à un département) par jointure spatiale sur son point représentatif, ce qui alimente les colonnes `code_insee` et `code_departement`.
+  - **L'import remplace les données existantes sur le périmètre** : suppression préalable des bâtiments de même `code_departement` (import départemental) ou des bâtiments des communes effectivement chargées (import par EPCI ou par communes). Les données hors périmètre ne sont pas touchées, et une commune demandée mais absente de la BD TOPO conserve ses données précédentes.
+  - La colonne `millesime` conserve la date d'édition de la BD TOPO importée.
+  - Chaque département téléchargé représente une archive de plusieurs centaines de Mo et un GeoPackage de plusieurs Go : prévoir l'espace disque correspondant dans `urbaflow/temp/`. Les fichiers sont supprimés après l'import, sauf avec `--keep-files`.
+  - Options :
+    - `-d, --departement TEXT` (codes séparés par des virgules, ex: `35` ou `35,22`)
+    - `-e, --epci TEXT` (numéro SIREN de l'EPCI)
+    - `-c, --communes TEXT` (codes INSEE séparés par des virgules)
+    - `--millesime TEXT` (défaut: dernière édition disponible, ex: `2026-06-15`)
+    - `--schema TEXT` (défaut: `public`)
+    - `--table-name TEXT` (défaut: `bdtopo_batiment`)
+    - `--recreate / --no-recreate` (défaut: `--no-recreate`)
+    - `--keep-files / --no-keep-files` (défaut: `--no-keep-files`, conserve l'archive et le GeoPackage téléchargés)
+
 - `bpe [dirname] [OPTIONS]`
   - Importe la Base Permanente des Équipements (BPE / INSEE) géolocalisée.
   - `dirname` est optionnel (télécharge le fichier ZIP national BPE depuis l'INSEE par défaut).
@@ -347,6 +368,15 @@ docker compose run --rm urbaflow python urbaflow/main.py majic /data/
 
 # Risques cavités pour un département
 docker compose run --rm urbaflow python urbaflow/main.py risques-cavite -d 85
+
+# Bâti BD TOPO IGN sur un département entier
+docker compose run --rm urbaflow python urbaflow/main.py bdtopo-batiment -d 35
+
+# Bâti BD TOPO IGN sur toutes les communes d'un EPCI
+docker compose run --rm urbaflow python urbaflow/main.py bdtopo-batiment -e 243500139
+
+# Bâti BD TOPO IGN sur une liste de communes
+docker compose run --rm urbaflow python urbaflow/main.py bdtopo-batiment -c 35238,35047
 
 # LOVAC FIL avec options
 docker compose run --rm urbaflow python urbaflow/main.py lovac-fil /data/ --schema public --table-name lovac_fil --recursive --recreate
