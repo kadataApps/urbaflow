@@ -39,6 +39,7 @@ SET
     -- FIXME
     -- https://doc-datafoncier.cerema.fr/doc/ff/pnb10_parcelle/ndroitpro
     typedroit = CASE
+    -- Seulement pour les comptes communaux dont le code droit (ccodro) = B,C,F,N,P,V ou X
         WHEN
             ccodro = 'B'
             OR ccodro = 'C'

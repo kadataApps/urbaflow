@@ -57,6 +57,7 @@ Exemple d'utilisation:
 ```shell
 docker compose run --rm urbaflow python urbaflow/main.py majic /data/ step1 step2
 ```
+
 ## Nommage des fichiers
 
 Les fichiers MAJIC importés doivent être nommés selon le format suivant:
@@ -67,7 +68,8 @@ Les fichiers MAJIC importés doivent être nommés selon le format suivant:
 "pdll": "PDL_LOTS",
 "lotlocal": "LLOC",
 "prop": "PROP",
-````
+```
+
 Si besoin, cela peut être configuré dans le fichier `urbaflow/urbaflow/config.py` en modifiant la variable `MAJIC_FILE_NAMES`.
 
 ## Champs complémentaires
@@ -79,12 +81,28 @@ Description de la nature du droit de propriété.
 Modalités:
 
 - COPROPRIETE
+- INDIVISION EN LITIGE
+- INDIVISION SIMPLE
 - INDIVISION
-- LITIGE
 - BAIL EMPHYTHEOTIQUE
-- SEPARATION NUE-PROPRIETE / USUFRUIT
+- SEP. NUE-PROPRIETE / USUFRUIT
 - PLEINE PROPRIETE
 - AUTRE
+
+### ndroitpro
+
+Nombre de droits de propriété de type « propriétaire » (`typedroit = 'P'`) associés au compte propriétaire de la parcelle.
+
+La définition de référence est celle du [Cerema](https://doc-datafoncier.cerema.fr/doc/ff/pnb10_parcelle/ndroitpro). Elle concerne uniquement les comptes communaux dont le code droit (`ccodro`) vaut `B`, `C`, `F`, `N`, `P`, `V` ou `X`.
+
+### ndroitpro_parcelle_bati
+
+Nombre de titulaires distincts (`dnuper`) ayant un droit de type « propriétaire » (`typedroit = 'P'`) sur :
+
+- le compte propriétaire de la parcelle ;
+- les comptes propriétaires des locaux situés sur la parcelle.
+
+Cet indicateur complète `ndroitpro` en prenant en compte les propriétaires des locaux bâtis et en dédoublonnant les titulaires identifiés par `dnuper`.
 
 ### catpro
 
