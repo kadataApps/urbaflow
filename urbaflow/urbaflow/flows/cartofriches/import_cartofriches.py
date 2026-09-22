@@ -13,6 +13,7 @@ from shared_tasks.etl_gpd_utils import (
 )
 from shared_tasks.file_utils import list_files_at_path
 from shared_tasks.logging_config import get_logger
+from sqlalchemy import DDL
 
 # Sites référencés dans Cartofriches (friches industrielles, commerciales, etc.)
 # URL de téléchargement data.gouv.fr :
@@ -105,6 +106,16 @@ def load_cartofriches_geodataframe(
             schema=db_schema,
             how="append",
             logger=logger,
+        )
+        q = conn.engine.dialect.identifier_preparer.quote
+        logger.info("Création de l'index spatial sur %s.%s", db_schema, table_name)
+        conn.execute(
+            DDL(
+                f"""
+                CREATE INDEX IF NOT EXISTS {q(f"sidx_{table_name}_geom")}
+                ON {q(db_schema)}.{q(table_name)} USING GIST (geom)
+                """
+            )
         )
 
 
