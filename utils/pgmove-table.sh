@@ -1,6 +1,54 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# pgmove-table.sh
+#
+# Copie une table Postgres depuis une base source vers une base cible, en
+# conservant les objets de structure utiles au transfert : index, séquences,
+# contraintes et éventuellement triggers selon l'option --no-triggers.
+#
+# Objectif principal : déplacer des données sans reconstruire la table à la main
+# depuis le SQL, en utilisant pg_dump custom + pg_restore.
+#
+# Pré-requis :
+#   - PostgreSQL client tools installés : psql, pg_dump, pg_restore
+#   - Accès réseau/credentials vers les deux bases
+#   - Le schéma cible doit déjà exister
+#   - Si la table source contient des colonnes PostGIS, la cible doit avoir
+#     l'extension postgis installée
+#
+# Contraintes connues :
+#   - Les permissions, propriétaires et rôles ne sont pas transférés
+#     (--no-owner --no-privileges)
+#   - Le script ne copie pas les données "à chaud" ; il fait un dump complet de
+#     la table puis une restauration sur la cible
+#   - Les triggers peuvent être ignorés avec --no-triggers, ce qui évite de
+#     copier les déclencheurs si le besoin est purement de données/structure
+#
+# Exemple d'utilisation :
+#   ./utils/pgmove-table.sh \
+#     --src "service=prod" \
+#     --src-table "public.my_table" \
+#     --dst "uri=postgresql://user:pass@host:5432/db_target" \
+#     --dst-schema "public" \
+#     --dst-table "my_table_copy" \
+#     --jobs 8 --verbose
+#
+# Exemple avec migration vers un schéma différent :
+#   ./utils/pgmove-table.sh \
+#     --src "service=prod" \
+#     --src-table "public.my_table" \
+#     --dst "service=staging" \
+#     --dst-schema "staging" \
+#     --no-triggers \
+#     --force-drop
+#
+# Remarques de sécurité :
+#   - Si la table cible existe, le script demande confirmation sauf avec
+#     --force-drop
+#   - Le dump est conservé dans le répertoire de travail pour inspection ou
+#     reprise manuelle
+#
 # ---- Defaults ----
 JOBS="${JOBS:-4}"
 NO_TRIGGERS="false"
@@ -11,6 +59,11 @@ VERBOSE="${VERBOSE:-false}"
 
 usage() {
   cat <<'EOF'
+Description:
+  Déplace une table PostgreSQL d'une source vers une cible, en conservant la
+  structure principale (index, séquences, contraintes), sans copier les
+  permissions/owners.
+
 Usage:
   pgmove-table.sh \
     --src "service=srcsvc|uri=postgres://..." \
@@ -22,21 +75,30 @@ Usage:
 
 Options:
   --src             Connexion source: "service=NAME" (PGSERVICE) ou "uri=postgres://..."
-  --src-table       Table source (schema.table)
-  --dst             Connexion cible:  "service=NAME" (PGSERVICE) ou "uri=postgres://..."
+  --src-table       Table source au format "schema.table"
+  --dst             Connexion cible: "service=NAME" (PGSERVICE) ou "uri=postgres://..."
   --dst-schema      Schéma cible (doit exister)
   --dst-table       Nom de table cible (sinon = nom source)
-  --jobs            Parallélisme pg_restore (defaut: 4)
-  --no-triggers     N'exporte pas les triggers (index & sequences conservés)
+  --jobs            Parallélisme pg_restore (défaut: 4)
+  --no-triggers     N'exporte pas les triggers (index et séquences conservés)
   --force-drop      Si la table cible existe, la DROP sans demander
-  --workdir         Répertoire pour le dump list et fichier .dump (defaut: /tmp)
-  --verbose         Sorties verbeuses
+  --workdir         Répertoire pour le dump list et le fichier .dump (défaut: /tmp)
+  --verbose         Affiche plus de logs détaillés
+  -h, --help        Affiche cette aide
+
+Comportement:
+  - Dump de la table source au format custom via pg_dump
+  - Restauration sur la base cible avec --clean pour éliminer les objets existants
+  - Si la table source contient geometry/geography, validation de l'extension PostGIS
+  - Ajustement des séquences via setval afin de conserver l'ordre de génération
+  - Si le schéma de destination est différent, la table est déplacée via ALTER TABLE ... SET SCHEMA
+  - Si --dst-table est différent, le nom est ajusté après restauration
 
 Notes:
   - Les rôles/privileges ne sont pas transférés (--no-owner --no-privileges).
-  - Les sequences et index sont transférés, et le setval est effectué.
-  - PostGIS: si la table source contient geometry/geography, vérifie que postgis est présent en cible.
-  - Si --dst-table est différent, on restaure au nom source puis on RENAME la table (les index gardent leur nom).
+  - Les séquences et index sont transférés, puis réalignés.
+  - PostGIS: si la table source contient geometry/geography, vérifie que postgis est bien installé en cible.
+  - Le dump est laissé sur disque dans le workdir pour diagnostic ou reprise manuelle.
 EOF
 }
 

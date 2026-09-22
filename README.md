@@ -14,10 +14,16 @@ ETL de traitement des données liées à l'urbanisme :
 L'ETL est composé de scripts python et de fichiers SQL.
 Il a été testé pour les environnements linux et OSX.
 
-UrbaFlow vient avec quelques utilitaires pour faciliter la gestion des bases de données PostgreSQL/PostGIS, notamment `pgmove-table.sh` qui permet de déplacer simplement une table d'une base à une autre en gérant les dépendances (contraintes, index, séquences...) et la destination (nom du schéma et de la table).
+UrbaFlow vient avec quelques utilitaires pour faciliter la gestion des bases de données PostgreSQL/PostGIS.
+
+Le script `utils/pgmove-table.sh` permet de copier une table d'une base source vers une base cible tout en conservant les éléments essentiels de structure : index, séquences, contraintes et, selon le cas, les triggers. Il est utile pour migrer une table sans recréer manuellement les objets dépendants ni réécrire le schéma.
 
 ## Prérequis
 
+- PostgreSQL client tools (`psql`, `pg_dump`, `pg_restore`) installés sur la machine ou dans l'environnement d'exécution.
+- Accès réseau et identifiants valides sur les bases source et cible.
+- Un schéma de destination existant.
+- Si la table source contient des colonnes géographiques PostGIS, la base cible doit avoir l'extension `postgis` activée.
 - Docker : permet de lancer les scripts dans un environnement maitrisé avec les bonnes dépendances.
   - (installation sur windows: [https://docs.docker.com/desktop/install/windows-install/])
   - (installation sur mac: [https://docs.docker.com/desktop/install/mac-install/])
@@ -32,6 +38,46 @@ uv sync
 ```
 
 Les commandes locales s'exécutent avec `uv run`, par exemple `uv run ruff check`.
+
+### Utiliser un PGSERVICE
+
+Le script accepte deux types de connexion :
+
+- un `PGSERVICE` sous la forme `service=nom_du_service`
+- ou une URI PostgreSQL sous la forme `uri=postgresql://utilisateur:motdepasse@hote:5432/base`
+
+Pour utiliser un `PGSERVICE`, il faut définir un service dans le fichier `~/.pg_service.conf` avec une section du type :
+
+```ini
+[srcsvc]
+host=prod-db.internal
+port=5432
+dbname=source_db
+user=app_user
+password=secret
+sslmode=require
+```
+
+Ensuite, on appelle le script avec :
+
+```bash
+./utils/pgmove-table.sh \
+  --src "service=srcsvc" \
+  --src-table "public.my_table" \
+  --dst "service=dstsvc" \
+  --dst-schema "public" \
+  --verbose
+```
+
+Autre exemple, avec une connexion directe par URI :
+
+```bash
+./utils/pgmove-table.sh \
+  --src "uri=postgresql://user:pass@host:5432/source_db" \
+  --src-table "public.my_table" \
+  --dst "uri=postgresql://user:pass@host:5432/target_db" \
+  --dst-schema "public"
+```
 
 ## Principe
 
