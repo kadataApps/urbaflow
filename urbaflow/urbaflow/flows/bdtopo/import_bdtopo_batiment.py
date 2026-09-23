@@ -641,7 +641,7 @@ def replace_perimeter_data(
                 {source_columns},
                 commune.code_insee,
                 COALESCE(commune.code_insee_du_departement, :department),
-                :edition_date::date,
+                CAST(:edition_date AS date),
                 ST_Multi(batiment.geom)
             FROM {staging_batiment} AS batiment
             INNER JOIN {staging_commune} AS commune
