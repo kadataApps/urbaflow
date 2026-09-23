@@ -13,6 +13,7 @@ from flows.cadastre.flow_dgfip_topo import import_dgfip_topo_flow
 from flows.cartofriches.import_cartofriches import import_cartofriches_flow
 from flows.dvf.dvf import dvf_flow
 from flows.geoportail.import_epci_gpu import import_epci_gpu_flow
+from flows.geoportail.import_gpu_plu import DEFAULT_DOWNLOAD_DIR, import_gpu_plu_flow
 from flows.geoportail.import_gpu_sup import import_gpu_sup_flow
 from flows.georisques.import_casias import import_risques_casias_flow
 from flows.georisques.import_cavite import import_risques_cavite_flow
@@ -346,6 +347,28 @@ BDTOPO_KEEP_FILES_OPTION = typer.Option(
     False,
     "--keep-files/--no-keep-files",
     help="Conserver l'archive téléchargée et le GeoPackage extrait",
+)
+GPU_PLU_EPCI_OPTION = typer.Option(
+    None,
+    "-e",
+    "--epci",
+    help="Code SIREN de l'EPCI à importer. Exclusif avec --commune.",
+)
+GPU_PLU_COMMUNE_OPTION = typer.Option(
+    None,
+    "-c",
+    "--commune",
+    help="Code INSEE de la commune à importer. Exclusif avec --epci.",
+)
+GPU_PLU_DOWNLOAD_DIR_OPTION = typer.Option(
+    None,
+    "--download-dir",
+    help="Répertoire de téléchargement. Par défaut : temp/geoportail/plu.",
+)
+GPU_PLU_KEEP_FILES_OPTION = typer.Option(
+    True,
+    "--keep-files/--no-keep-files",
+    help="Conserver les fichiers GeoJSON téléchargés",
 )
 
 
@@ -840,6 +863,29 @@ def epci_gpu(
         siren_epci=siren,
         db_schema=schema,
         banatic_table=banatic_table,
+    )
+
+
+@app.command(name="gpu-plu")
+def gpu_plu(
+    epci: str | None = GPU_PLU_EPCI_OPTION,
+    commune: str | None = GPU_PLU_COMMUNE_OPTION,
+    schema: str = SCHEMA_OPTION,
+    download_dir: Path | None = GPU_PLU_DOWNLOAD_DIR_OPTION,
+    keep_files: bool = GPU_PLU_KEEP_FILES_OPTION,
+):
+    """
+    Télécharge et importe cinq couches PLU du Géoportail de l'Urbanisme.
+
+    Le périmètre est défini par un code EPCI ou un code commune. Les tables
+    créées sont préfixées par urba_. Les fichiers sont conservés par défaut.
+    """
+    import_gpu_plu_flow(
+        epci=epci,
+        commune=commune,
+        db_schema=schema,
+        download_dir=download_dir or DEFAULT_DOWNLOAD_DIR,
+        keep_files=keep_files,
     )
 
 

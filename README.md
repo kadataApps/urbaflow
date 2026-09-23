@@ -302,6 +302,20 @@ uv run python urbaflow/main.py --help
     - `--schema TEXT` (défaut: `public`)
     - `--banatic-table TEXT` (défaut: `banatic_communes`)
 
+- `gpu-plu [OPTIONS]`
+  - Télécharge et importe les données géographiques PLU du Géoportail de l'Urbanisme via APICARTO.
+  - Le périmètre est défini par **une seule** des options `--epci` ou `--commune`.
+  - Un EPCI inclut ses partitions intercommunales et les partitions de toutes ses communes, résolues via `geo.api.gouv.fr`.
+  - Importe les tables `urba_zone_urba`, `urba_prescription_surf`, `urba_prescription_lin`, `urba_prescription_pct` et `urba_info_surf`.
+  - Les partitions du périmètre sont remplacées sans supprimer les données des autres territoires.
+  - Les réponses GeoJSON sont conservées par défaut dans `urbaflow/temp/geoportail/plu/<code>/`.
+  - Options :
+    - `-e, --epci TEXT` (code SIREN de l'EPCI)
+    - `-c, --commune TEXT` (code INSEE de la commune)
+    - `--schema TEXT` (défaut: `public`)
+    - `--download-dir PATH` (répertoire de téléchargement personnalisé)
+    - `--keep-files / --no-keep-files` (défaut: `--keep-files`)
+
 - `bdtopo-batiment [OPTIONS]`
   - Télécharge et importe les bâtiments de la BD TOPO® de l'IGN dans la table `bdtopo_batiment`.
   - Les archives départementales GeoPackage sont téléchargées depuis la Géoplateforme (`data.geopf.fr`), puis seule la couche `batiment` est importée (géométries `MultiPolygon` en Lambert 93).
@@ -374,6 +388,12 @@ docker compose run --rm urbaflow python urbaflow/main.py bdtopo-batiment -d 35
 
 # Bâti BD TOPO IGN sur toutes les communes d'un EPCI
 docker compose run --rm urbaflow python urbaflow/main.py bdtopo-batiment -e 243500139
+
+# PLU du Géoportail de l'Urbanisme pour un EPCI
+docker compose run --rm urbaflow python urbaflow/main.py gpu-plu -e 200071629
+
+# PLU du Géoportail de l'Urbanisme pour une commune
+docker compose run --rm urbaflow python urbaflow/main.py gpu-plu -c 85047
 
 # Bâti BD TOPO IGN sur une liste de communes
 docker compose run --rm urbaflow python urbaflow/main.py bdtopo-batiment -c 35238,35047
