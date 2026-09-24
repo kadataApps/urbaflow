@@ -337,6 +337,26 @@ uv run python urbaflow/main.py --help
     - `--recreate / --no-recreate` (défaut: `--no-recreate`)
     - `--keep-files / --no-keep-files` (défaut: `--no-keep-files`, conserve l'archive et le GeoPackage téléchargés)
 
+- `ocsge [OPTIONS]`
+  - Télécharge et importe les données OCS GE (Occupation du Sol à Grande Échelle) de l'IGN dans les tables `ocsge_occupation_sol` et `ocsge_zone_construite`.
+  - Les archives départementales GeoPackage sont téléchargées depuis la Géoplateforme (`data.geopf.fr`) ; les livraisons différentielles (`_DIFF`) sont ignorées au profit de la dernière édition complète.
+  - Le périmètre est défini par **une seule** des options `--departement`, `--epci` ou `--communes` (mêmes règles de résolution que `bdtopo-batiment`).
+  - OCS GE ne fournit pas de couche commune : seule la colonne `code_departement` est renseignée (pas de `code_insee`). Pour un périmètre EPCI ou communes, seuls les polygones intersectant les contours communaux (récupérés via l'API Découpage administratif) sont conservés.
+  - **L'import remplace les données existantes sur le périmètre** : suppression préalable des enregistrements de même `code_departement` (import départemental) ou intersectant les contours des communes effectivement chargées (import par EPCI ou par communes). Les données hors périmètre ne sont pas touchées.
+  - La colonne `millesime` conserve la date d'édition de l'OCS GE importée.
+  - Le CRS source varie selon le territoire (Lambert-93 en métropole, CRS locaux outre-mer) ; les géométries sont systématiquement reprojetées en Lambert-93 (EPSG:2154) dans les tables cibles.
+  - Chaque département téléchargé représente une archive de quelques dizaines à centaines de Mo : prévoir l'espace disque correspondant dans `urbaflow/temp/`. Les fichiers sont supprimés après l'import, sauf avec `--keep-files`.
+  - Options :
+    - `-d, --departement TEXT` (codes séparés par des virgules, ex: `35` ou `35,22`)
+    - `-e, --epci TEXT` (numéro SIREN de l'EPCI)
+    - `-c, --communes TEXT` (codes INSEE séparés par des virgules)
+    - `--millesime TEXT` (défaut: dernière édition complète disponible, ex: `2023-01-01`)
+    - `--schema TEXT` (défaut: `public`)
+    - `--occupation-sol-table TEXT` (défaut: `ocsge_occupation_sol`)
+    - `--zone-construite-table TEXT` (défaut: `ocsge_zone_construite`)
+    - `--recreate / --no-recreate` (défaut: `--no-recreate`)
+    - `--keep-files / --no-keep-files` (défaut: `--no-keep-files`, conserve l'archive et les GeoPackages téléchargés)
+
 - `bpe [dirname] [OPTIONS]`
   - Importe la Base Permanente des Équipements (BPE / INSEE) géolocalisée.
   - `dirname` est optionnel (télécharge le fichier ZIP national BPE depuis l'INSEE par défaut).
@@ -397,6 +417,12 @@ docker compose run --rm urbaflow python urbaflow/main.py gpu-plu -c 85047
 
 # Bâti BD TOPO IGN sur une liste de communes
 docker compose run --rm urbaflow python urbaflow/main.py bdtopo-batiment -c 35238,35047
+
+# OCS GE IGN sur un département entier
+docker compose run --rm urbaflow python urbaflow/main.py ocsge -d 35
+
+# OCS GE IGN sur toutes les communes d'un EPCI
+docker compose run --rm urbaflow python urbaflow/main.py ocsge -e 243500139
 
 # LOVAC FIL avec options
 docker compose run --rm urbaflow python urbaflow/main.py lovac-fil /data/ --schema public --table-name lovac_fil --recursive --recreate

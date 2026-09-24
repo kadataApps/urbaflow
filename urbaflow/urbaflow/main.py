@@ -31,6 +31,7 @@ from flows.locomvac import import_locomvac
 from flows.lovac.import_lovac import import_lovac_flow
 from flows.lovac.import_lovac_fil import import_lovac_fil_flow
 from flows.mh.import_mh import import_mh_flow
+from flows.ocsge.import_ocsge import import_ocsge_flow
 from shared_tasks.logging_config import setup_logging
 
 # Load environment variables from .env file in the root directory
@@ -347,6 +348,20 @@ BDTOPO_KEEP_FILES_OPTION = typer.Option(
     False,
     "--keep-files/--no-keep-files",
     help="Conserver l'archive téléchargée et le GeoPackage extrait",
+)
+OCSGE_MILLESIME_OPTION = typer.Option(
+    None,
+    "--millesime",
+    help=(
+        "Millésime OCS GE souhaité (ex: '2023-01-01'). Par défaut, la dernière "
+        "édition complète disponible (les livraisons différentielles sont ignorées)."
+    ),
+)
+OCSGE_OCCUPATION_SOL_TABLE_OPTION = typer.Option(
+    "ocsge_occupation_sol", help="Database table name"
+)
+OCSGE_ZONE_CONSTRUITE_TABLE_OPTION = typer.Option(
+    "ocsge_zone_construite", help="Database table name"
 )
 GPU_PLU_EPCI_OPTION = typer.Option(
     None,
@@ -841,6 +856,41 @@ def bdtopo_batiment(
         edition_date=millesime,
         db_schema=schema,
         table_name=table_name,
+        recreate=recreate,
+        keep_files=keep_files,
+    )
+
+
+@app.command(name="ocsge")
+def ocsge(
+    departement: str = BDTOPO_DEPARTEMENTS_OPTION,
+    epci: str = BDTOPO_EPCI_OPTION,
+    communes: str = BDTOPO_COMMUNES_OPTION,
+    millesime: str = OCSGE_MILLESIME_OPTION,
+    schema: str = SCHEMA_OPTION,
+    occupation_sol_table: str = OCSGE_OCCUPATION_SOL_TABLE_OPTION,
+    zone_construite_table: str = OCSGE_ZONE_CONSTRUITE_TABLE_OPTION,
+    recreate: bool = RECREATE_FALSE_OPTION,
+    keep_files: bool = BDTOPO_KEEP_FILES_OPTION,
+):
+    """
+    Import des données OCS GE (Occupation du Sol à Grande Échelle) de l'IGN
+    depuis la Géoplateforme.
+
+    Le périmètre est défini par un ou plusieurs départements (--departement),
+    un EPCI (--epci) ou une liste de codes INSEE de communes (--communes). Pour
+    un périmètre EPCI ou communes, seuls les polygones intersectant les contours
+    communaux (récupérés depuis l'API Découpage administratif) sont conservés.
+    Les données déjà présentes sur le périmètre sont supprimées avant l'import.
+    """
+    import_ocsge_flow(
+        departements=departement,
+        epci=epci,
+        communes=communes,
+        edition_date=millesime,
+        db_schema=schema,
+        occupation_sol_table=occupation_sol_table,
+        zone_construite_table=zone_construite_table,
         recreate=recreate,
         keep_files=keep_files,
     )

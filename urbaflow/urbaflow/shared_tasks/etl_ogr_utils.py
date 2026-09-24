@@ -17,6 +17,7 @@ def import_vector_layer(
     replace: bool = False,
     force_2d: bool = False,
     spatial_extent: tuple[float, float, float, float] | None = None,
+    spatial_extent_srs: str | None = None,
     where: str | None = None,
 ) -> None:
     """
@@ -36,8 +37,11 @@ def import_vector_layer(
         destination_srs: système de coordonnées cible.
         replace: si True, la table cible est recréée, sinon les données sont ajoutées.
         force_2d: si True, les géométries 3D sont aplaties en 2D.
-        spatial_extent: emprise (xmin, ymin, xmax, ymax) exprimée dans le SRS source,
-            permettant de ne lire qu'une partie de la couche.
+        spatial_extent: emprise (xmin, ymin, xmax, ymax) permettant de ne lire
+            qu'une partie de la couche, exprimée dans le SRS source sauf si
+            `spatial_extent_srs` est renseigné.
+        spatial_extent_srs: système de coordonnées de `spatial_extent`, si différent
+            du SRS source de la couche.
         where: filtre attributaire SQL appliqué à la couche source.
 
     Raises:
@@ -78,6 +82,8 @@ def import_vector_layer(
         command += ["-dim", "XY"]
     if spatial_extent:
         command += ["-spat", *[str(coordinate) for coordinate in spatial_extent]]
+        if spatial_extent_srs:
+            command += ["-spat_srs", spatial_extent_srs]
     if where:
         command += ["-where", where]
     if layer:
