@@ -84,3 +84,29 @@ SET
         ELSE
             'f'
     END;
+
+
+
+-- Mise à jour de la table local10
+-- ajout d'un champ presgdprop (présence d'un grand propriétaire)
+ALTER TABLE local10
+ADD COLUMN IF NOT EXISTS presgdprop boolean;
+
+COMMENT ON COLUMN local10.presgdprop
+IS 'Indique la présence d''un grand propriétaire pour le logement';
+
+WITH idprocpte_avec_gdprop AS (
+    SELECT distinct idprocpte
+    FROM proprietaire
+    WHERE gdprop = 't'
+)   
+
+UPDATE local10 AS l
+SET presgdprop = CASE
+    WHEN g.idprocpte IS NOT NULL THEN TRUE
+    ELSE FALSE
+END
+FROM idprocpte_avec_gdprop AS g
+WHERE l.idprocpte = g.idprocpte;
+;
+
