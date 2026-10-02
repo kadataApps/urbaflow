@@ -11,11 +11,13 @@ from .tasks.create_unites_foncieres import flow_create_unites_foncieres
 from .tasks.download_cadastre import (
     download_bati_for_communes,
     download_cadastre_for_communes,
+    download_sections_for_communes,
 )
 from .tasks.format_cadastre import (
     execute_format_cadastre,
     execute_init_bati,
     execute_init_cadastre,
+    execute_init_sections,
 )
 from .tasks.format_majic import (
     clean_with_drop_db_for_majic_import,
@@ -29,6 +31,7 @@ from .tasks.move_data_to_public_schema import (
     flow_import_local,
     flow_import_parcelles,
     flow_import_proprietaire,
+    flow_import_sections,
 )
 
 logger = get_logger(__name__)
@@ -96,6 +99,18 @@ STEPS_FLOW_CADASTRE = {
         "description": "Export building data to the public schema",
         "default": True,
         "tasks": [flow_import_bati],
+    },
+    "sections": {
+        "description": "Import des sections cadastrales",
+        "default": True,
+        "tasks": [
+            lambda: copy_directory(
+                os.path.join(QUERIES_DIR, "majic"), os.path.join(TEMP_DIR, "sql")
+            ),
+            execute_init_sections,
+            download_sections_for_communes,
+            flow_import_sections,
+        ],
     },
     "step12": {
         "description": "Clean up temporary files and database tables",

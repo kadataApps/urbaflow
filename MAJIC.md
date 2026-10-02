@@ -24,6 +24,13 @@ Pour n'exécuter que certaines étapes MAJIC, ajouter leurs identifiants à la c
 docker compose run --rm urbaflow python urbaflow/main.py majic /data/ step1 step2
 ```
 
+Pour importer uniquement les sections cadastrales des communes MAJIC déjà présentes
+en base :
+
+```shell
+docker compose run --rm urbaflow python urbaflow/main.py majic /data/ sections
+```
+
 ## Description des étapes de processing des données MAJIC
 
 Il est possible de sélectionner les étapes à lancer ou non.
@@ -49,6 +56,8 @@ Options:
            (vecteurs)
 - step10 : Intégration des données bati dans le schéma Public
 - step11 : Nettoyage des fichiers temporaires et des tables
+- sections : Téléchargement et import des sections cadastrales dans
+             `public.sections_cadastrales_france`
 
 Exemple d'utilisation:
 

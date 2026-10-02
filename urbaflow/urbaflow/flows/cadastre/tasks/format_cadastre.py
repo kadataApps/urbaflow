@@ -50,3 +50,16 @@ def execute_init_bati():
     with e.begin() as conn:
         run_sql_script(sql_filepath=script_path, connection=conn)
         logger.info("La table cadastre_bati a été créée si nécessaire.")
+
+
+def execute_init_sections():
+    """Crée la table temporaire d'import des sections cadastrales."""
+    logger.info("Création de la table cadastre_sections")
+    script_path = (
+        TEMP_DIR / "sql/traitements/cadastre/0-initialisation_cadastre_sections.sql"
+    )
+
+    engine = create_engine()
+    with engine.begin() as connection:
+        run_sql_script(sql_filepath=script_path, connection=connection)
+        logger.info("La table cadastre_sections a été créée.")

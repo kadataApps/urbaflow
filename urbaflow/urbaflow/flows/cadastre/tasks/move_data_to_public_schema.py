@@ -65,6 +65,17 @@ def create_bati_france():
     logger.info("La table bati_france a été créée.")
 
 
+def create_sections_cadastrales_france():
+    """Crée la table publique des sections cadastrales."""
+    logger = get_logger()
+    logger.info("Création de la table sections_cadastrales_france dans public")
+    script_path_create = TEMP_DIR / "sql/commun_create_sections_cadastrales.sql"
+    engine = create_engine()
+    with engine.begin() as connection:
+        run_sql_script(sql_filepath=script_path_create, connection=connection)
+    logger.info("La table sections_cadastrales_france a été créée.")
+
+
 def insert_parcelles_to_public():
     logger = get_logger()
     schema = db_schema()
@@ -184,6 +195,24 @@ def insert_bati_to_public():
     logger.info("Table bati importée dans bati_france")
 
 
+def insert_sections_to_public():
+    """Insère les sections importées dans la table publique."""
+    logger = get_logger()
+    schema = db_schema()
+    import_query = (
+        "INSERT INTO public.sections_cadastrales_france "
+        "(wkb_geometry, id, code_insee, prefixe, code, created, updated) "
+        "SELECT wkb_geometry, id, commune, prefixe, code, created, updated "
+        f"FROM {schema}.cadastre_sections;"
+    )
+
+    engine = create_engine()
+    with engine.begin() as connection:
+        run_sql_script(sql=import_query, connection=connection)
+
+    logger.info("Sections importées dans sections_cadastrales_france")
+
+
 def delete_from_public(
     codes_insee,
     table_name,
@@ -244,5 +273,19 @@ def flow_import_bati():
     try:
         delete_from_public(communes, table_name)
         insert_bati_to_public()
+    except psycopg2.DatabaseError as error:
+        logger.error(error)
+
+
+def flow_import_sections():
+    """Remplace les sections publiques des communes importées."""
+    logger = get_logger()
+    communes_df = get_imported_communes_from_postgres()
+    table_name = "sections_cadastrales_france"
+    create_sections_cadastrales_france()
+    communes = communes_df["code_insee"].to_list()
+    try:
+        delete_from_public(communes, table_name)
+        insert_sections_to_public()
     except psycopg2.DatabaseError as error:
         logger.error(error)

@@ -70,6 +70,24 @@ def download_bati(codeinsee, target_dir):
     return dest_filename
 
 
+def download_sections(codeinsee: str, target_dir: str, millesime: str = "latest"):
+    """Télécharge les sections cadastrales d'une commune."""
+    base_url = (
+        f"https://cadastre.data.gouv.fr/data/etalab-cadastre/{millesime}/"
+        "geojson/communes/"
+    )
+    url = (
+        f"{base_url}{codeinsee[0:2]}/{codeinsee}/cadastre-{codeinsee}-sections.json.gz"
+    )
+    file_name = url.split("/")[-1]
+
+    os.makedirs(target_dir, exist_ok=True)
+    destination = os.path.join(target_dir, file_name)
+    urllib.request.urlretrieve(url, destination, reporthook)
+    unzip_cadastre(destination)
+    return destination
+
+
 def download_cadastre_for_communes():
     """
     Download cadastre (parcelles) for all communes referenced in the imported majic data
@@ -99,6 +117,20 @@ def download_bati_for_communes():
         download_bati(commune, temp_dir)
         file = os.path.join(temp_dir, f"cadastre-{commune}-batiments.json")
         import_geojson(file, "cadastre_bati")
+
+
+def download_sections_for_communes():
+    """Télécharge et importe les sections des communes issues de MAJIC."""
+    logger = get_logger()
+    temp_dir = os.path.join(os.getcwd(), "temp/downloads/")
+    communes = get_imported_communes_from_postgres()
+    millesime = os.getenv("CADASTRE_MILLESIME", "latest")
+    logger.info(communes)
+    for commune in communes["code_insee"]:
+        logger.info(commune)
+        download_sections(commune, temp_dir, millesime)
+        file = os.path.join(temp_dir, f"cadastre-{commune}-sections.json")
+        import_geojson(file, "cadastre_sections")
 
 
 def unzip_cadastre(archive_path):
