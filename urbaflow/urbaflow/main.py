@@ -27,6 +27,10 @@ from flows.georisques.import_sis import import_risques_sis_flow
 from flows.georisques.import_sup import import_risques_sup_flow
 from flows.georisques.import_tri import import_tri_flow
 from flows.geosirene.import_geosirene_etablissement import import_geosirene_data
+from flows.geosirene.import_sirene_etablissement import (
+    create_geosirene_etablissement_detail,
+    import_sirene_etablissement_data,
+)
 from flows.locomvac import import_locomvac
 from flows.lovac.import_lovac import import_lovac_flow
 from flows.lovac.import_lovac_fil import import_lovac_fil_flow
@@ -250,6 +254,18 @@ OPTIONAL_DIRNAME_GEOSIRENE_ARGUMENT = typer.Argument(
     ),
 )
 
+OPTIONAL_DIRNAME_SIRENE_ETABLISSEMENT_ARGUMENT = typer.Argument(
+    None,
+    exists=True,
+    file_okay=False,
+    dir_okay=True,
+    readable=True,
+    help=(
+        "Directory path containing Sirene Etablissement GeoParquet file. "
+        "Optional (downloads national GeoParquet if omitted)."
+    ),
+)
+
 OPTIONAL_DIRNAME_CARTOFRICHES_ARGUMENT = typer.Argument(
     None,
     exists=True,
@@ -284,6 +300,19 @@ BANATIC_COMMUNES_TABLE_OPTION = typer.Option(
 INSEE_BPE_TABLE_OPTION = typer.Option("insee_bpe", help="Database table name")
 GEOSIRENE_TABLE_OPTION = typer.Option(
     "geosirene_etablissement", help="Database table name"
+)
+SIRENE_ETABLISSEMENT_TABLE_OPTION = typer.Option(
+    "sirene_etablissement", help="Database table name"
+)
+GEOSIRENE_DETAIL_TABLE_OPTION = typer.Option(
+    "geosirene_etablissement_detail", help="Database table name"
+)
+FILTER_BY_GEOSIRENE_COMMUNES_OPTION = typer.Option(
+    True,
+    help=(
+        "Filter the Sirene Etablissement import to communes already present in "
+        "the geosirene_etablissement table (ignored if --department is provided)."
+    ),
 )
 PATRIMOINE_MH_TABLE_OPTION = typer.Option(
     "patrimoine_immeubles_proteges_mh", help="Database table name"
@@ -1003,6 +1032,60 @@ def geosirene(
         dirname=dirname,
         db_schema=schema,
         table_name=table_name,
+        recreate=recreate,
+    )
+
+
+@app.command(name="sirene-etablissement")
+def sirene_etablissement(
+    dirname: Path = OPTIONAL_DIRNAME_SIRENE_ETABLISSEMENT_ARGUMENT,
+    department: str = DEPARTEMENT_OPTION,
+    schema: str = SCHEMA_OPTION,
+    table_name: str = SIRENE_ETABLISSEMENT_TABLE_OPTION,
+    geosirene_table_name: str = GEOSIRENE_TABLE_OPTION,
+    filter_by_geosirene_communes: bool = FILTER_BY_GEOSIRENE_COMMUNES_OPTION,
+    recreate: bool = RECREATE_TRUE_OPTION,
+):
+    """
+    Import des données descriptives des établissements Sirene (INSEE - GeoParquet).
+
+    Base nationale volumineuse. Filtrable par département (-d/--departement) ou,
+    par défaut, sur les communes déjà présentes dans la table
+    geosirene_etablissement. Si le répertoire n'est pas fourni, le fichier
+    GeoParquet est téléchargé.
+    """
+    import_sirene_etablissement_data(
+        department=department,
+        dirname=dirname,
+        db_schema=schema,
+        table_name=table_name,
+        geosirene_table_name=geosirene_table_name,
+        filter_by_geosirene_communes=filter_by_geosirene_communes,
+        recreate=recreate,
+    )
+
+
+@app.command(name="geosirene-detail")
+def geosirene_detail(
+    schema: str = SCHEMA_OPTION,
+    detail_table_name: str = GEOSIRENE_DETAIL_TABLE_OPTION,
+    geosirene_table_name: str = GEOSIRENE_TABLE_OPTION,
+    sirene_table_name: str = SIRENE_ETABLISSEMENT_TABLE_OPTION,
+    recreate: bool = RECREATE_TRUE_OPTION,
+):
+    """
+    Création de la table geosirene_etablissement_detail (jointure entre
+    geosirene_etablissement et sirene_etablissement).
+
+    Seuls les établissements présents dans les deux tables sont conservés.
+    Nécessite que les tables geosirene_etablissement et sirene_etablissement
+    aient été importées au préalable.
+    """
+    create_geosirene_etablissement_detail(
+        db_schema=schema,
+        detail_table_name=detail_table_name,
+        geosirene_table_name=geosirene_table_name,
+        sirene_table_name=sirene_table_name,
         recreate=recreate,
     )
 
