@@ -29,19 +29,19 @@ def get_majic_source_filenames(config):
         {
             "key": "[FICHIER_LOTLOCAL]",
             "value": config["lotlocal"],
-            "table": "lot_local",
+            "table": "lloc",
             "required": False,
         },
         {
             "key": "[FICHIER_NBATI]",
             "value": config["nbati"],
-            "table": "non_bati",
+            "table": "nbat",
             "required": True,
         },
         {
             "key": "[FICHIER_PDL]",
             "value": config["pdll"],
-            "table": "pdl_lots",
+            "table": "pdll",
             "required": False,
         },
         {

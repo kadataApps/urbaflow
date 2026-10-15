@@ -25,8 +25,8 @@ def db_schema() -> str:
 def majic_config():
     MAJIC_FILE_NAMES = {
         "bati": "BATI",
-        "nbati": "NON_BATI",
-        "pdll": "PDL_LOTS",
+        "nbati": "NBAT",
+        "pdll": "PDLL",
         "lotlocal": "LLOC",
         "prop": "PROP",
         "max_insert_rows": "50000",
