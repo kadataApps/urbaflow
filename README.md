@@ -154,6 +154,20 @@ uv run python urbaflow/main.py --help
 
 ### Commandes
 
+- `install-base-functions`
+  - Installe ou met à jour `public.PolygonalMakeValid` et
+    `public.PolygonalIntersection` depuis les scripts de
+    `urbaflow/urbaflow/queries/base_functions/`.
+  - Utilise la connexion définie par les variables `POSTGRES_*` du fichier `.env`.
+  - PostGIS doit déjà être installé et l'utilisateur doit avoir les droits de
+    création des fonctions dans `public`.
+  - Les deux scripts sont exécutés dans une même transaction : en cas d'erreur,
+    aucune des deux installations n'est conservée. La commande peut être relancée.
+
+  ```shell
+  docker compose run --rm urbaflow python urbaflow/main.py install-base-functions
+  ```
+
 - `dvf <departements> [dirname]`
   - Importe les données DVF pour un ou plusieurs départements.
   - `dirname` est optionnel (par défaut: `/data/`).

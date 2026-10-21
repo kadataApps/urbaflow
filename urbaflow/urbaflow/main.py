@@ -3,6 +3,7 @@ from pathlib import Path
 import typer
 from dotenv import load_dotenv
 from flows.banatic.import_banatic_communes import import_banatic_communes_flow
+from flows.base_functions import install_base_functions_flow
 from flows.bdtopo.import_bdtopo_batiment import import_bdtopo_batiment_flow
 from flows.bpe.import_bpe import import_bpe_flow
 from flows.cadastre.flow_cadastre import (
@@ -385,6 +386,12 @@ GPU_PLU_KEEP_FILES_OPTION = typer.Option(
     "--keep-files/--no-keep-files",
     help="Conserver les fichiers GeoJSON téléchargés",
 )
+
+
+@app.command(name="install-base-functions")
+def install_base_functions() -> None:
+    """Installe PolygonalMakeValid et PolygonalIntersection dans PostGIS."""
+    install_base_functions_flow()
 
 
 @app.command()
