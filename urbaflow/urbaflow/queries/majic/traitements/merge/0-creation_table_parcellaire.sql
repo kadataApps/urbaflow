@@ -96,9 +96,14 @@ CREATE TABLE parcellaire AS (
         null::text AS tpevdom_n,
         null::text AS tpevdom_s,
         null::smallint AS ncp,
-        st_transform(
-            st_setsrid(cadastre_parcelles.wkb_geometry, 4326), 2154
-        ) AS geom,
+        st_multi(
+            st_collectionextract(
+                st_makevalid(
+                    st_transform(st_force2d(cadastre_parcelles.wkb_geometry), 2154)
+                ),
+                3
+            )
+        )::geometry(MultiPolygon, 2154) AS geom,
         left(cadastre_parcelles.commune, 2) AS ccodep,
         right(cadastre_parcelles.commune, 3) AS ccocom,
         trim(cadastre_parcelles.section) AS ccosec,
@@ -132,8 +137,14 @@ CREATE TABLE parcellaire AS (
         ON (cadastre_parcelles.geo_parcelle = parcelle.parcelle)
 );
 
---DROP TABLE temp_parcellaire;
--- index
+-- Création des contraintes et index après le chargement en masse.
+ALTER TABLE parcellaire
+ADD CONSTRAINT parcellaire_pkey PRIMARY KEY (idparcelle_geom),
+ADD CONSTRAINT parcellaire_geom_valid CHECK (st_isvalid(geom));
+
+CREATE INDEX parcellaire_geom_idx ON parcellaire
+USING gist (geom);
+
 CREATE INDEX parcelle_idprocpte_idx ON parcellaire
 USING btree (idprocpte);
 

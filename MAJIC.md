@@ -67,6 +67,39 @@ Exemple d'utilisation:
 docker compose run --rm urbaflow python urbaflow/main.py majic /data/ step1 step2
 ```
 
+## Garanties sur la table parcellaire
+
+Lors de la fusion Cadastre × MAJIC (`step7`), les géométries sont converties
+en 2D, reprojetées depuis leur SRID déclaré vers Lambert-93 (EPSG:2154),
+réparées avec `ST_MakeValid`, puis normalisées en `MultiPolygon`.
+Seules les composantes polygonales sont conservées. Une géométrie sans
+composante polygonale devient un multipolygone vide ; une valeur `NULL`
+reste `NULL`.
+
+Juste après le chargement initial de `parcellaire`, avant les enrichissements
+MAJIC et la création des unités foncières, le script ajoute :
+
+- une clé primaire sur `idparcelle_geom` (identifiant cadastral géométrique),
+  qui refuse les identifiants nuls ou dupliqués ;
+- un index spatial GiST sur `geom` ;
+- une contrainte `CHECK (ST_IsValid(geom))`, en complément du type
+  `geometry(MultiPolygon, 2154)`, pour garantir la validité des géométries
+  non nulles lors des écritures ultérieures.
+
+Les index B-tree sur `idprocpte` et `idpar`, utilisés par les enrichissements,
+sont conservés. Ces garanties s'appliquent lors de la recréation de la table
+par `step7` ; elles ne modifient pas automatiquement une table déjà existante.
+
+Le test d'intégration s'exécute sur une base de test avec PostGIS activé :
+
+```shell
+psql -X "$TEST_DATABASE_URL" -f urbaflow/tests/test_parcellaire.sql
+```
+
+Il vérifie les contraintes, les index, la réparation des géométries et les
+projections depuis les SRID 4326 et 2154. Ses tables sont créées dans un schéma
+dédié, puis annulées par un `ROLLBACK`.
+
 ## Nommage des fichiers
 
 Les fichiers MAJIC importés doivent être nommés selon le format suivant:
