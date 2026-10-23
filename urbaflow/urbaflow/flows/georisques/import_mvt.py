@@ -213,6 +213,7 @@ def import_risques_mvt_flow(
     if path is None:
         logger.info(f"Downloading MVT data for department {department}")
         url = f"https://www.georisques.gouv.fr/webappReport/ws/mvmt/departements/{department}/fichecommunes.csv"
+        logger.info(f"Downloading MVT data from {url}")
         target_dir = TEMP_DIR / "georisques/mvt" / department
         target_dir.mkdir(parents=True, exist_ok=True)
         target_file = target_dir / f"mvt_{department}.csv"

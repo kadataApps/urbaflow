@@ -599,7 +599,7 @@ def risques_mvt(
     import_risques_mvt_flow(
         path=dirname,
         department=departement,
-        schema=schema,
+        db_schema=schema,
         table_name=table_name,
         recreate=recreate,
     )
@@ -630,7 +630,7 @@ def risques_casias(
     import_risques_casias_flow(
         path=dirname,
         department=departement,
-        schema=schema,
+        db_schema=schema,
         table_name=table_name,
         recreate=recreate,
     )
@@ -642,6 +642,7 @@ def risques_sis(
     departement: str = DEPARTEMENT_OPTION,
     schema: str = SCHEMA_OPTION,
     table_name: str = RISQUES_SIS_TABLE_OPTION,
+    db_schema: str = SCHEMA_OPTION,
     recreate: bool = RECREATE_FALSE_OPTION,
 ):
     """
@@ -661,7 +662,7 @@ def risques_sis(
     import_risques_sis_flow(
         path=dirname,
         department=departement,
-        db_schema=schema,
+        db_schema=db_schema,
         table_name=table_name,
         recreate=recreate,
     )
@@ -671,7 +672,7 @@ def risques_sis(
 def risques_sup(
     dirname: Path = OPTIONAL_DIRNAME_SUP_ARGUMENT,
     departement: str = DEPARTEMENT_OPTION,
-    schema: str = SCHEMA_OPTION,
+    db_schema: str = SCHEMA_OPTION,
     table_name: str = RISQUES_SUP_TABLE_OPTION,
     recreate: bool = RECREATE_FALSE_OPTION,
 ):
@@ -692,7 +693,7 @@ def risques_sup(
     import_risques_sup_flow(
         path=dirname,
         department=departement,
-        db_schema=schema,
+        db_schema=db_schema,
         table_name=table_name,
         recreate=recreate,
     )
@@ -702,7 +703,7 @@ def risques_sup(
 def risques_tri(
     dirname: Path = OPTIONAL_DIRNAME_TRI_ARGUMENT,
     departement: str = DEPARTEMENT_OPTION,
-    schema: str = SCHEMA_OPTION,
+    db_schema: str = SCHEMA_OPTION,
     table_name: str = RISQUES_TRI_TABLE_OPTION,
     recreate: bool = RECREATE_FALSE_OPTION,
 ):
@@ -723,7 +724,7 @@ def risques_tri(
     import_tri_flow(
         dirname=dirname,
         department=departement,
-        schema=schema,
+        schema=db_schema,
         table=table_name,
         replace=recreate,
     )
@@ -754,7 +755,7 @@ def risques_icpe(
 def risques_irep(
     dirname: Path = OPTIONAL_DIRNAME_IREP_ARGUMENT,
     year: int = YEAR_IREP_OPTION,
-    schema: str = SCHEMA_OPTION,
+    db_schema: str = SCHEMA_OPTION,
     table_name: str = RISQUES_IREP_TABLE_OPTION,
     recreate: bool = RECREATE_FALSE_OPTION,
 ):
@@ -767,7 +768,7 @@ def risques_irep(
     import_risques_irep_flow(
         dirname=dirname,
         year=year,
-        schema=schema,
+        db_schema=db_schema,
         table_name=table_name,
         recreate=recreate,
     )
@@ -776,7 +777,7 @@ def risques_irep(
 @app.command()
 def risques_gaspar(
     dirname: Path = OPTIONAL_DIRNAME_GASPAR_ARGUMENT,
-    schema: str = SCHEMA_OPTION,
+    db_schema: str = SCHEMA_OPTION,
     table_name: str = RISQUES_GASPAR_TABLE_OPTION,
     recreate: bool = RECREATE_FALSE_OPTION,
 ):
@@ -788,7 +789,7 @@ def risques_gaspar(
     """
     import_risques_gaspar_flow(
         dirname=dirname,
-        schema=schema,
+        db_schema=db_schema,
         table_name=table_name,
         recreate=recreate,
     )
@@ -797,7 +798,7 @@ def risques_gaspar(
 @app.command(name="gpu-sup")
 def gpu_sup(
     dirname: Path = OPTIONAL_DIRNAME_GPU_SUP_ARGUMENT,
-    schema: str = SCHEMA_OPTION,
+    db_schema: str = SCHEMA_OPTION,
     recreate: bool = RECREATE_TRUE_OPTION,
 ):
     """
@@ -808,7 +809,7 @@ def gpu_sup(
     """
     import_gpu_sup_flow(
         dirname=dirname,
-        schema=schema,
+        db_schema=db_schema,
         replace=recreate,
     )
 
@@ -816,7 +817,7 @@ def gpu_sup(
 @app.command(name="banatic-communes")
 def banatic_communes(
     dirname: Path = OPTIONAL_DIRNAME_BANATIC_ARGUMENT,
-    schema: str = SCHEMA_OPTION,
+    db_schema: str = SCHEMA_OPTION,
     table_name: str = BANATIC_COMMUNES_TABLE_OPTION,
     recreate: bool = RECREATE_TRUE_OPTION,
 ):
@@ -832,7 +833,7 @@ def banatic_communes(
     import_banatic_communes_flow(
         epci_fp_file=epci_file,
         communes_siren_file=communes_file,
-        db_schema=schema,
+        db_schema=db_schema,
         table_name=table_name,
         recreate=recreate,
     )
@@ -844,7 +845,7 @@ def bdtopo_batiment(
     epci: str = BDTOPO_EPCI_OPTION,
     communes: str = BDTOPO_COMMUNES_OPTION,
     millesime: str = BDTOPO_MILLESIME_OPTION,
-    schema: str = SCHEMA_OPTION,
+    db_schema: str = SCHEMA_OPTION,
     table_name: str = BDTOPO_BATIMENT_TABLE_OPTION,
     recreate: bool = RECREATE_FALSE_OPTION,
     keep_files: bool = BDTOPO_KEEP_FILES_OPTION,
@@ -861,7 +862,7 @@ def bdtopo_batiment(
         epci=epci,
         communes=communes,
         edition_date=millesime,
-        db_schema=schema,
+        db_schema=db_schema,
         table_name=table_name,
         recreate=recreate,
         keep_files=keep_files,
@@ -874,7 +875,7 @@ def ocsge(
     epci: str = BDTOPO_EPCI_OPTION,
     communes: str = BDTOPO_COMMUNES_OPTION,
     millesime: str = OCSGE_MILLESIME_OPTION,
-    schema: str = SCHEMA_OPTION,
+    db_schema: str = SCHEMA_OPTION,
     occupation_sol_table: str = OCSGE_OCCUPATION_SOL_TABLE_OPTION,
     zone_construite_table: str = OCSGE_ZONE_CONSTRUITE_TABLE_OPTION,
     recreate: bool = RECREATE_FALSE_OPTION,
@@ -895,7 +896,7 @@ def ocsge(
         epci=epci,
         communes=communes,
         edition_date=millesime,
-        db_schema=schema,
+        db_schema=db_schema,
         occupation_sol_table=occupation_sol_table,
         zone_construite_table=zone_construite_table,
         recreate=recreate,

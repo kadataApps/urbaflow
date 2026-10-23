@@ -10,6 +10,13 @@ stop-postgis: ## Stop the postgis server daemon
 urbaflow: ## Run bash environment with available python dependencies for data urbaflow
 	docker compose -f docker-compose.yml run --rm urbaflow /bin/bash
 
+.PHONY: run
+
+run: ## Exécuter une commande urbaflow (ex. : make run risques-cavite -- --department 59)
+	docker compose run --rm urbaflow python urbaflow/main.py $(filter-out $@,$(MAKECMDGOALS))
+
+$(filter-out run,$(MAKECMDGOALS)):
+	@:
 
 # DEV COMMANDS
 .PHONY: install build-urbaflow dev update-python-dependencies

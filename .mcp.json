@@ -1,0 +1,30 @@
+{
+	"mcpServers": {
+		"datagouv": {
+			"type": "http",
+			"url": "https://mcp.data.gouv.fr/mcp",
+			"tools": [
+				"*"
+			]
+		},
+		"postgrespro": {
+			"type": "stdio",
+			"command": "docker",
+			"args": [
+				"run",
+				"-i",
+				"--rm",
+				"-e",
+				"DATABASE_URI",
+				"crystaldba/postgres-mcp",
+				"--access-mode=unrestricted"
+			],
+			"tools": [
+				"*"
+			],
+			"env": {
+				"DATABASE_URI": "postgresql://postgres:postgres@localhost:5433/test"
+			}
+		}
+	}
+}
