@@ -32,15 +32,11 @@ def init_db_for_majic_import():
     )
     script_path_create = TEMP_DIR / "sql/commun_create_metier.sql"
     script_path_nomenclature = TEMP_DIR / "sql/commun_insert_nomenclature.sql"
-    script_path_correspondance_prop = (
-        TEMP_DIR / "sql/table_corresponance_manuelle_proprietaires.sql"
-    )
 
     e = create_engine()
     with e.begin() as conn:
         run_sql_script(sql_filepath=script_path_create, connection=conn)
         run_sql_script(sql_filepath=script_path_nomenclature, connection=conn)
-        run_sql_script(sql_filepath=script_path_correspondance_prop, connection=conn)
     logger.info("Base de données initialisée avec les tables métiers MAJIC.")
 
 
@@ -58,6 +54,7 @@ def execute_format_majic_scripts():
     script_list = [
         "2019/majic3_formatage_donnees.sql",
         "traitements/majic/0-renommage_tables.sql",
+        "table_corresponance_manuelle_proprietaires.sql",
         "traitements/majic/1-traitement_qualification_proprietaires.sql",
         "traitements/majic/2-traitement_local_pev.sql",
         "traitements/majic/3-traitement_lots.sql",

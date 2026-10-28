@@ -59,6 +59,14 @@ Options:
 - sections : Téléchargement et import des sections cadastrales dans
              `public.sections_cadastrales_france`
 
+Lors du formatage (`step5`), le script
+`urbaflow/urbaflow/queries/majic/table_corresponance_manuelle_proprietaires.sql`
+est exécuté immédiatement avant
+`urbaflow/urbaflow/queries/majic/traitements/majic/1-traitement_qualification_proprietaires.sql`.
+Il recrée et alimente la table `correction_typologie_proprietaire`, y compris
+lorsque le formatage est lancé sans l'étape d'initialisation (`step4`).
+Les scripts doivent avoir été copiés dans le répertoire temporaire (`step1`).
+
 Exemple d'utilisation:
 
 - import seulement des données brutes dans postgresql:
