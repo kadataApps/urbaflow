@@ -69,6 +69,19 @@ CADASTRE_SCHEMA_OPTION = typer.Option(
 
 DEFAULT_DIRNAME = Path("/data/")
 
+OPTIONAL_DIRNAME_DGFIP_TOPO_ARGUMENT = typer.Argument(
+    None,
+    exists=True,
+    file_okay=False,
+    dir_okay=True,
+    readable=True,
+    resolve_path=True,
+    help=(
+        "Répertoire contenant le CSV DGFiP TOPO. "
+        "Si omis, le fichier est téléchargé depuis data.gouv.fr."
+    ),
+)
+
 DIRNAME_ARGUMENT = typer.Argument(
     DEFAULT_DIRNAME,
     exists=True,
@@ -469,10 +482,10 @@ def dvf(
 
 @app.command(name="dgfip-topo")
 def dgfip_topo(
-    dirname: Path = DIRNAME_ARGUMENT,
+    dirname: Path | None = OPTIONAL_DIRNAME_DGFIP_TOPO_ARGUMENT,
 ):
     """
-    DIRNAME : Chemin du répertoire contenant le fichier des entités topographiques DGFiP
+    Importe les entités topographiques DGFiP depuis un répertoire ou data.gouv.fr.
     """
     import_dgfip_topo_flow(path=dirname)
 

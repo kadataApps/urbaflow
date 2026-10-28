@@ -3,11 +3,19 @@
 La donnée DGFiP TOPO est un fichier CSV contenant la liste des entités topographiques de la DGFiP, nécessaire pour le traitement des données MAJIC.
 Il remplace le fichier Fantoir.
 
-Source: <https://data.economie.gouv.fr/explore/assets/topo-fichier-des-entites-topographiques/>
+Source : <https://www.data.gouv.fr/datasets/fichier-des-entites-topographiques-topo-dgfip-1>
 
-Lien direct au format CSV <https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/topo-fichier-des-entites-topographiques/exports/csv/?delimiter=%3B&lang=fr&timezone=Europe%2FParis&use_labels=true>
+Lien direct au format CSV : <https://www.data.gouv.fr/api/1/datasets/r/906e5bd0-8be8-4150-9956-594fa0e8154c>
 
-Pour importer les entités topographiques DGFiP, nécessaires au traitement MAJIC, placer le fichier `topo-fichier-des-entites-topographiques.csv` dans le répertoire défini par `PATH_TO_DATA`, puis exécuter :
+Pour télécharger automatiquement le fichier et importer les entités topographiques DGFiP, nécessaires au traitement MAJIC, exécuter sans argument :
+
+```shell
+docker compose run --rm urbaflow python urbaflow/main.py dgfip-topo
+```
+
+Le fichier `topo-fichier-des-entites-topographiques.csv` est téléchargé dans le sous-répertoire `dgfip_topo` du répertoire temporaire de l'application.
+
+Pour utiliser un fichier local sans téléchargement, placer le CSV dans le répertoire défini par `PATH_TO_DATA`, puis fournir explicitement le répertoire :
 
 ```shell
 docker compose run --rm urbaflow python urbaflow/main.py dgfip-topo /data/

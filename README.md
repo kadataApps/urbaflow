@@ -182,7 +182,9 @@ uv run python urbaflow/main.py --help
 
 - `dgfip-topo [dirname]`
   - Importe les entités topographiques DGFiP.
-  - `dirname` est optionnel (par défaut: `/data/`).
+  - Sans `dirname`, télécharge automatiquement le CSV depuis data.gouv.fr.
+  - Avec `dirname`, importe le fichier local sans téléchargement.
+  - Voir [la documentation DGFiP TOPO](DGFiP_TOPO.md) pour la source et les exemples.
 
 - `dgfip-geoparquet [OPTIONS]`
   - Importe les contours des communes, sections et bâtiments dans
