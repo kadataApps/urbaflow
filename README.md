@@ -324,6 +324,22 @@ uv run python urbaflow/main.py --help
     - `--schema TEXT` (défaut: `public`)
     - `--banatic-table TEXT` (défaut: `banatic_communes`)
 
+- `docurba-epci <siren> [OPTIONS]`
+  - État des documents d'urbanisme d'un EPCI et de ses communes à partir de l'[API Docurba](https://docurba.beta.gouv.fr/dev/api) (endpoint `/api/communes`, interrogé pour chaque département concerné).
+  - Nécessite la table `banatic_communes` (commande `banatic-communes`) pour lister les communes membres de l'EPCI.
+  - Crée si besoin la table `docurba_documents_urbanisme` et remplace les lignes de l'EPCI : une ligne par commune (`type_territoire = 'COM'`) et une ligne de synthèse pour l'EPCI (`type_territoire = 'EPCI'`).
+  - Colonnes principales :
+    - `document_opposable` : `PLU`, `PLUi`, `PLUiH`…, `Carte communale` ou `RNU` (vide si la commune est absente de Docurba) ;
+    - `date_approbation` : date d'approbation de la procédure ayant rendu le document opposable ;
+    - `document_en_cours` : type de document en cours d'élaboration ou de révision, avec `type_procedure_en_cours` et `date_prescription_en_cours`.
+  - Pour la ligne EPCI, le document et ses dates sont repris s'il s'agit d'une procédure unique couvrant toutes les communes (ex : PLUi) ; sinon les types distincts sont listés (ex : `Carte communale / PLU / RNU`) et `repartition_documents_opposables` détaille le nombre de communes par type.
+  - Options :
+    - `--schema TEXT` (défaut: `public`)
+    - `--table-name TEXT` (défaut: `docurba_documents_urbanisme`)
+    - `--banatic-table TEXT` (défaut: `banatic_communes`)
+    - `--avant YYYY-MM-DD` (état à une date donnée)
+    - `--recreate / --no-recreate` (défaut: `--no-recreate`)
+
 - `gpu-plu [OPTIONS]`
   - Télécharge et importe les données géographiques PLU du Géoportail de l'Urbanisme via APICARTO.
   - Le périmètre est défini par **une seule** des options `--epci` ou `--commune`.
@@ -455,6 +471,9 @@ docker compose run --rm urbaflow python urbaflow/main.py bdtopo-batiment -e 2435
 
 # PLU du Géoportail de l'Urbanisme pour un EPCI
 docker compose run --rm urbaflow python urbaflow/main.py gpu-plu -e 200071629
+
+# État des documents d'urbanisme (Docurba) d'un EPCI et de ses communes
+docker compose run --rm urbaflow python urbaflow/main.py docurba-epci 200069193
 
 # PLU du Géoportail de l'Urbanisme pour une commune
 docker compose run --rm urbaflow python urbaflow/main.py gpu-plu -c 85047
