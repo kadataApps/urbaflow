@@ -134,7 +134,7 @@ def test_conflicting_filters_do_not_open_source():
 )
 def test_cli_perimeter_and_schema(monkeypatch, option, value, argument):
     """Vérifie le routage Typer et la configuration du schéma par environnement."""
-    from main import app
+    from cli.app import app
     from typer.testing import CliRunner
 
     monkeypatch.setenv("IMPORT_SCHEMA", "cadastre_test")
@@ -146,7 +146,7 @@ def test_cli_perimeter_and_schema(monkeypatch, option, value, argument):
         "source": "local.parquet",
         argument: value,
     }
-    with patch("main.import_dgfip_geoparquet_flow") as import_flow:
+    with patch("cli.commands.cadastre.import_dgfip_geoparquet_flow") as import_flow:
         result = CliRunner().invoke(
             app, ["dgfip-geoparquet", option, value, "--source", "local.parquet"]
         )

@@ -147,6 +147,13 @@ make urbaflow
 
 Le point d'entrée CLI est `urbaflow/main.py` (Typer).
 
+L'assemblage de l'application se trouve dans `urbaflow/urbaflow/cli/app.py`.
+Les commandes sont réparties par domaine dans `urbaflow/urbaflow/cli/commands/`,
+avec leurs arguments et options spécifiques. Les options partagées sont définies
+dans `urbaflow/urbaflow/cli/options.py`. Les traitements métier restent dans
+`flows/` : les modules CLI adaptent les paramètres puis appellent les flows.
+Les commandes restent toutes à la racine, sans sous-commandes de domaine.
+
 Pour toutes les commandes proposant un filtre par département, les options
 `-d`, `--departement` et `--department` sont équivalentes. La forme
 `--departement` est privilégiée dans la documentation ; `--department` reste

@@ -235,12 +235,13 @@ def test_flow_cleanup(monkeypatch, tmp_path, keep_files, failed_step) -> None:
 
 def test_cli_forwards_options(monkeypatch) -> None:
     """Vérifie la commande documentée et toutes ses options."""
-    import main
+    from cli.app import app
+    from cli.commands import bdtopo
 
     run_flow = MagicMock()
-    monkeypatch.setattr(main, "import_bdtopo_troncon_route_flow", run_flow)
+    monkeypatch.setattr(bdtopo, "import_bdtopo_troncon_route_flow", run_flow)
     result = CliRunner().invoke(
-        main.app,
+        app,
         [
             "bdtopo-troncon-route",
             "-d",
@@ -266,11 +267,12 @@ def test_cli_forwards_options(monkeypatch) -> None:
 
 def test_cli_requires_department(monkeypatch) -> None:
     """Le département est obligatoire et aucune opération ne démarre sans lui."""
-    import main
+    from cli.app import app
+    from cli.commands import bdtopo
 
     run_flow = MagicMock()
-    monkeypatch.setattr(main, "import_bdtopo_troncon_route_flow", run_flow)
-    result = CliRunner().invoke(main.app, ["bdtopo-troncon-route"])
+    monkeypatch.setattr(bdtopo, "import_bdtopo_troncon_route_flow", run_flow)
+    result = CliRunner().invoke(app, ["bdtopo-troncon-route"])
     assert result.exit_code == 2
     run_flow.assert_not_called()
 

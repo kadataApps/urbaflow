@@ -1,7 +1,8 @@
+import inspect
 from unittest.mock import MagicMock
 
-import main
 import pytest
+from cli.app import app
 from typer.main import get_command
 from typer.testing import CliRunner
 
@@ -49,6 +50,19 @@ RECREATE_DEFAULTS = {
     "cartofriches": True,
 }
 
+COMMAND_NAMES = set(RECREATE_DEFAULTS) | {
+    "install-base-functions",
+    "dvf",
+    "dgfip-topo",
+    "dgfip-geoparquet",
+    "locomvac",
+    "lovac",
+    "majic",
+    "bdtopo-troncon-route",
+    "epci-gpu",
+    "gpu-plu",
+}
+
 
 @pytest.mark.parametrize("option", ["-d", "--departement", "--department"])
 @pytest.mark.parametrize(
@@ -57,9 +71,11 @@ RECREATE_DEFAULTS = {
 def test_department_aliases(monkeypatch, command_name, flow_name, parameter, option):
     """Vérifie les trois alias et la transmission du code sans exécuter de flow."""
     run_flow = MagicMock()
-    monkeypatch.setattr(main, flow_name, run_flow)
+    command = get_command(app).commands[command_name]
+    command_module = inspect.getmodule(inspect.unwrap(command.callback))
+    monkeypatch.setattr(command_module, flow_name, run_flow)
 
-    result = CliRunner().invoke(main.app, [command_name, option, "2A"])
+    result = CliRunner().invoke(app, [command_name, option, "2A"])
 
     assert result.exit_code == 0, result.output
     run_flow.assert_called_once()
@@ -68,7 +84,7 @@ def test_department_aliases(monkeypatch, command_name, flow_name, parameter, opt
 
 def test_recreate_defaults():
     """Fige les valeurs historiques de recreate pour toutes les commandes."""
-    commands = get_command(main.app).commands
+    commands = get_command(app).commands
     actual = {
         command_name: parameter.default
         for command_name, command in commands.items()
@@ -77,3 +93,35 @@ def test_recreate_defaults():
     }
 
     assert actual == RECREATE_DEFAULTS
+
+
+def test_command_names():
+    """Conserve toutes les commandes à la racine, sans groupes supplémentaires."""
+    assert set(get_command(app).commands) == COMMAND_NAMES
+
+
+@pytest.mark.parametrize("command_name", sorted(COMMAND_NAMES))
+def test_command_help(command_name):
+    """Vérifie que chaque commande reste accessible et expose son aide."""
+    result = CliRunner().invoke(app, [command_name, "--help"])
+
+    assert result.exit_code == 0, result.output
+
+
+@pytest.mark.parametrize(
+    ("command_name", "flow_name", "parameter"), DEPARTMENT_COMMANDS[:8]
+)
+def test_missing_directory_and_department(
+    monkeypatch, command_name, flow_name, parameter
+):
+    """Refuse une commande Géorisques sans source avant d'appeler le flow."""
+    run_flow = MagicMock()
+    command = get_command(app).commands[command_name]
+    command_module = inspect.getmodule(inspect.unwrap(command.callback))
+    monkeypatch.setattr(command_module, flow_name, run_flow)
+
+    result = CliRunner().invoke(app, [command_name])
+
+    assert result.exit_code == 1
+    assert "--departement" in result.output
+    run_flow.assert_not_called()
