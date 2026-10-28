@@ -6,6 +6,9 @@ from flows.acr.import_acr import import_acr_flow
 from flows.banatic.import_banatic_communes import import_banatic_communes_flow
 from flows.base_functions import install_base_functions_flow
 from flows.bdtopo.import_bdtopo_batiment import import_bdtopo_batiment_flow
+from flows.bdtopo.import_bdtopo_troncon_route import (
+    import_bdtopo_troncon_route_flow,
+)
 from flows.bpe.import_bpe import import_bpe_flow
 from flows.cadastre.flow_cadastre import (
     STEPS_FLOW_CADASTRE,
@@ -911,6 +914,30 @@ def bdtopo_batiment(
         db_schema=db_schema,
         table_name=table_name,
         recreate=recreate,
+        keep_files=keep_files,
+    )
+
+
+@app.command(name="bdtopo-troncon-route")
+def bdtopo_troncon_route(
+    departement: str = typer.Option(
+        ..., "-d", "--departement", help="Code du département (ex. : 35, 2A, 974)."
+    ),
+    millesime: str | None = BDTOPO_MILLESIME_OPTION,
+    db_schema: str = typer.Option(
+        "public", "--schema", "--db-schema", help="Nom du schéma cible existant."
+    ),
+    table_name: str = typer.Option(
+        "bdtopo_troncon_de_route", help="Nom de la table cible."
+    ),
+    keep_files: bool = BDTOPO_KEEP_FILES_OPTION,
+):
+    """Importe les tronçons de route BD TOPO IGN d'un département."""
+    import_bdtopo_troncon_route_flow(
+        department=departement,
+        edition_date=millesime,
+        db_schema=db_schema,
+        table_name=table_name,
         keep_files=keep_files,
     )
 

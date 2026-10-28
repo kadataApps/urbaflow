@@ -375,6 +375,47 @@ uv run python urbaflow/main.py --help
     - `--recreate / --no-recreate` (défaut: `--no-recreate`)
     - `--keep-files / --no-keep-files` (défaut: `--no-keep-files`, conserve l'archive et le GeoPackage téléchargés)
 
+- `bdtopo-troncon-route -d <departement> [OPTIONS]`
+  - Télécharge l'archive départementale GeoPackage BD TOPO® depuis la Géoplateforme
+    IGN et importe uniquement la couche `troncon_de_route` dans PostGIS.
+    Les livraisons différentielles (`_DIFF`) sont exclues.
+  - Conserve tous les attributs IGN (dont `cleabs`, `nature`, `importance`,
+    `nombre_de_voies`, `largeur_de_chaussee`, `sens_de_circulation` et les codes
+    INSEE des communes à gauche et à droite), sans renommage. La géométrie `geom`
+    est une `MultiLineString` 2D reprojetée en Lambert-93 (EPSG:2154).
+  - Un tronçon est retenu si sa commune gauche **ou** droite appartient au
+    département : les débordements de l'archive sont exclus, les routes en limite
+    départementale sont conservées entières, sans découpage. Une même route
+    limitrophe peut donc figurer dans deux départements importés.
+  - Ajoute `code_departement` et `millesime` (date d'édition IGN). La clé primaire
+    porte sur `(code_departement, cleabs)` ; l'identifiant technique de la livraison
+    n'est pas un identifiant global.
+  - **Remplace uniquement les données du département demandé, en une transaction** :
+    relancer l'import ne crée pas de doublons et ne touche pas les autres départements.
+    Une livraison vide ou en erreur conserve les anciennes données. La structure
+    attributaire est créée lors du premier import ; une évolution incompatible du
+    schéma IGN provoque une erreur SQL et nécessite une adaptation de la table.
+  - Utilise les variables `POSTGRES_*` du fichier `.env` et un schéma existant
+    avec PostGIS. Prévoir plusieurs Go libres dans `urbaflow/temp/bdtopo_route/`.
+    Les fichiers temporaires et la table de travail sont supprimés même en cas
+    d'échec ; `--keep-files` conserve les fichiers dans le répertoire journalisé.
+  - Options :
+    - `-d, --departement TEXT` (**obligatoire**, un seul département : `35`, `2A`, `974`…)
+    - `--millesime TEXT` (défaut : dernière édition disponible, date `AAAA-MM-JJ`)
+    - `--schema TEXT` (défaut : `public`)
+    - `--table-name TEXT` (défaut : `bdtopo_troncon_de_route`)
+    - `--keep-files / --no-keep-files` (défaut : `--no-keep-files`)
+
+  ```shell
+  docker compose run --rm urbaflow python urbaflow/main.py bdtopo-troncon-route -d 35
+  ```
+
+  En local, depuis le répertoire `urbaflow` (GDAL/`ogr2ogr` doit être installé) :
+
+  ```shell
+  uv run python urbaflow/main.py bdtopo-troncon-route -d 35 --schema public
+  ```
+
 - `ocsge [OPTIONS]`
   - Télécharge et importe les données OCS GE (Occupation du Sol à Grande Échelle) de l'IGN dans les tables `ocsge_occupation_sol` et `ocsge_zone_construite`.
   - Les archives départementales GeoPackage sont téléchargées depuis la Géoplateforme (`data.geopf.fr`) ; les livraisons différentielles (`_DIFF`) sont ignorées au profit de la dernière édition complète.
