@@ -1,9 +1,9 @@
 import typer
 from cli.options import (
-    BDTOPO_COMMUNES_OPTION,
-    BDTOPO_DEPARTEMENTS_OPTION,
-    BDTOPO_EPCI_OPTION,
-    BDTOPO_KEEP_FILES_OPTION,
+    COMMUNES_OPTION,
+    DEPARTMENTS_OPTION,
+    EPCI_OPTION,
+    KEEP_FILES_OPTION,
     RECREATE_FALSE_OPTION,
     SCHEMA_OPTION,
 )
@@ -21,26 +21,26 @@ OCSGE_MILLESIME_OPTION = typer.Option(
 )
 
 OCSGE_OCCUPATION_SOL_TABLE_OPTION = typer.Option(
-    "ocsge_occupation_sol", help="Database table name"
+    "ocsge_occupation_sol", help="Nom de la table cible"
 )
 
 OCSGE_ZONE_CONSTRUITE_TABLE_OPTION = typer.Option(
-    "ocsge_zone_construite", help="Database table name"
+    "ocsge_zone_construite", help="Nom de la table cible"
 )
 
 
 @app.command(name="ocsge")
 def ocsge(
-    departments: str = BDTOPO_DEPARTEMENTS_OPTION,
-    epci: str = BDTOPO_EPCI_OPTION,
-    communes: str = BDTOPO_COMMUNES_OPTION,
-    millesime: str = OCSGE_MILLESIME_OPTION,
+    departments: str | None = DEPARTMENTS_OPTION,
+    epci: str | None = EPCI_OPTION,
+    communes: str | None = COMMUNES_OPTION,
+    millesime: str | None = OCSGE_MILLESIME_OPTION,
     db_schema: str = SCHEMA_OPTION,
     occupation_sol_table: str = OCSGE_OCCUPATION_SOL_TABLE_OPTION,
     zone_construite_table: str = OCSGE_ZONE_CONSTRUITE_TABLE_OPTION,
     recreate: bool = RECREATE_FALSE_OPTION,
-    keep_files: bool = BDTOPO_KEEP_FILES_OPTION,
-):
+    keep_files: bool = KEEP_FILES_OPTION,
+) -> None:
     """
     Import des données OCS GE (Occupation du Sol à Grande Échelle) de l'IGN
     depuis la Géoplateforme.

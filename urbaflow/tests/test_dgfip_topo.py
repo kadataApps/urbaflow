@@ -3,8 +3,9 @@
 from pathlib import Path
 from unittest.mock import Mock
 
-import main
 import pytest
+from cli.app import app
+from cli.commands import cadastre
 from flows.cadastre import flow_dgfip_topo
 from flows.cadastre.tasks.import_dgfip_topo import SOURCE_FILENAME
 from requests import HTTPError
@@ -67,12 +68,12 @@ def test_download_failure_stops_import(flow_steps):
 def test_cli_source(monkeypatch, tmp_path, use_local_directory):
     """Transmet le répertoire explicite ou None au flux depuis la commande."""
     import_flow = Mock()
-    monkeypatch.setattr(main, "import_dgfip_topo_flow", import_flow)
+    monkeypatch.setattr(cadastre, "import_dgfip_topo_flow", import_flow)
     arguments = ["dgfip-topo"]
     if use_local_directory:
         arguments.append(str(tmp_path))
 
-    result = CliRunner().invoke(main.app, arguments)
+    result = CliRunner().invoke(app, arguments)
 
     assert result.exit_code == 0, result.output
     import_flow.assert_called_once_with(
@@ -84,12 +85,12 @@ def test_cli_source(monkeypatch, tmp_path, use_local_directory):
 def test_cli_rejects_invalid_directory(monkeypatch, tmp_path, invalid_path_type):
     """Refuse les chemins inexistants et les fichiers sans lancer le flux."""
     import_flow = Mock()
-    monkeypatch.setattr(main, "import_dgfip_topo_flow", import_flow)
+    monkeypatch.setattr(cadastre, "import_dgfip_topo_flow", import_flow)
     source_path: Path = tmp_path / invalid_path_type
     if invalid_path_type == "file":
         source_path.touch()
 
-    result = CliRunner().invoke(main.app, ["dgfip-topo", str(source_path)])
+    result = CliRunner().invoke(app, ["dgfip-topo", str(source_path)])
 
     assert result.exit_code == 2, result.output
     import_flow.assert_not_called()

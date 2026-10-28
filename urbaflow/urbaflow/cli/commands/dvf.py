@@ -13,5 +13,6 @@ app = typer.Typer()
 def dvf(
     departements: str,
     dirname: Path = DIRNAME_ARGUMENT,
-):
+) -> None:
+    """Importe les valeurs foncières des départements demandés."""
     dvf_flow._run(departements, dirname)

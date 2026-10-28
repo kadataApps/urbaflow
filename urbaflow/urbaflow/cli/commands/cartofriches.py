@@ -16,23 +16,23 @@ OPTIONAL_DIRNAME_CARTOFRICHES_ARGUMENT = typer.Argument(
     dir_okay=True,
     readable=True,
     help=(
-        "Directory path containing Cartofriches GeoPackage file. "
-        "Optional (downloads national GeoPackage if omitted)."
+        "Répertoire du fichier GeoPackage Cartofriches. "
+        "Par défaut, le fichier GeoPackage national est téléchargé."
     ),
 )
 
 FRICHES_CARTOFRICHES_TABLE_OPTION = typer.Option(
-    "friches_cartofriches", help="Database table name"
+    "friches_cartofriches", help="Nom de la table cible"
 )
 
 
 @app.command()
 def cartofriches(
-    dirname: Path = OPTIONAL_DIRNAME_CARTOFRICHES_ARGUMENT,
+    dirname: Path | None = OPTIONAL_DIRNAME_CARTOFRICHES_ARGUMENT,
     schema: str = SCHEMA_OPTION,
     table_name: str = FRICHES_CARTOFRICHES_TABLE_OPTION,
     recreate: bool = RECREATE_TRUE_OPTION,
-):
+) -> None:
     """
     Import des sites référencés dans Cartofriches (friches industrielles,
     commerciales, etc.).

@@ -14,7 +14,7 @@ def docurba_epci(
     siren: str = typer.Argument(..., help="Numéro SIREN de l'EPCI (ex: 200071629)"),
     schema: str = SCHEMA_OPTION,
     table_name: str = typer.Option(
-        "docurba_documents_urbanisme", help="Database table name"
+        "docurba_documents_urbanisme", help="Nom de la table cible"
     ),
     banatic_table: str = BANATIC_COMMUNES_TABLE_OPTION,
     avant: str | None = typer.Option(
@@ -23,7 +23,7 @@ def docurba_epci(
         help="Ne prend en compte que les événements jusqu'à cette date (YYYY-MM-DD).",
     ),
     recreate: bool = RECREATE_FALSE_OPTION,
-):
+) -> None:
     """
     État des documents d'urbanisme d'un EPCI et de ses communes (API Docurba).
 

@@ -19,8 +19,8 @@ OPTIONAL_DIRNAME_GPU_SUP_ARGUMENT = typer.Argument(
     dir_okay=True,
     readable=True,
     help=(
-        "Directory path containing SUP GeoPackage files. "
-        "Optional (downloads latest GPKG files from Géoportail if omitted)."
+        "Répertoire des fichiers GeoPackage SUP. "
+        "Par défaut, les derniers fichiers GPKG du Géoportail sont téléchargés."
     ),
 )
 
@@ -53,10 +53,10 @@ GPU_PLU_KEEP_FILES_OPTION = typer.Option(
 
 @app.command(name="gpu-sup")
 def gpu_sup(
-    dirname: Path = OPTIONAL_DIRNAME_GPU_SUP_ARGUMENT,
+    dirname: Path | None = OPTIONAL_DIRNAME_GPU_SUP_ARGUMENT,
     db_schema: str = SCHEMA_OPTION,
     recreate: bool = RECREATE_TRUE_OPTION,
-):
+) -> None:
     """
     Import des Servitudes d'Utilité Publique (SUP) du Géoportail de l'Urbanisme (GPU).
 
@@ -75,7 +75,7 @@ def epci_gpu(
     siren: str = typer.Argument(..., help="Numéro SIREN de l'EPCI (ex: 200071629)"),
     schema: str = SCHEMA_OPTION,
     banatic_table: str = BANATIC_COMMUNES_TABLE_OPTION,
-):
+) -> None:
     """
     Intégration des communes et documents GPU d'un EPCI via APICARTO.
 
@@ -97,7 +97,7 @@ def gpu_plu(
     schema: str = SCHEMA_OPTION,
     download_dir: Path | None = GPU_PLU_DOWNLOAD_DIR_OPTION,
     keep_files: bool = GPU_PLU_KEEP_FILES_OPTION,
-):
+) -> None:
     """
     Télécharge et importe cinq couches PLU du Géoportail de l'Urbanisme.
 

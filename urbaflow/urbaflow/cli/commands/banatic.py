@@ -17,19 +17,19 @@ OPTIONAL_DIRNAME_BANATIC_ARGUMENT = typer.Argument(
     dir_okay=True,
     readable=True,
     help=(
-        "Directory path containing BANATIC CSV files. "
-        "Optional (downloads latest CSV files from data.gouv.fr if omitted)."
+        "Répertoire des fichiers CSV BANATIC. "
+        "Par défaut, les derniers fichiers CSV de data.gouv.fr sont téléchargés."
     ),
 )
 
 
 @app.command(name="banatic-communes")
 def banatic_communes(
-    dirname: Path = OPTIONAL_DIRNAME_BANATIC_ARGUMENT,
+    dirname: Path | None = OPTIONAL_DIRNAME_BANATIC_ARGUMENT,
     db_schema: str = SCHEMA_OPTION,
     table_name: str = BANATIC_COMMUNES_TABLE_OPTION,
     recreate: bool = RECREATE_TRUE_OPTION,
-):
+) -> None:
     """
     Import de la table des communes BANATIC avec le raccordement aux EPCI FP.
 

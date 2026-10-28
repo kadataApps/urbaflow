@@ -1,9 +1,9 @@
 import typer
 from cli.options import (
-    BDTOPO_COMMUNES_OPTION,
-    BDTOPO_DEPARTEMENTS_OPTION,
-    BDTOPO_EPCI_OPTION,
-    BDTOPO_KEEP_FILES_OPTION,
+    COMMUNES_OPTION,
+    DEPARTMENTS_OPTION,
+    EPCI_OPTION,
+    KEEP_FILES_OPTION,
     RECREATE_FALSE_OPTION,
     SCHEMA_OPTION,
 )
@@ -25,21 +25,21 @@ BDTOPO_MILLESIME_OPTION = typer.Option(
 )
 
 BDTOPO_BATIMENT_TABLE_OPTION = typer.Option(
-    "bdtopo_batiment", help="Database table name"
+    "bdtopo_batiment", help="Nom de la table cible"
 )
 
 
 @app.command(name="bdtopo-batiment")
 def bdtopo_batiment(
-    departments: str = BDTOPO_DEPARTEMENTS_OPTION,
-    epci: str = BDTOPO_EPCI_OPTION,
-    communes: str = BDTOPO_COMMUNES_OPTION,
-    millesime: str = BDTOPO_MILLESIME_OPTION,
+    departments: str | None = DEPARTMENTS_OPTION,
+    epci: str | None = EPCI_OPTION,
+    communes: str | None = COMMUNES_OPTION,
+    millesime: str | None = BDTOPO_MILLESIME_OPTION,
     db_schema: str = SCHEMA_OPTION,
     table_name: str = BDTOPO_BATIMENT_TABLE_OPTION,
     recreate: bool = RECREATE_FALSE_OPTION,
-    keep_files: bool = BDTOPO_KEEP_FILES_OPTION,
-):
+    keep_files: bool = KEEP_FILES_OPTION,
+) -> None:
     """
     Import des bâtiments de la BD TOPO® IGN depuis la Géoplateforme.
 
@@ -79,8 +79,8 @@ def bdtopo_troncon_route(
     table_name: str = typer.Option(
         "bdtopo_troncon_de_route", help="Nom de la table cible."
     ),
-    keep_files: bool = BDTOPO_KEEP_FILES_OPTION,
-):
+    keep_files: bool = KEEP_FILES_OPTION,
+) -> None:
     """Importe les tronçons de route BD TOPO IGN d'un département."""
     import_bdtopo_troncon_route_flow(
         department=department,

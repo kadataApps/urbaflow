@@ -20,12 +20,16 @@ SCHEMA_OPTION = typer.Option(
 )
 
 BANATIC_COMMUNES_TABLE_OPTION = typer.Option(
-    "banatic_communes", help="Database table name"
+    "banatic_communes", help="Nom de la table cible"
 )
 
-RECREATE_TRUE_OPTION = typer.Option(True, help="Drop/recreate table if it exists")
+RECREATE_TRUE_OPTION = typer.Option(
+    True, help="Supprimer et recréer la table si elle existe"
+)
 
-RECREATE_FALSE_OPTION = typer.Option(False, help="Drop/recreate table if it exists")
+RECREATE_FALSE_OPTION = typer.Option(
+    False, help="Supprimer et recréer la table si elle existe"
+)
 
 DEPARTMENT_OPTION = typer.Option(
     None,
@@ -35,7 +39,7 @@ DEPARTMENT_OPTION = typer.Option(
     help="Code du département (ex. : '75' pour Paris).",
 )
 
-BDTOPO_DEPARTEMENTS_OPTION = typer.Option(
+DEPARTMENTS_OPTION = typer.Option(
     None,
     "-d",
     "--departement",
@@ -46,7 +50,7 @@ BDTOPO_DEPARTEMENTS_OPTION = typer.Option(
     ),
 )
 
-BDTOPO_EPCI_OPTION = typer.Option(
+EPCI_OPTION = typer.Option(
     None,
     "-e",
     "--epci",
@@ -56,7 +60,7 @@ BDTOPO_EPCI_OPTION = typer.Option(
     ),
 )
 
-BDTOPO_COMMUNES_OPTION = typer.Option(
+COMMUNES_OPTION = typer.Option(
     None,
     "-c",
     "--communes",
@@ -66,7 +70,7 @@ BDTOPO_COMMUNES_OPTION = typer.Option(
     ),
 )
 
-BDTOPO_KEEP_FILES_OPTION = typer.Option(
+KEEP_FILES_OPTION = typer.Option(
     False,
     "--keep-files/--no-keep-files",
     help="Conserver l'archive téléchargée et le GeoPackage extrait",

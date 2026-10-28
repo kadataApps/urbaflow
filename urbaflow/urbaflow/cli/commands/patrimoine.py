@@ -17,8 +17,8 @@ OPTIONAL_DIRNAME_MH_ARGUMENT = typer.Argument(
     dir_okay=True,
     readable=True,
     help=(
-        "Directory path containing MH GeoJSON file. "
-        "Optional (downloads national GeoJSON if omitted)."
+        "Répertoire du fichier GeoJSON MH. "
+        "Par défaut, le fichier GeoJSON national est téléchargé."
     ),
 )
 
@@ -29,27 +29,27 @@ OPTIONAL_DIRNAME_ACR_ARGUMENT = typer.Argument(
     dir_okay=True,
     readable=True,
     help=(
-        "Directory path containing ACR CSV file. "
-        "Optional (downloads national CSV if omitted)."
+        "Répertoire du fichier CSV ACR. "
+        "Par défaut, le fichier CSV national est téléchargé."
     ),
 )
 
 PATRIMOINE_MH_TABLE_OPTION = typer.Option(
-    "patrimoine_immeubles_proteges_mh", help="Database table name"
+    "patrimoine_immeubles_proteges_mh", help="Nom de la table cible"
 )
 
 PATRIMOINE_ACR_TABLE_OPTION = typer.Option(
-    "patrimoine_architecture_contemporaine_remarquable", help="Database table name"
+    "patrimoine_architecture_contemporaine_remarquable", help="Nom de la table cible"
 )
 
 
 @app.command()
 def mh(
-    dirname: Path = OPTIONAL_DIRNAME_MH_ARGUMENT,
+    dirname: Path | None = OPTIONAL_DIRNAME_MH_ARGUMENT,
     schema: str = SCHEMA_OPTION,
     table_name: str = PATRIMOINE_MH_TABLE_OPTION,
     recreate: bool = RECREATE_TRUE_OPTION,
-):
+) -> None:
     """
     Import des immeubles protégés au titre des Monuments Historiques (MH).
 
@@ -66,11 +66,11 @@ def mh(
 
 @app.command()
 def acr(
-    dirname: Path = OPTIONAL_DIRNAME_ACR_ARGUMENT,
+    dirname: Path | None = OPTIONAL_DIRNAME_ACR_ARGUMENT,
     schema: str = SCHEMA_OPTION,
     table_name: str = PATRIMOINE_ACR_TABLE_OPTION,
     recreate: bool = RECREATE_TRUE_OPTION,
-):
+) -> None:
     """
     Import des édifices labellisés Architecture Contemporaine Remarquable (ACR).
 

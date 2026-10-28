@@ -17,22 +17,22 @@ OPTIONAL_DIRNAME_BPE_ARGUMENT = typer.Argument(
     dir_okay=True,
     readable=True,
     help=(
-        "Directory path containing BPE CSV files. "
-        "Optional (downloads national BPE zip if omitted)."
+        "Répertoire des fichiers CSV BPE. "
+        "Par défaut, l'archive nationale BPE est téléchargée."
     ),
 )
 
-INSEE_BPE_TABLE_OPTION = typer.Option("insee_bpe", help="Database table name")
+INSEE_BPE_TABLE_OPTION = typer.Option("insee_bpe", help="Nom de la table cible")
 
 
 @app.command()
 def bpe(
-    dirname: Path = OPTIONAL_DIRNAME_BPE_ARGUMENT,
-    department: str = DEPARTMENT_OPTION,
+    dirname: Path | None = OPTIONAL_DIRNAME_BPE_ARGUMENT,
+    department: str | None = DEPARTMENT_OPTION,
     schema: str = SCHEMA_OPTION,
     table_name: str = INSEE_BPE_TABLE_OPTION,
     recreate: bool = RECREATE_TRUE_OPTION,
-):
+) -> None:
     """
     Import de la Base Permanente des Équipements (BPE / INSEE).
 

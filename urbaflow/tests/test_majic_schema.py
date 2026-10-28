@@ -242,13 +242,18 @@ def test_cli_schema_respects_environment_and_explicit_override(
     monkeypatch, command, flow_name, explicit_schema
 ):
     """Priorise l'option explicite, puis IMPORT_SCHEMA, pour les imports du CLI."""
-    import main
+    import inspect
+
+    from cli.app import app
+    from typer.main import get_command
     from typer.testing import CliRunner
 
     monkeypatch.setenv("IMPORT_SCHEMA", "imports")
     arguments = command + (["--schema", explicit_schema] if explicit_schema else [])
-    with patch.object(main, flow_name) as import_flow:
-        result = CliRunner().invoke(main.app, arguments)
+    callback = get_command(app).commands[command[0]].callback
+    command_module = inspect.getmodule(inspect.unwrap(callback))
+    with patch.object(command_module, flow_name) as import_flow:
+        result = CliRunner().invoke(app, arguments)
     assert result.exit_code == 0, result.output
     assert import_flow.call_args.kwargs["db_schema"] == (explicit_schema or "imports")
 

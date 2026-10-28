@@ -7,6 +7,7 @@ from cli.options import (
     RECREATE_TRUE_OPTION,
     SCHEMA_OPTION,
 )
+from cli.validation import require_directory_or_department
 from flows.georisques.import_casias import import_risques_casias_flow
 from flows.georisques.import_cavite import import_risques_cavite_flow
 from flows.georisques.import_gaspar import import_risques_gaspar_flow
@@ -36,10 +37,7 @@ OPTIONAL_DIRNAME_RGA_ARGUMENT = typer.Argument(
     file_okay=False,
     dir_okay=True,
     readable=True,
-    help=(
-        "Directory path containing RGA shapefiles. "
-        "Optional if --departement is provided."
-    ),
+    help=("Répertoire des shapefiles RGA. Optionnel si --departement est fourni."),
 )
 
 OPTIONAL_DIRNAME_REMNAPPES_ARGUMENT = typer.Argument(
@@ -49,8 +47,7 @@ OPTIONAL_DIRNAME_REMNAPPES_ARGUMENT = typer.Argument(
     dir_okay=True,
     readable=True,
     help=(
-        "Directory path containing REMNAPPES shapefiles. "
-        "Optional if --departement is provided."
+        "Répertoire des shapefiles REMNAPPES. Optionnel si --departement est fourni."
     ),
 )
 
@@ -60,10 +57,7 @@ OPTIONAL_DIRNAME_MVT_ARGUMENT = typer.Argument(
     file_okay=False,
     dir_okay=True,
     readable=True,
-    help=(
-        "Directory path containing MVT CSV files. "
-        "Optional if --departement is provided."
-    ),
+    help=("Répertoire des fichiers CSV MVT. Optionnel si --departement est fourni."),
 )
 
 OPTIONAL_DIRNAME_CASIAS_ARGUMENT = typer.Argument(
@@ -72,10 +66,7 @@ OPTIONAL_DIRNAME_CASIAS_ARGUMENT = typer.Argument(
     file_okay=False,
     dir_okay=True,
     readable=True,
-    help=(
-        "Directory path containing CASIAS CSV files. "
-        "Optional if --departement is provided."
-    ),
+    help=("Répertoire des fichiers CSV CASIAS. Optionnel si --departement est fourni."),
 )
 
 OPTIONAL_DIRNAME_SIS_ARGUMENT = typer.Argument(
@@ -84,10 +75,7 @@ OPTIONAL_DIRNAME_SIS_ARGUMENT = typer.Argument(
     file_okay=False,
     dir_okay=True,
     readable=True,
-    help=(
-        "Directory path containing SIS JSON files. "
-        "Optional if --departement is provided."
-    ),
+    help=("Répertoire des fichiers JSON SIS. Optionnel si --departement est fourni."),
 )
 
 OPTIONAL_DIRNAME_SUP_ARGUMENT = typer.Argument(
@@ -96,10 +84,7 @@ OPTIONAL_DIRNAME_SUP_ARGUMENT = typer.Argument(
     file_okay=False,
     dir_okay=True,
     readable=True,
-    help=(
-        "Directory path containing SUP JSON files. "
-        "Optional if --departement is provided."
-    ),
+    help=("Répertoire des fichiers JSON SUP. Optionnel si --departement est fourni."),
 )
 
 OPTIONAL_DIRNAME_TRI_ARGUMENT = typer.Argument(
@@ -108,10 +93,7 @@ OPTIONAL_DIRNAME_TRI_ARGUMENT = typer.Argument(
     file_okay=False,
     dir_okay=True,
     readable=True,
-    help=(
-        "Directory path containing TRI shapefiles. "
-        "Optional if --departement is provided."
-    ),
+    help=("Répertoire des shapefiles TRI. Optionnel si --departement est fourni."),
 )
 
 OPTIONAL_DIRNAME_ICPE_ARGUMENT = typer.Argument(
@@ -121,8 +103,7 @@ OPTIONAL_DIRNAME_ICPE_ARGUMENT = typer.Argument(
     dir_okay=True,
     readable=True,
     help=(
-        "Directory path containing ICPE shapefiles. "
-        "Optional (downloads national base if omitted)."
+        "Répertoire des shapefiles ICPE. Par défaut, la base nationale est téléchargée."
     ),
 )
 
@@ -133,8 +114,8 @@ OPTIONAL_DIRNAME_IREP_ARGUMENT = typer.Argument(
     dir_okay=True,
     readable=True,
     help=(
-        "Directory path containing IREP CSV files. "
-        "Optional (downloads national zip for --year if omitted)."
+        "Répertoire des fichiers CSV IREP. "
+        "Par défaut, l'archive nationale de l'année --year est téléchargée."
     ),
 )
 
@@ -145,57 +126,57 @@ OPTIONAL_DIRNAME_GASPAR_ARGUMENT = typer.Argument(
     dir_okay=True,
     readable=True,
     help=(
-        "Directory path containing GASPAR CSV files. "
-        "Optional (downloads national zip if omitted)."
+        "Répertoire des fichiers CSV GASPAR. "
+        "Par défaut, l'archive nationale est téléchargée."
     ),
 )
 
-YEAR_IREP_OPTION = typer.Option(2024, help="Year of the IREP dataset (e.g. 2024)")
+YEAR_IREP_OPTION = typer.Option(2024, help="Année du jeu de données IREP (ex. : 2024)")
 
-RISQUES_CAVITE_TABLE_OPTION = typer.Option("risques_cavite", help="Database table name")
-
-RISQUES_REMNAPPES_TABLE_OPTION = typer.Option(
-    "risques_remnappes", help="Database table name"
+RISQUES_CAVITE_TABLE_OPTION = typer.Option(
+    "risques_cavite", help="Nom de la table cible"
 )
 
-RISQUES_MVT_TABLE_OPTION = typer.Option("risques_mvt", help="Database table name")
+RISQUES_REMNAPPES_TABLE_OPTION = typer.Option(
+    "risques_remnappes", help="Nom de la table cible"
+)
 
-RISQUES_CASIAS_TABLE_OPTION = typer.Option("risques_casias", help="Database table name")
+RISQUES_MVT_TABLE_OPTION = typer.Option("risques_mvt", help="Nom de la table cible")
 
-RISQUES_SIS_TABLE_OPTION = typer.Option("risques_sis", help="Database table name")
+RISQUES_CASIAS_TABLE_OPTION = typer.Option(
+    "risques_casias", help="Nom de la table cible"
+)
 
-RISQUES_SUP_TABLE_OPTION = typer.Option("risques_sup", help="Database table name")
+RISQUES_SIS_TABLE_OPTION = typer.Option("risques_sis", help="Nom de la table cible")
 
-RISQUES_TRI_TABLE_OPTION = typer.Option("risques_tri", help="Database table name")
+RISQUES_SUP_TABLE_OPTION = typer.Option("risques_sup", help="Nom de la table cible")
 
-RISQUES_ICPE_TABLE_OPTION = typer.Option("risques_icpe", help="Database table name")
+RISQUES_TRI_TABLE_OPTION = typer.Option("risques_tri", help="Nom de la table cible")
 
-RISQUES_IREP_TABLE_OPTION = typer.Option("risques_irep", help="Database table name")
+RISQUES_ICPE_TABLE_OPTION = typer.Option("risques_icpe", help="Nom de la table cible")
 
-RISQUES_GASPAR_TABLE_OPTION = typer.Option("risques_gaspar", help="Database table name")
+RISQUES_IREP_TABLE_OPTION = typer.Option("risques_irep", help="Nom de la table cible")
+
+RISQUES_GASPAR_TABLE_OPTION = typer.Option(
+    "risques_gaspar", help="Nom de la table cible"
+)
 
 
 @app.command()
 def risques_cavite(
-    dirname: Path = OPTIONAL_DIRNAME_CAVITE_ARGUMENT,
-    department: str = DEPARTMENT_OPTION,
+    dirname: Path | None = OPTIONAL_DIRNAME_CAVITE_ARGUMENT,
+    department: str | None = DEPARTMENT_OPTION,
     recreate: bool = RECREATE_TRUE_OPTION,
     schema: str = SCHEMA_OPTION,
     table_name: str = RISQUES_CAVITE_TABLE_OPTION,
-):
+) -> None:
     """
     Import des données de risques de cavités.
 
     DIRNAME : Chemin optionnel du répertoire contenant les fichiers CSV de cavités.
     Si non fourni, l'option --departement (-d) doit être spécifiée.
     """
-    # Validate that at least one of dirname or department is provided
-    if dirname is None and department is None:
-        typer.echo(
-            "Erreur : fournir un répertoire ou utiliser l'option --departement/-d.",
-            err=True,
-        )
-        raise typer.Exit(1)
+    require_directory_or_department(dirname, department)
 
     import_risques_cavite_flow(
         path=dirname,
@@ -208,24 +189,18 @@ def risques_cavite(
 
 @app.command()
 def risques_rga(
-    dirname: Path = OPTIONAL_DIRNAME_RGA_ARGUMENT,
-    department: str = DEPARTMENT_OPTION,
+    dirname: Path | None = OPTIONAL_DIRNAME_RGA_ARGUMENT,
+    department: str | None = DEPARTMENT_OPTION,
     schema: str = SCHEMA_OPTION,
     recreate: bool = RECREATE_FALSE_OPTION,
-):
+) -> None:
     """
     Import des données de risques de retrait-gonflement des argiles (RGA).
 
     Si le répertoire n'est pas fourni, l'option --departement (-d) doit être spécifiée
     pour télécharger les données.
     """
-    # Validate that at least one of dirname or departement is provided
-    if dirname is None and department is None:
-        typer.echo(
-            "Error: Either provide a dirname argument or use --departement/-d option.",
-            err=True,
-        )
-        raise typer.Exit(1)
+    require_directory_or_department(dirname, department)
 
     import_rga_flow(
         dirname=dirname,
@@ -237,25 +212,19 @@ def risques_rga(
 
 @app.command()
 def risques_remnappes(
-    dirname: Path = OPTIONAL_DIRNAME_REMNAPPES_ARGUMENT,
-    department: str = DEPARTMENT_OPTION,
+    dirname: Path | None = OPTIONAL_DIRNAME_REMNAPPES_ARGUMENT,
+    department: str | None = DEPARTMENT_OPTION,
     schema: str = SCHEMA_OPTION,
     table_name: str = RISQUES_REMNAPPES_TABLE_OPTION,
     recreate: bool = RECREATE_FALSE_OPTION,
-):
+) -> None:
     """
     Import des données de risques d'inondation par remontée de nappe (REMNAPPES).
 
     Si le répertoire n'est pas fourni, l'option --departement (-d) doit être spécifiée
     pour télécharger les données.
     """
-    # Validate that at least one of dirname or departement is provided
-    if dirname is None and department is None:
-        typer.echo(
-            "Error: Either provide a dirname argument or use --departement/-d option.",
-            err=True,
-        )
-        raise typer.Exit(1)
+    require_directory_or_department(dirname, department)
 
     import_remnappes_flow(
         dirname=dirname,
@@ -268,25 +237,19 @@ def risques_remnappes(
 
 @app.command()
 def risques_mvt(
-    dirname: Path = OPTIONAL_DIRNAME_MVT_ARGUMENT,
-    department: str = DEPARTMENT_OPTION,
+    dirname: Path | None = OPTIONAL_DIRNAME_MVT_ARGUMENT,
+    department: str | None = DEPARTMENT_OPTION,
     schema: str = SCHEMA_OPTION,
     table_name: str = RISQUES_MVT_TABLE_OPTION,
     recreate: bool = RECREATE_FALSE_OPTION,
-):
+) -> None:
     """
     Import des données de mouvements de terrain (MVT).
 
     Si le répertoire n'est pas fourni, l'option --departement (-d) doit être spécifiée
     pour télécharger les données.
     """
-    # Validate that at least one of dirname or departement is provided
-    if dirname is None and department is None:
-        typer.echo(
-            "Error: Either provide a dirname argument or use --departement/-d option.",
-            err=True,
-        )
-        raise typer.Exit(1)
+    require_directory_or_department(dirname, department)
 
     import_risques_mvt_flow(
         path=dirname,
@@ -299,25 +262,19 @@ def risques_mvt(
 
 @app.command()
 def risques_casias(
-    dirname: Path = OPTIONAL_DIRNAME_CASIAS_ARGUMENT,
-    department: str = DEPARTMENT_OPTION,
+    dirname: Path | None = OPTIONAL_DIRNAME_CASIAS_ARGUMENT,
+    department: str | None = DEPARTMENT_OPTION,
     schema: str = SCHEMA_OPTION,
     table_name: str = RISQUES_CASIAS_TABLE_OPTION,
     recreate: bool = RECREATE_FALSE_OPTION,
-):
+) -> None:
     """
     Import des données CASIAS (Anciens Sites Industriels et Activités de Service).
 
     Si le répertoire n'est pas fourni, l'option --departement (-d) doit être spécifiée
     pour télécharger les données.
     """
-    # Validate that at least one of dirname or departement is provided
-    if dirname is None and department is None:
-        typer.echo(
-            "Error: Either provide a dirname argument or use --departement/-d option.",
-            err=True,
-        )
-        raise typer.Exit(1)
+    require_directory_or_department(dirname, department)
 
     import_risques_casias_flow(
         path=dirname,
@@ -330,26 +287,20 @@ def risques_casias(
 
 @app.command()
 def risques_sis(
-    dirname: Path = OPTIONAL_DIRNAME_SIS_ARGUMENT,
-    department: str = DEPARTMENT_OPTION,
+    dirname: Path | None = OPTIONAL_DIRNAME_SIS_ARGUMENT,
+    department: str | None = DEPARTMENT_OPTION,
     schema: str = SCHEMA_OPTION,
     table_name: str = RISQUES_SIS_TABLE_OPTION,
     db_schema: str = SCHEMA_OPTION,
     recreate: bool = RECREATE_FALSE_OPTION,
-):
+) -> None:
     """
     Import des données SIS (Secteurs d'Information sur les Sols).
 
     Si le répertoire n'est pas fourni, l'option --departement (-d) doit être spécifiée
     pour télécharger les données.
     """
-    # Validate that at least one of dirname or departement is provided
-    if dirname is None and department is None:
-        typer.echo(
-            "Error: Either provide a dirname argument or use --departement/-d option.",
-            err=True,
-        )
-        raise typer.Exit(1)
+    require_directory_or_department(dirname, department)
 
     import_risques_sis_flow(
         path=dirname,
@@ -362,25 +313,19 @@ def risques_sis(
 
 @app.command()
 def risques_sup(
-    dirname: Path = OPTIONAL_DIRNAME_SUP_ARGUMENT,
-    department: str = DEPARTMENT_OPTION,
+    dirname: Path | None = OPTIONAL_DIRNAME_SUP_ARGUMENT,
+    department: str | None = DEPARTMENT_OPTION,
     db_schema: str = SCHEMA_OPTION,
     table_name: str = RISQUES_SUP_TABLE_OPTION,
     recreate: bool = RECREATE_FALSE_OPTION,
-):
+) -> None:
     """
     Import des données SUP (Servitudes d'Utilité Publique).
 
     Si le répertoire n'est pas fourni, l'option --departement (-d) doit être spécifiée
     pour télécharger les données.
     """
-    # Validate that at least one of dirname or departement is provided
-    if dirname is None and department is None:
-        typer.echo(
-            "Error: Either provide a dirname argument or use --departement/-d option.",
-            err=True,
-        )
-        raise typer.Exit(1)
+    require_directory_or_department(dirname, department)
 
     import_risques_sup_flow(
         path=dirname,
@@ -393,25 +338,19 @@ def risques_sup(
 
 @app.command()
 def risques_tri(
-    dirname: Path = OPTIONAL_DIRNAME_TRI_ARGUMENT,
-    department: str = DEPARTMENT_OPTION,
+    dirname: Path | None = OPTIONAL_DIRNAME_TRI_ARGUMENT,
+    department: str | None = DEPARTMENT_OPTION,
     db_schema: str = SCHEMA_OPTION,
     table_name: str = RISQUES_TRI_TABLE_OPTION,
     recreate: bool = RECREATE_FALSE_OPTION,
-):
+) -> None:
     """
     Import des données des Territoires à Risques Important d'Inondation (TRI 2020).
 
     Si le répertoire n'est pas fourni, l'option --departement (-d) doit être spécifiée
     pour télécharger les données.
     """
-    # Validate that at least one of dirname or departement is provided
-    if dirname is None and department is None:
-        typer.echo(
-            "Error: Either provide a dirname argument or use --departement/-d option.",
-            err=True,
-        )
-        raise typer.Exit(1)
+    require_directory_or_department(dirname, department)
 
     import_tri_flow(
         dirname=dirname,
@@ -424,11 +363,11 @@ def risques_tri(
 
 @app.command()
 def risques_icpe(
-    dirname: Path = OPTIONAL_DIRNAME_ICPE_ARGUMENT,
+    dirname: Path | None = OPTIONAL_DIRNAME_ICPE_ARGUMENT,
     schema: str = SCHEMA_OPTION,
     table_name: str = RISQUES_ICPE_TABLE_OPTION,
     recreate: bool = RECREATE_FALSE_OPTION,
-):
+) -> None:
     """
     Import des données des Installations Classées (ICPE).
 
@@ -445,12 +384,12 @@ def risques_icpe(
 
 @app.command()
 def risques_irep(
-    dirname: Path = OPTIONAL_DIRNAME_IREP_ARGUMENT,
+    dirname: Path | None = OPTIONAL_DIRNAME_IREP_ARGUMENT,
     year: int = YEAR_IREP_OPTION,
     db_schema: str = SCHEMA_OPTION,
     table_name: str = RISQUES_IREP_TABLE_OPTION,
     recreate: bool = RECREATE_FALSE_OPTION,
-):
+) -> None:
     """
     Import du Registre des Émissions Polluantes (IREP).
 
@@ -468,11 +407,11 @@ def risques_irep(
 
 @app.command()
 def risques_gaspar(
-    dirname: Path = OPTIONAL_DIRNAME_GASPAR_ARGUMENT,
+    dirname: Path | None = OPTIONAL_DIRNAME_GASPAR_ARGUMENT,
     db_schema: str = SCHEMA_OPTION,
     table_name: str = RISQUES_GASPAR_TABLE_OPTION,
     recreate: bool = RECREATE_FALSE_OPTION,
-):
+) -> None:
     """
     Import des procédures administratives de gestion des risques (GASPAR).
 

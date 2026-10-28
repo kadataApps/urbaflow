@@ -47,8 +47,8 @@ CADASTRE_SCHEMA_OPTION = typer.Option(
 STEPS_ARGUMENT = typer.Argument(
     None,
     help=(
-        "List of steps to run (e.g., 'step1', 'step2'). "
-        "If not provided, all steps are run."
+        "Liste des étapes à exécuter (ex. : 'step1', 'step2'). "
+        "Par défaut, toutes les étapes sont exécutées."
     ),
 )
 
@@ -56,7 +56,7 @@ STEPS_ARGUMENT = typer.Argument(
 @app.command(name="dgfip-topo")
 def dgfip_topo(
     dirname: Path | None = OPTIONAL_DIRNAME_DGFIP_TOPO_ARGUMENT,
-):
+) -> None:
     """Importe les entités topographiques DGFiP depuis un répertoire ou data.gouv.fr."""
     import_dgfip_topo_flow(path=dirname)
 
@@ -82,18 +82,17 @@ def dgfip_geoparquet(
 @app.command()
 def majic(
     dirname: Path = DIRNAME_ARGUMENT,
-    steps: list[str] = STEPS_ARGUMENT,
-):
+    steps: list[str] | None = STEPS_ARGUMENT,
+) -> None:
     """
     DIRNAME : Chemin du répertoire contenant les fichiers MAJIC
     """
     if steps:
-        # ensure step names are valid
         for step in steps:
             if step not in STEPS_FLOW_CADASTRE.keys():
                 raise typer.BadParameter(
-                    f"Invalid step name '{step}'. "
-                    f"Valid step names are: {STEPS_FLOW_CADASTRE.keys()}"
+                    f"Étape inconnue '{step}'. "
+                    f"Étapes disponibles : {STEPS_FLOW_CADASTRE.keys()}"
                 )
 
     steps_to_process = steps if steps else STEPS_FLOW_CADASTRE.keys()

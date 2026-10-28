@@ -12,30 +12,30 @@ from flows.lovac.import_lovac_fil import import_lovac_fil_flow
 
 app = typer.Typer()
 
-LOVAC_FIL_TABLE_OPTION = typer.Option("lovac_fil", help="Database table name")
+LOVAC_FIL_TABLE_OPTION = typer.Option("lovac_fil", help="Nom de la table cible")
 
-RECURSIVE_OPTION = typer.Option(False, help="Search recursively in subdirectories")
+RECURSIVE_OPTION = typer.Option(False, help="Rechercher dans les sous-répertoires")
 
 
 @app.command()
 def locomvac(
     dirname: Path = DIRNAME_ARGUMENT,
-):
+) -> None:
     """
     DIRNAME : Chemin du répertoire contenant les fichiers LOCOMVAC
     """
-    typer.echo(f"Running LocomVac flow in directory: {dirname}")
+    typer.echo(f"Exécution de l'import LOCOMVAC depuis : {dirname}")
     import_locomvac(dirname)
 
 
 @app.command()
 def lovac(
     dirname: Path = DIRNAME_ARGUMENT,
-):
+) -> None:
     """
     DIRNAME : Chemin du répertoire contenant les fichiers csv LOVAC
     """
-    typer.echo(f"Running Lovac flow in directory: {dirname}")
+    typer.echo(f"Exécution de l'import LOVAC depuis : {dirname}")
     import_lovac_flow(dirname=dirname)
 
 
@@ -46,16 +46,16 @@ def lovac_fil(
     table_name: str = LOVAC_FIL_TABLE_OPTION,
     recursive: bool = RECURSIVE_OPTION,
     recreate: bool = RECREATE_TRUE_OPTION,
-):
+) -> None:
     """
     DIRNAME : Chemin du répertoire contenant les fichiers lovac_fil.csv
 
     Import des données LOVAC FIL (Locaux Vacants Commerciaux - données détaillées)
     """
-    typer.echo(f"Running Lovac FIL flow in directory: {dirname}")
-    typer.echo(f"Target: {schema}.{table_name}")
-    typer.echo(f"Recursive search: {recursive}")
-    typer.echo(f"Recreate table: {recreate}")
+    typer.echo(f"Exécution de l'import LOVAC FIL depuis : {dirname}")
+    typer.echo(f"Cible : {schema}.{table_name}")
+    typer.echo(f"Recherche récursive : {recursive}")
+    typer.echo(f"Recréation de la table : {recreate}")
     result = import_lovac_fil_flow(
         dirname=dirname,
         schema=schema,
@@ -63,4 +63,4 @@ def lovac_fil(
         recursive=recursive,
         recreate=recreate,
     )
-    typer.echo(f"Import completed successfully: {result}")
+    typer.echo(f"Import terminé avec succès : {result}")

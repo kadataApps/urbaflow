@@ -154,6 +154,24 @@ dans `urbaflow/urbaflow/cli/options.py`. Les traitements métier restent dans
 `flows/` : les modules CLI adaptent les paramètres puis appellent les flows.
 Les commandes restent toutes à la racine, sans sous-commandes de domaine.
 
+Le démarrage est explicite dans `urbaflow/urbaflow/cli/bootstrap.py` :
+chargement du `.env` à la racine du dépôt, configuration des logs, puis import
+de l'application et des flows. Importer le module `main` ne déclenche pas ce
+démarrage. Pour tester la CLI sans initialisation globale, utiliser
+`from cli.app import app` avec `typer.testing.CliRunner`.
+
+Les validations communes à plusieurs commandes se trouvent dans
+`urbaflow/urbaflow/cli/validation.py`. Les aides et messages définis par le projet
+sont en français. Les valeurs par défaut de `recreate` restent propres à chaque
+commande.
+
+Pour vérifier le contrat CLI et le démarrage sans lancer d'import de données :
+
+```shell
+cd urbaflow
+PYTHONPATH=urbaflow uv run pytest tests/test_cli.py tests/test_cli_bootstrap.py
+```
+
 Pour toutes les commandes proposant un filtre par département, les options
 `-d`, `--departement` et `--department` sont équivalentes. La forme
 `--departement` est privilégiée dans la documentation ; `--department` reste
