@@ -1,7 +1,13 @@
 --
 -- Name: cadastre_bati; Type: TABLE; Schema: public; Owner: spreadsheep_ids
 --
-DROP TABLE IF EXISTS cadastre_bati CASCADE;
+DO $$
+BEGIN
+    EXECUTE format(
+        'DROP TABLE IF EXISTS %I.cadastre_bati CASCADE', current_schema()
+    );
+END
+$$;
 CREATE TABLE cadastre_bati (
     ogc_fid integer NOT NULL,
     wkb_geometry geometry(MultiPolygon,4326),

@@ -26,7 +26,7 @@ from .tasks.format_majic import (
 )
 from .tasks.import_majic import import_majic_files
 from .tasks.merge_majic_cadastre import execute_merge_cadastre_majic_scripts
-from .tasks.move_data_to_public_schema import (
+from .tasks.move_data_to_import_schema import (
     flow_import_bati,
     flow_import_local,
     flow_import_parcelles,
@@ -38,7 +38,7 @@ logger = get_logger(__name__)
 
 STEPS_FLOW_CADASTRE = {
     "step1": {
-        "description": "Copy SQL scripts to the temp directory",
+        "description": "Copie des scripts SQL dans le répertoire temporaire",
         "default": True,
         "tasks": [
             lambda: copy_directory(
@@ -47,27 +47,27 @@ STEPS_FLOW_CADASTRE = {
         ],
     },
     "step2": {
-        "description": "Import raw MAJIC data into temporary PostgreSQL tables",
+        "description": "Import des données brutes dans MAJIC_SCHEMA",
         "default": True,
         "tasks": [lambda dirname: import_majic_files(dirname)],
     },
     "step3": {
-        "description": "Drop existing tables before importing new MAJIC data",
+        "description": "Suppression des anciennes tables métiers MAJIC",
         "default": True,
         "tasks": [clean_with_drop_db_for_majic_import],
     },
     "step4": {
-        "description": "Initialize database for MAJIC data import",
+        "description": "Initialisation des tables métiers dans MAJIC_SCHEMA",
         "default": True,
         "tasks": [init_db_for_majic_import],
     },
     "step5": {
-        "description": "Format and process MAJIC data",
+        "description": "Formatage et traitement des données MAJIC",
         "default": True,
         "tasks": [execute_format_majic_scripts],
     },
     "step6": {
-        "description": "Download and import cadastre geometries",
+        "description": "Téléchargement et import des géométries cadastrales",
         "default": True,
         "tasks": [
             execute_init_cadastre,
@@ -76,7 +76,7 @@ STEPS_FLOW_CADASTRE = {
         ],
     },
     "step7": {
-        "description": "Merge cadastre data with MAJIC",
+        "description": "Consolidation Cadastre × MAJIC dans IMPORT_SCHEMA",
         "default": True,
         "tasks": [execute_merge_cadastre_majic_scripts],
     },
@@ -86,17 +86,19 @@ STEPS_FLOW_CADASTRE = {
         "tasks": [flow_create_unites_foncieres],
     },
     "step9": {
-        "description": "Export parcel, owner, and local data to the public schema",
+        "description": (
+            "Copie des parcelles, propriétaires et locaux dans IMPORT_SCHEMA"
+        ),
         "default": True,
         "tasks": [flow_import_parcelles, flow_import_proprietaire, flow_import_local],
     },
     "step10": {
-        "description": "Download and import building geometries",
+        "description": "Téléchargement et import des géométries des bâtiments",
         "default": True,
         "tasks": [execute_init_bati, download_bati_for_communes],
     },
     "step11": {
-        "description": "Export building data to the public schema",
+        "description": "Copie des bâtiments dans IMPORT_SCHEMA",
         "default": True,
         "tasks": [flow_import_bati],
     },
@@ -113,7 +115,7 @@ STEPS_FLOW_CADASTRE = {
         ],
     },
     "step12": {
-        "description": "Clean up temporary files and database tables",
+        "description": "Nettoyage des fichiers temporaires et de MAJIC_SCHEMA",
         "default": True,
         "tasks": [clean_temp_dir, clean_db],
     },
@@ -123,11 +125,7 @@ STEPS_FLOW_CADASTRE = {
 @flow
 def import_cadastre_majic_flow(path: Path, enabled_steps: list[str]):
     """
-    Execute the cadastre workflow based on the given steps.
-
-    Args:
-        path (str): Path to the directory containing MAJIC files.
-        steps (dict): A dictionary defining which steps to execute.
+    Exécute les étapes sélectionnées du flux Cadastre × MAJIC.
     """
     # Check if the path exists
     if path is None or not os.path.isdir(path):
@@ -137,14 +135,14 @@ def import_cadastre_majic_flow(path: Path, enabled_steps: list[str]):
         )
         return
 
-    logger.info("Path is a valid directory. Proceeding with the workflow.")
+    logger.info("Le répertoire existe. Lancement du traitement.")
     temp_dir = os.path.join(os.getcwd(), "temp")
-    logger.info(f"Temporary directory: {temp_dir}")
+    logger.info(f"Répertoire temporaire : {temp_dir}")
     logger.info("----------------")
 
     for step_name, step in STEPS_FLOW_CADASTRE.items():
         if step_name in enabled_steps:
-            logger.info(f"Executing Step {step_name}: {step['description']}")
+            logger.info(f"Exécution de l'étape {step_name} : {step['description']}")
             for task in step["tasks"]:
                 # Pass `path` to tasks that accept it
                 if "dirname" in task.__code__.co_varnames:
@@ -152,6 +150,6 @@ def import_cadastre_majic_flow(path: Path, enabled_steps: list[str]):
                 else:
                     task()
         else:
-            logger.info(f"Skipping Step {step_name}: {step['description']}")
+            logger.info(f"Étape ignorée {step_name} : {step['description']}")
 
-    logger.info("Workflow completed successfully.")
+    logger.info("Traitement terminé avec succès.")

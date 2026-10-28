@@ -1,6 +1,6 @@
 UPDATE parcellaire SET
   dlibvoi = trim(coalesce(v.natvoi, '') || ' ' || coalesce(v.libvoi, ''))
-FROM voie_france AS v
+FROM [IMPORT_SCHEMA].voie_france AS v
 WHERE v.idvoie = parcellaire.idvoie;
 
 
@@ -13,5 +13,5 @@ UPDATE parcellaire SET
 
 UPDATE parcellaire SET
   libcom = c.libcom
-FROM commune_france AS c
+FROM [IMPORT_SCHEMA].commune_france AS c
 WHERE parcellaire.idcom = c.idcom;

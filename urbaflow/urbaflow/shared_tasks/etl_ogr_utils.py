@@ -145,23 +145,36 @@ def import_shapefile(
         logger.error(e)
 
 
-def import_geojson(file: str, table: str):
+def import_geojson(file: str, table: str, schema: str | None = None):
+    """Importe un GeoJSON dans le schéma demandé ou dans IMPORT_SCHEMA."""
     params = db_config()
-    schema = db_schema()
-
-    password_string = (
-        f"PGPASSWORD='{params['password']}'" if params["password"] != "" else ""
+    schema = db_schema() if schema is None else schema
+    connection_string = (
+        f"PG:host={params['host']} port={params['port']} "
+        f"user={params['user']} dbname={params['database']}"
     )
-    command = (
-        f"{password_string} "
-        f'ogr2ogr -f "PostgreSQL" '
-        f'PG:"host={params["host"]} port={params["port"]} user={params["user"]} '
-        f'dbname={params["database"]} " '
-        f'"{file}" -nln {schema}.{table} -append -update -skipfailures '
-        f'-a_srs "EPSG:4326" -nlt "PROMOTE_TO_MULTI"'
-    )
-    logger.info(command)
+    command = [
+        "ogr2ogr",
+        "-f",
+        "PostgreSQL",
+        connection_string,
+        str(file),
+        "-nln",
+        f"{schema}.{table}",
+        "-append",
+        "-update",
+        "-skipfailures",
+        "-a_srs",
+        "EPSG:4326",
+        "-nlt",
+        "PROMOTE_TO_MULTI",
+    ]
+    environment = os.environ.copy()
+    if params["password"]:
+        environment["PGPASSWORD"] = params["password"]
+    logger.info("Import GeoJSON de %s vers %s.%s", file, schema, table)
     try:
-        os.system(command)
-    except OSError as e:
-        logger.error(e)
+        subprocess.run(command, env=environment, check=True)
+    except (OSError, subprocess.CalledProcessError):
+        logger.exception("Échec de l'import GeoJSON vers %s.%s", schema, table)
+        raise

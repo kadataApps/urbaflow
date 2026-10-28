@@ -30,6 +30,7 @@ services:
       # urbaflow config
       - CADASTRE_MILLESIME
       - IMPORT_SCHEMA
+      - MAJIC_SCHEMA
     volumes:
       - ${PATH_TO_DATA}:/data
       - ${LOG_FOLDER}:/home/urbaflow-user/logs

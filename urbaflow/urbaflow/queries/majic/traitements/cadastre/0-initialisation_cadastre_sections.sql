@@ -1,4 +1,10 @@
-DROP TABLE IF EXISTS cadastre_sections CASCADE;
+DO $$
+BEGIN
+    EXECUTE format(
+        'DROP TABLE IF EXISTS %I.cadastre_sections CASCADE', current_schema()
+    );
+END
+$$;
 
 CREATE TABLE cadastre_sections (
     ogc_fid serial PRIMARY KEY,

@@ -10,6 +10,40 @@ Dans la mesure du possible, le nom des colonnes et les traitements ont été con
 
 ## Lancement des traitements
 
+### Configuration des schémas
+
+```dotenv
+IMPORT_SCHEMA=urbaflow
+MAJIC_SCHEMA=majic
+```
+
+- `IMPORT_SCHEMA` est la destination par défaut des imports (`public` si la
+  variable est absente). L'option CLI `--schema` reste prioritaire lorsqu'elle
+  est disponible.
+- `MAJIC_SCHEMA` contient les fichiers bruts, les tables métiers, les
+  nomenclatures et les géométries cadastrales de travail du flux MAJIC
+  (`majic` si la variable est absente). Il doit être distinct d'`IMPORT_SCHEMA`,
+  de `public` et des schémas système.
+- Les schémas sont créés si nécessaire ; le compte PostgreSQL doit disposer
+  des droits correspondants.
+- À la fin de `step7`, la table consolidée `parcellaire` est transférée dans
+  `IMPORT_SCHEMA`, avec ses contraintes et ses index. `step8` y crée
+  `unites_foncieres`. Ces tables sont des tables physiques, sans dépendance
+  aux tables de travail MAJIC.
+- Les copies nationales `parcellaire_france`, `proprietaire_droit`,
+  `pb0010_local`, `bati_france` et `sections_cadastrales_france` sont également
+  conservées dans `IMPORT_SCHEMA`, et non systématiquement dans `public`.
+- `step12` supprime uniquement `MAJIC_SCHEMA` et les fichiers temporaires.
+  Après les étapes de consolidation et de copie, ce schéma peut aussi être
+  supprimé manuellement avec `DROP SCHEMA majic CASCADE` sans perdre les
+  résultats ni les autres imports. Adapter le nom au schéma configuré.
+  Les étapes qui relisent les données de travail nécessitent un nouvel import.
+
+Les données déjà présentes ne sont pas déplacées automatiquement : relancer
+les étapes concernées pour les produire dans les nouveaux schémas.
+Les tables DGFiP `voie_france` et `commune_france`, utilisées pour les adresses,
+doivent également être importées dans `IMPORT_SCHEMA`.
+
 Lancer le traitement MAJIC complet :
 
 ```shell
@@ -50,14 +84,14 @@ Options:
            MAJIC ont été importées, téléchargement et import 
            des données cadastre (vecteurs)
 - step7  : Fusion des données Cadastre et MAJIC
-- step8  : Intégration des données parcelles,
-           proprietaires et local dans le schema Public
-- step9 : Téléchargement et import des données bati
+- step8  : Création des unités foncières dans `IMPORT_SCHEMA`
+- step9  : Copie des parcelles, propriétaires et locaux dans `IMPORT_SCHEMA`
+- step10 : Téléchargement et import des données bati
            (vecteurs)
-- step10 : Intégration des données bati dans le schéma Public
-- step11 : Nettoyage des fichiers temporaires et des tables
+- step11 : Copie des données bati dans `IMPORT_SCHEMA`
+- step12 : Nettoyage des fichiers temporaires et suppression de `MAJIC_SCHEMA`
 - sections : Téléchargement et import des sections cadastrales dans
-             `public.sections_cadastrales_france`
+             `IMPORT_SCHEMA.sections_cadastrales_france`
 
 Lors du formatage (`step5`), le script
 `urbaflow/urbaflow/queries/majic/table_corresponance_manuelle_proprietaires.sql`
@@ -107,6 +141,19 @@ psql -X "$TEST_DATABASE_URL" -f urbaflow/tests/test_parcellaire.sql
 Il vérifie les contraintes, les index, la réparation des géométries et les
 projections depuis les SRID 4326 et 2154. Ses tables sont créées dans un schéma
 dédié, puis annulées par un `ROLLBACK`.
+
+Le test de séparation des schémas exécute le formatage, la consolidation,
+les copies nationales et le nettoyage sur des données synthétiques :
+
+```shell
+cd urbaflow
+PYTHONPATH=urbaflow MAJIC_TEST_DATABASE_URL="$TEST_DATABASE_URL" \
+  uv run pytest tests/test_majic_schema_integration.py
+```
+
+Il utilise deux schémas de test uniques, supprimés en fin de test, et vérifie
+que les résultats, leurs index et les séquences restent utilisables après
+la suppression du schéma de travail.
 
 ## Nommage des fichiers
 

@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pandas as pd
 from prefect import flow, task
+from shared_tasks.config import db_schema
 from shared_tasks.db_engine import create_engine
 from shared_tasks.etl_gpd_utils import load
 from shared_tasks.logging_config import get_logger
@@ -77,15 +78,13 @@ def extract_locomvac_data(file: Path) -> pd.DataFrame:
 
 @task
 def create_table_locomvac():
-    """
-    Create the table in the database
-    """
+    """Crée la table LOCOMVAC dans IMPORT_SCHEMA."""
     e = create_engine()
     with e.begin() as conn:
         conn.execute(
             DDL(
                 """
-                CREATE TABLE IF NOT EXISTS public.locomvac (
+                CREATE TABLE IF NOT EXISTS locomvac (
                     idparcelle_geom text PRIMARY KEY,
                     nblocomvac INTEGER
                 )
@@ -96,9 +95,7 @@ def create_table_locomvac():
 
 @task
 def load_locomvac_data(data: pd.DataFrame):
-    """
-    Load the data into the database
-    """
+    """Charge les données LOCOMVAC dans IMPORT_SCHEMA."""
     e = create_engine()
     with e.begin() as conn:
         load(
@@ -106,42 +103,38 @@ def load_locomvac_data(data: pd.DataFrame):
             connection=conn,
             table_name="locomvac",
             how="replace",
-            schema="public",
+            schema=db_schema(),
             logger=logger,
         )
 
 
 @task
 def transform_locomvac_data():
-    """
-    Add geometry to locomvac table
-    """
+    """Enrichit LOCOMVAC avec le parcellaire consolidé d'IMPORT_SCHEMA."""
     e = create_engine()
     with e.begin() as conn:
         conn.execute(
             DDL(
                 """
-                ALTER TABLE public.locomvac
+                ALTER TABLE locomvac
                 ADD COLUMN IF NOT EXISTS geom geometry(MULTIPOLYGON, 2154);
-                CREATE INDEX IF NOT EXISTS sidx_locomvac_geom ON public.locomvac 
+                CREATE INDEX IF NOT EXISTS sidx_locomvac_geom ON locomvac
                     USING GIST (geom);
                 """
             )
         )
-        logger.info("Added geom column to locomvac table")
+        logger.info("Ajout de la colonne geom dans la table locomvac")
         conn.execute(
             text(
                 """
-                UPDATE public.locomvac
+                UPDATE locomvac
                 SET geom = parcelle.geom
-                FROM public.parcellaire_france as parcelle
+                FROM parcellaire_france as parcelle
                 WHERE locomvac.idparcelle_geom = parcelle.idparcelle_geom
                 """
             )
         )
-        logger.info(
-            "Updated geom column in locomvac table from parcellaire_france table"
-        )
+        logger.info("Géométries LOCOMVAC mises à jour depuis parcellaire_france")
 
 
 @flow

@@ -1,6 +1,6 @@
 import psycopg2
-from shared_tasks.config import TEMP_DIR, db_schema
-from shared_tasks.db_engine import create_engine
+from shared_tasks.config import TEMP_DIR, db_schema, majic_schema
+from shared_tasks.db_engine import create_engine, quote_identifier
 from shared_tasks.db_sql_utils import run_sql_script
 from shared_tasks.logging_config import get_logger
 
@@ -9,11 +9,10 @@ from .get_communes_majic import get_imported_communes_from_postgres
 
 def create_parcellaire_france():
     """
-    Importation des parcelles créées dans la table principale
-    parcellaire_france du schema "public"
+    Crée la table principale parcellaire_france dans IMPORT_SCHEMA.
     """
     logger = get_logger()
-    logger.info("Création de la table parcellaire_france dans public")
+    logger.info("Création de la table parcellaire_france dans IMPORT_SCHEMA")
     script_path_create = TEMP_DIR / "sql/commun_create_parcellaire.sql"
 
     e = create_engine()
@@ -24,11 +23,10 @@ def create_parcellaire_france():
 
 def create_proprietaire_droit():
     """
-    Importation des données de proprietaire dans la table proprietaire_droit
-    du schema "public"
+    Crée la table proprietaire_droit dans IMPORT_SCHEMA.
     """
     logger = get_logger()
-    logger.info("Création de la table proprietaire_droit dans public")
+    logger.info("Création de la table proprietaire_droit dans IMPORT_SCHEMA")
     script_path_create = TEMP_DIR / "sql/commun_create_proprietaire.sql"
 
     e = create_engine()
@@ -39,11 +37,10 @@ def create_proprietaire_droit():
 
 def create_pb0010_local():
     """
-    Importation des données de local dans la table pb0010_local
-    du schema "public"
+    Crée la table pb0010_local dans IMPORT_SCHEMA.
     """
     logger = get_logger()
-    logger.info("Création de la table pb0010_local dans public")
+    logger.info("Création de la table pb0010_local dans IMPORT_SCHEMA")
     script_path_create = TEMP_DIR / "sql/commun_create_local.sql"
     e = create_engine()
     with e.begin() as conn:
@@ -53,11 +50,10 @@ def create_pb0010_local():
 
 def create_bati_france():
     """
-    Importation de la table bati créée à partir des données du cadastre
-    dans la table principale bati_france du schema "public"
+    Crée la table principale bati_france dans IMPORT_SCHEMA.
     """
     logger = get_logger()
-    logger.info("Création de la table bati_france dans public")
+    logger.info("Création de la table bati_france dans IMPORT_SCHEMA")
     script_path_create = TEMP_DIR / "sql/commun_create_bati.sql"
     e = create_engine()
     with e.begin() as conn:
@@ -66,9 +62,9 @@ def create_bati_france():
 
 
 def create_sections_cadastrales_france():
-    """Crée la table publique des sections cadastrales."""
+    """Crée la table des sections cadastrales dans IMPORT_SCHEMA."""
     logger = get_logger()
-    logger.info("Création de la table sections_cadastrales_france dans public")
+    logger.info("Création de sections_cadastrales_france dans IMPORT_SCHEMA")
     script_path_create = TEMP_DIR / "sql/commun_create_sections_cadastrales.sql"
     engine = create_engine()
     with engine.begin() as connection:
@@ -76,11 +72,12 @@ def create_sections_cadastrales_france():
     logger.info("La table sections_cadastrales_france a été créée.")
 
 
-def insert_parcelles_to_public():
+def insert_parcelles_to_import_schema():
+    """Copie les parcelles consolidées dans la table nationale de destination."""
     logger = get_logger()
-    schema = db_schema()
+    schema = quote_identifier(db_schema())
     import_query = """
-    INSERT INTO public.parcellaire_france (
+    INSERT INTO parcellaire_france (
       geom, idparcelle_geom, code_insee, idpar, idpar_simple, idprocpte, dcntpa, jdatat,
       libcom, dlibvoi, adressepar, nbat, jdatatan, jannatmin, jannatmax,
       jannatminh, jannatmaxh, dcntarti, dcntnaf, nlocal, spevtot, nloclog,
@@ -107,11 +104,12 @@ def insert_parcelles_to_public():
     logger.info("Table parcellaire importée dans parcellaire_france")
 
 
-def insert_proprietaire_to_public():
+def insert_proprietaire_to_import_schema():
+    """Copie les propriétaires MAJIC dans IMPORT_SCHEMA."""
     logger = get_logger()
-    schema = db_schema()
+    schema = quote_identifier(majic_schema())
     import_query = """
-    INSERT INTO public.proprietaire_droit (
+    INSERT INTO proprietaire_droit (
       proprietaire, annee, idprodroit, idprocpte, idpersonne, idvoie, idcom,
       idcomtxt, ccodep, ccodir, ccocom, dnupro, comptecommunal, dnulp, ccocif,
       dnuper, ccodro, ccodrotxt, typedroit, ccodem, gdesip, gtoper, ccoqua,
@@ -147,11 +145,12 @@ def insert_proprietaire_to_public():
     logger.info("Table proprietaire importée dans proprietaire_droit")
 
 
-def insert_local_to_public():
+def insert_local_to_import_schema():
+    """Copie les locaux MAJIC dans IMPORT_SCHEMA."""
     logger = get_logger()
-    schema = db_schema()
+    schema = quote_identifier(majic_schema())
     import_query = """
-    INSERT INTO public.pb0010_local (
+    INSERT INTO pb0010_local (
       local10, annee, idlocal, idbat, idpar, idprocpte, ccodep, ccodir, ccocom, invar,
       local00, ccopre, ccosec, dnupla, dnubat, parcelle, ccoriv, voie, ccovoi, dnvoiri,
       gpdl, dsrpar, dnupro, comptecommunal, jdatat, dnufnl, ccoeva, ccitlv, dteloc,
@@ -177,12 +176,13 @@ def insert_local_to_public():
     logger.info("Table local10 importée dans pb0010_local")
 
 
-def insert_bati_to_public():
+def insert_bati_to_import_schema():
+    """Copie les bâtiments cadastraux dans IMPORT_SCHEMA."""
     logger = get_logger()
-    schema = db_schema()
+    schema = quote_identifier(majic_schema())
 
     import_query = (
-        "INSERT INTO public.bati_france "
+        "INSERT INTO bati_france "
         "(wkb_geometry, type, nom, code_insee, created, updated ) "
         "SELECT wkb_geometry, type, nom, commune, created, updated "
         f"FROM {schema}.cadastre_bati;"
@@ -195,12 +195,12 @@ def insert_bati_to_public():
     logger.info("Table bati importée dans bati_france")
 
 
-def insert_sections_to_public():
-    """Insère les sections importées dans la table publique."""
+def insert_sections_to_import_schema():
+    """Copie les sections cadastrales dans IMPORT_SCHEMA."""
     logger = get_logger()
-    schema = db_schema()
+    schema = quote_identifier(majic_schema())
     import_query = (
-        "INSERT INTO public.sections_cadastrales_france "
+        "INSERT INTO sections_cadastrales_france "
         "(wkb_geometry, id, code_insee, prefixe, code, created, updated) "
         "SELECT wkb_geometry, id, commune, prefixe, code, created, updated "
         f"FROM {schema}.cadastre_sections;"
@@ -213,14 +213,16 @@ def insert_sections_to_public():
     logger.info("Sections importées dans sections_cadastrales_france")
 
 
-def delete_from_public(
+def delete_from_import_schema(
     codes_insee,
     table_name,
 ):
+    """Supprime les données à remplacer dans le seul schéma de destination."""
     logger = get_logger()
     logger.info(codes_insee)
     delete_query = (
-        f"DELETE FROM public.{table_name} WHERE code_insee = ANY(ARRAY{codes_insee});"
+        f"DELETE FROM {quote_identifier(db_schema())}.{quote_identifier(table_name)} "
+        f"WHERE code_insee = ANY(ARRAY{codes_insee});"
     )
 
     e = create_engine()
@@ -240,28 +242,31 @@ def flow_import_parcelles():
     create_parcellaire_france()
     code_insee_to_be_imported = communes_imported_df["code_insee"].to_list()
     try:
-        delete_from_public(code_insee_to_be_imported, table_name)
-        insert_parcelles_to_public()
+        delete_from_import_schema(code_insee_to_be_imported, table_name)
+        insert_parcelles_to_import_schema()
     except psycopg2.DatabaseError as error:
         logger.error(error)
+        raise
 
 
 def flow_import_proprietaire():
     logger = get_logger()
     create_proprietaire_droit()
     try:
-        insert_proprietaire_to_public()
+        insert_proprietaire_to_import_schema()
     except psycopg2.DatabaseError as error:
         logger.error(error)
+        raise
 
 
 def flow_import_local():
     logger = get_logger()
     create_pb0010_local()
     try:
-        insert_local_to_public()
+        insert_local_to_import_schema()
     except psycopg2.DatabaseError as error:
         logger.error(error)
+        raise
 
 
 def flow_import_bati():
@@ -271,21 +276,23 @@ def flow_import_bati():
     create_bati_france()
     communes = communes_df["code_insee"].to_list()
     try:
-        delete_from_public(communes, table_name)
-        insert_bati_to_public()
+        delete_from_import_schema(communes, table_name)
+        insert_bati_to_import_schema()
     except psycopg2.DatabaseError as error:
         logger.error(error)
+        raise
 
 
 def flow_import_sections():
-    """Remplace les sections publiques des communes importées."""
+    """Remplace les sections des communes importées dans IMPORT_SCHEMA."""
     logger = get_logger()
     communes_df = get_imported_communes_from_postgres()
     table_name = "sections_cadastrales_france"
     create_sections_cadastrales_france()
     communes = communes_df["code_insee"].to_list()
     try:
-        delete_from_public(communes, table_name)
-        insert_sections_to_public()
+        delete_from_import_schema(communes, table_name)
+        insert_sections_to_import_schema()
     except psycopg2.DatabaseError as error:
         logger.error(error)
+        raise

@@ -1,5 +1,9 @@
 -- Création de la table unités foncières
-DROP TABLE IF EXISTS unites_foncieres;
+DO $$
+BEGIN
+    EXECUTE format('DROP TABLE IF EXISTS %I.unites_foncieres', current_schema());
+END
+$$;
 CREATE TABLE unites_foncieres (
     id_uf serial PRIMARY KEY,
     geom GEOMETRY (MULTIPOLYGON, 2154),
@@ -56,7 +60,7 @@ BEGIN
       JOIN pg_attribute att
         ON att.attrelid = tbl.oid AND att.attnum = k.attnum
     ) c ON true
-    WHERE ns.nspname = 'public'
+    WHERE ns.nspname = current_schema()
       AND tbl.relname = 'parcellaire'
       AND am.amname = 'gist'
       AND c.cols = ARRAY['geom_centroid']::name[]
@@ -66,7 +70,7 @@ BEGIN
 
   IF NOT idx_exists THEN
     EXECUTE 'CREATE INDEX parcellaire_geom_centroid_sidx
-             ON public.parcellaire USING gist (geom_centroid)';
+             ON parcellaire USING gist (geom_centroid)';
   END IF;
 END
 $$;

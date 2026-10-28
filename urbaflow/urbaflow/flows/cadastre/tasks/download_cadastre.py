@@ -3,6 +3,7 @@ import os
 import sys
 import urllib.request
 
+from shared_tasks.config import majic_schema
 from shared_tasks.etl_ogr_utils import import_geojson
 from shared_tasks.logging_config import get_logger
 
@@ -101,7 +102,7 @@ def download_cadastre_for_communes():
         logger.info(commune)
         download_cadastre(commune, temp_dir, millesime)
         file = os.path.join(temp_dir, f"cadastre-{commune}-parcelles.json")
-        import_geojson(file, "cadastre_parcelles")
+        import_geojson(file, "cadastre_parcelles", schema=majic_schema())
 
 
 def download_bati_for_communes():
@@ -116,7 +117,7 @@ def download_bati_for_communes():
         logger.info(commune)
         download_bati(commune, temp_dir)
         file = os.path.join(temp_dir, f"cadastre-{commune}-batiments.json")
-        import_geojson(file, "cadastre_bati")
+        import_geojson(file, "cadastre_bati", schema=majic_schema())
 
 
 def download_sections_for_communes():
@@ -130,7 +131,7 @@ def download_sections_for_communes():
         logger.info(commune)
         download_sections(commune, temp_dir, millesime)
         file = os.path.join(temp_dir, f"cadastre-{commune}-sections.json")
-        import_geojson(file, "cadastre_sections")
+        import_geojson(file, "cadastre_sections", schema=majic_schema())
 
 
 def unzip_cadastre(archive_path):

@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 from prefect import flow, task
+from shared_tasks.config import db_schema
 from shared_tasks.db_engine import create_engine
 from shared_tasks.etl_gpd_utils import load
 from shared_tasks.logging_config import get_logger
@@ -76,15 +77,13 @@ def extract_lovac_data(file: Path) -> pd.DataFrame:
 
 @task
 def create_table_lovac():
-    """
-    Create the table in the database
-    """
+    """Crée la table LOVAC dans IMPORT_SCHEMA."""
     e = create_engine()
     with e.begin() as conn:
         conn.execute(
             DDL(
                 """
-                CREATE TABLE IF NOT EXISTS public.lovac (
+                CREATE TABLE IF NOT EXISTS lovac (
                     idparcelle_geom text PRIMARY KEY,
                     nblovac INTEGER
                 )
@@ -95,9 +94,7 @@ def create_table_lovac():
 
 @task
 def load_lovac_data(data: pd.DataFrame):
-    """
-    Load the data into the database
-    """
+    """Charge les données LOVAC dans IMPORT_SCHEMA."""
     logger = get_logger()
     e = create_engine()
     with e.begin() as conn:
@@ -106,41 +103,39 @@ def load_lovac_data(data: pd.DataFrame):
             connection=conn,
             table_name="lovac",
             how="replace",
-            schema="public",
+            schema=db_schema(),
             logger=logger,
         )
 
 
 @task
 def transform_lovac_data():
-    """
-    Add geometry to lovac table
-    """
+    """Enrichit LOVAC avec le parcellaire consolidé d'IMPORT_SCHEMA."""
     logger = get_logger()
     e = create_engine()
     with e.begin() as conn:
         conn.execute(
             DDL(
                 """
-                ALTER TABLE public.lovac
+                ALTER TABLE lovac
                 ADD COLUMN IF NOT EXISTS geom geometry(MULTIPOLYGON, 2154);
-                CREATE INDEX IF NOT EXISTS sidx_lovac_geom ON public.lovac 
+                CREATE INDEX IF NOT EXISTS sidx_lovac_geom ON lovac
                     USING GIST (geom);
                 """
             )
         )
-        logger.info("Added geom column to lovac table")
+        logger.info("Ajout de la colonne geom dans la table lovac")
         conn.execute(
             text(
                 """
-                UPDATE public.lovac
+                UPDATE lovac
                 SET geom = parcelle.geom
-                FROM public.parcellaire_france as parcelle
+                FROM parcellaire_france as parcelle
                 WHERE lovac.idparcelle_geom = parcelle.idparcelle_geom
                 """
             )
         )
-        logger.info("Updated geom column in lovac table from parcellaire_france table")
+        logger.info("Géométries LOVAC mises à jour depuis parcellaire_france")
 
 
 @task

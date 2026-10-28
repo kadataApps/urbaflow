@@ -124,7 +124,8 @@ Les commandes d'import sont exécutées dans le conteneur `urbaflow`. Les donné
       - si la base de données est lancée avec docker-compose, conserver `POSTGRES_HOST=postgis`
       - si la base de données n'est pas lancée avec le même docker compose, utiliser `POSTGRES_HOST=host.docker.internal` pour rediriger vers le host de l'hôte (la machine qui exécute le container)
       - Configurer également : `POSTGRES_USER`, `POSTGRES_PASS`, `POSTGRES_DB`, `POSTGRES_PORT` (les mêmes variables sont utilisées pour le lancement de la base de données avec docker-compose et pour le lancement de l'image de processing)
-      - Configurer également : `IMPORT_SCHEMA` (schéma de la base de données dans lequel les données seront importées)
+      - Configurer également : `IMPORT_SCHEMA` (destination par défaut des imports et des résultats consolidés, `public` si absent ; une option `--schema` explicite reste prioritaire).
+      - Pour MAJIC, définir `MAJIC_SCHEMA` (schéma de travail, `majic` si absent), distinct d'`IMPORT_SCHEMA` et de `public`. Seul ce schéma est supprimé à la fin du traitement. Voir [la documentation MAJIC](./MAJIC.md).
 2. Construire l'image :
 
 ```shell
@@ -234,7 +235,7 @@ uv run python urbaflow/main.py --help
 - `lovac-fil [dirname] [OPTIONS]`
   - Importe les données LOVAC FIL.
   - Options :
-    - `--schema TEXT` (défaut: `public`)
+    - `--schema TEXT` (défaut: `IMPORT_SCHEMA`, sinon `public`)
     - `--table-name TEXT` (défaut: `lovac_fil`)
     - `--recursive / --no-recursive` (défaut: `--no-recursive`)
     - `--recreate / --no-recreate` (défaut: `--recreate`)
@@ -248,7 +249,7 @@ uv run python urbaflow/main.py --help
   - Fournir soit `dirname`, soit `--department`.
   - Options :
     - `-d, --department TEXT`
-    - `--schema TEXT` (défaut: `public`)
+    - `--schema TEXT` (défaut: `IMPORT_SCHEMA`, sinon `public`)
     - `--table-name TEXT` (défaut: `risques_cavite`)
     - `--recreate / --no-recreate` (défaut: `--recreate`)
 
@@ -257,7 +258,7 @@ uv run python urbaflow/main.py --help
   - Fournir soit `dirname`, soit `--departement`.
   - Options :
     - `-d, --departement TEXT`
-    - `--schema TEXT` (défaut: `public`)
+    - `--schema TEXT` (défaut: `IMPORT_SCHEMA`, sinon `public`)
     - `--recreate / --no-recreate` (défaut: `--no-recreate`)
 
 - `risques-remnappes [dirname] [OPTIONS]`
@@ -265,7 +266,7 @@ uv run python urbaflow/main.py --help
   - Fournir soit `dirname`, soit `--departement`.
   - Options :
     - `-d, --departement TEXT`
-    - `--schema TEXT` (défaut: `public`)
+    - `--schema TEXT` (défaut: `IMPORT_SCHEMA`, sinon `public`)
     - `--table-name TEXT` (défaut: `risques_remnappes`)
     - `--recreate / --no-recreate` (défaut: `--no-recreate`)
 
@@ -274,7 +275,7 @@ uv run python urbaflow/main.py --help
   - Fournir soit `dirname`, soit `--departement`.
   - Options :
     - `-d, --departement TEXT`
-    - `--schema TEXT` (défaut: `public`)
+    - `--schema TEXT` (défaut: `IMPORT_SCHEMA`, sinon `public`)
     - `--table-name TEXT` (défaut: `risques_mvt`)
     - `--recreate / --no-recreate` (défaut: `--no-recreate`)
 
@@ -283,7 +284,7 @@ uv run python urbaflow/main.py --help
   - Fournir soit `dirname`, soit `--departement`.
   - Options :
     - `-d, --departement TEXT`
-    - `--schema TEXT` (défaut: `public`)
+    - `--schema TEXT` (défaut: `IMPORT_SCHEMA`, sinon `public`)
     - `--table-name TEXT` (défaut: `risques_casias`)
     - `--recreate / --no-recreate` (défaut: `--no-recreate`)
 
@@ -292,7 +293,7 @@ uv run python urbaflow/main.py --help
   - Fournir soit `dirname`, soit `--departement`.
   - Options :
     - `-d, --departement TEXT`
-    - `--schema TEXT` (défaut: `public`)
+    - `--schema TEXT` (défaut: `IMPORT_SCHEMA`, sinon `public`)
     - `--table-name TEXT` (défaut: `risques_sis`)
     - `--recreate / --no-recreate` (défaut: `--no-recreate`)
 
@@ -301,7 +302,7 @@ uv run python urbaflow/main.py --help
   - Fournir soit `dirname`, soit `--departement`.
   - Options :
     - `-d, --departement TEXT`
-    - `--schema TEXT` (défaut: `public`)
+    - `--schema TEXT` (défaut: `IMPORT_SCHEMA`, sinon `public`)
     - `--table-name TEXT` (défaut: `risques_sup`)
     - `--recreate / --no-recreate` (défaut: `--no-recreate`)
 
@@ -310,7 +311,7 @@ uv run python urbaflow/main.py --help
   - Fournir soit `dirname`, soit `--departement`.
   - Options :
     - `-d, --departement TEXT`
-    - `--schema TEXT` (défaut: `public`)
+    - `--schema TEXT` (défaut: `IMPORT_SCHEMA`, sinon `public`)
     - `--table-name TEXT` (défaut: `risques_tri`)
     - `--recreate / --no-recreate` (défaut: `--no-recreate`)
 
@@ -318,7 +319,7 @@ uv run python urbaflow/main.py --help
   - Importe la base nationale des installations classées pour la protection de l'environnement (ICPE).
   - `dirname` est optionnel (télécharge la base nationale WFS par défaut).
   - Options :
-    - `--schema TEXT` (défaut: `public`)
+    - `--schema TEXT` (défaut: `IMPORT_SCHEMA`, sinon `public`)
     - `--table-name TEXT` (défaut: `risques_icpe`)
     - `--recreate / --no-recreate` (défaut: `--no-recreate`)
 
@@ -327,7 +328,7 @@ uv run python urbaflow/main.py --help
   - `dirname` est optionnel (télécharge l'archive annuelle nationale par défaut).
   - Options :
     - `--year INTEGER` (défaut: `2024`)
-    - `--schema TEXT` (défaut: `public`)
+    - `--schema TEXT` (défaut: `IMPORT_SCHEMA`, sinon `public`)
     - `--table-name TEXT` (défaut: `risques_irep`)
     - `--recreate / --no-recreate` (défaut: `--no-recreate`)
 
@@ -335,7 +336,7 @@ uv run python urbaflow/main.py --help
   - Importe les procédures administratives relatives aux risques (GASPAR consolidé).
   - `dirname` est optionnel (télécharge l'archive nationale par défaut).
   - Options :
-    - `--schema TEXT` (défaut: `public`)
+    - `--schema TEXT` (défaut: `IMPORT_SCHEMA`, sinon `public`)
     - `--table-name TEXT` (défaut: `risques_gaspar`)
     - `--recreate / --no-recreate` (défaut: `--no-recreate`)
 
@@ -344,14 +345,14 @@ uv run python urbaflow/main.py --help
   - `dirname` est optionnel (télécharge les fichiers GPKG depuis l'API Géoportail `download-latest` par défaut).
   - Les tables créées dans PostGIS sont préfixées par `gp_` (`gp_acte_sup`, `gp_assiette_sup_l`, `gp_assiette_sup_p`, `gp_assiette_sup_s`, `gp_generateur_sup_l`, `gp_generateur_sup_p`, `gp_generateur_sup_s`, `gp_gestionnaire_sup`, `gp_servitude`, `gp_servitude_acte_sup`).
   - Options :
-    - `--schema TEXT` (défaut: `public`)
+    - `--schema TEXT` (défaut: `IMPORT_SCHEMA`, sinon `public`)
     - `--recreate / --no-recreate` (défaut: `--recreate`)
 
 - `banatic-communes [dirname] [OPTIONS]`
   - Importe la table consolidée des communes BANATIC avec leur raccordement aux EPCI à fiscalité propre (EPCI FP).
   - `dirname` est optionnel (télécharge automatiquement les fichiers CSV depuis data.gouv.fr par défaut).
   - Options :
-    - `--schema TEXT` (défaut: `public`)
+    - `--schema TEXT` (défaut: `IMPORT_SCHEMA`, sinon `public`)
     - `--table-name TEXT` (défaut: `banatic_communes`)
     - `--recreate / --no-recreate` (défaut: `--recreate`)
 
@@ -360,7 +361,7 @@ uv run python urbaflow/main.py --help
   - Crée la table `banatic_communes_<SIREN>` enrichie par l'API APICARTO IGN (`is_rnu`, `is_coastline`).
   - Met à jour les 8 tables PostGIS `gpu_*` (`gpu_zone_urba`, `gpu_secteur_cc`, `gpu_prescription_surf`, `gpu_prescription_lin`, `gpu_prescription_pct`, `gpu_info_surf`, `gpu_info_lin`, `gpu_info_pct`) pour les partitions `DU_<insee>`, `PSMV_<insee>`, `DU_<siren>` et `PSMV_<siren>`.
   - Options :
-    - `--schema TEXT` (défaut: `public`)
+    - `--schema TEXT` (défaut: `IMPORT_SCHEMA`, sinon `public`)
     - `--banatic-table TEXT` (défaut: `banatic_communes`)
 
 - `docurba-epci <siren> [OPTIONS]`
@@ -373,7 +374,7 @@ uv run python urbaflow/main.py --help
     - `document_en_cours` : type de document en cours d'élaboration ou de révision, avec `type_procedure_en_cours` et `date_prescription_en_cours`.
   - Pour la ligne EPCI, le document et ses dates sont repris s'il s'agit d'une procédure unique couvrant toutes les communes (ex : PLUi) ; sinon les types distincts sont listés (ex : `Carte communale / PLU / RNU`) et `repartition_documents_opposables` détaille le nombre de communes par type.
   - Options :
-    - `--schema TEXT` (défaut: `public`)
+    - `--schema TEXT` (défaut: `IMPORT_SCHEMA`, sinon `public`)
     - `--table-name TEXT` (défaut: `docurba_documents_urbanisme`)
     - `--banatic-table TEXT` (défaut: `banatic_communes`)
     - `--avant YYYY-MM-DD` (état à une date donnée)
@@ -389,7 +390,7 @@ uv run python urbaflow/main.py --help
   - Options :
     - `-e, --epci TEXT` (code SIREN de l'EPCI)
     - `-c, --commune TEXT` (code INSEE de la commune)
-    - `--schema TEXT` (défaut: `public`)
+    - `--schema TEXT` (défaut: `IMPORT_SCHEMA`, sinon `public`)
     - `--download-dir PATH` (répertoire de téléchargement personnalisé)
     - `--keep-files / --no-keep-files` (défaut: `--keep-files`)
 
@@ -409,7 +410,7 @@ uv run python urbaflow/main.py --help
     - `-e, --epci TEXT` (numéro SIREN de l'EPCI)
     - `-c, --communes TEXT` (codes INSEE séparés par des virgules)
     - `--millesime TEXT` (défaut: dernière édition disponible, ex: `2026-06-15`)
-    - `--schema TEXT` (défaut: `public`)
+    - `--schema TEXT` (défaut: `IMPORT_SCHEMA`, sinon `public`)
     - `--table-name TEXT` (défaut: `bdtopo_batiment`)
     - `--recreate / --no-recreate` (défaut: `--no-recreate`)
     - `--keep-files / --no-keep-files` (défaut: `--no-keep-files`, conserve l'archive et le GeoPackage téléchargés)
@@ -441,7 +442,7 @@ uv run python urbaflow/main.py --help
   - Options :
     - `-d, --departement TEXT` (**obligatoire**, un seul département : `35`, `2A`, `974`…)
     - `--millesime TEXT` (défaut : dernière édition disponible, date `AAAA-MM-JJ`)
-    - `--schema TEXT` (défaut : `public`)
+    - `--schema TEXT` (défaut : `IMPORT_SCHEMA`, sinon `public`)
     - `--table-name TEXT` (défaut : `bdtopo_troncon_de_route`)
     - `--keep-files / --no-keep-files` (défaut : `--no-keep-files`)
 
@@ -469,7 +470,7 @@ uv run python urbaflow/main.py --help
     - `-e, --epci TEXT` (numéro SIREN de l'EPCI)
     - `-c, --communes TEXT` (codes INSEE séparés par des virgules)
     - `--millesime TEXT` (défaut: dernière édition complète disponible, ex: `2023-01-01`)
-    - `--schema TEXT` (défaut: `public`)
+    - `--schema TEXT` (défaut: `IMPORT_SCHEMA`, sinon `public`)
     - `--occupation-sol-table TEXT` (défaut: `ocsge_occupation_sol`)
     - `--zone-construite-table TEXT` (défaut: `ocsge_zone_construite`)
     - `--recreate / --no-recreate` (défaut: `--no-recreate`)
@@ -480,7 +481,7 @@ uv run python urbaflow/main.py --help
   - `dirname` est optionnel (télécharge le fichier ZIP national BPE depuis l'INSEE par défaut).
   - Options :
     - `-d, --departement TEXT` (optionnel : limite l'import au département spécifié)
-    - `--schema TEXT` (défaut: `public`)
+    - `--schema TEXT` (défaut: `IMPORT_SCHEMA`, sinon `public`)
     - `--table-name TEXT` (défaut: `insee_bpe`)
     - `--recreate / --no-recreate` (défaut: `--recreate`)
 
@@ -488,7 +489,7 @@ uv run python urbaflow/main.py --help
   - Importe les immeubles protégés au titre des Monuments Historiques (MH).
   - `dirname` est optionnel (télécharge le fichier GeoJSON national depuis data.gouv.fr par défaut).
   - Options :
-    - `--schema TEXT` (défaut: `public`)
+    - `--schema TEXT` (défaut: `IMPORT_SCHEMA`, sinon `public`)
     - `--table-name TEXT` (défaut: `patrimoine_immeubles_proteges_mh`)
     - `--recreate / --no-recreate` (défaut: `--recreate`)
 
@@ -497,7 +498,7 @@ uv run python urbaflow/main.py --help
   - Source : [data.gouv.fr](https://www.data.gouv.fr/datasets/liste-des-edifices-labellises-architecture-contemporaine-remarquable-acr) (CSV séparé par `|`, coordonnées WGS84 `lat,lon` converties en points Lambert 93 ; les édifices sans coordonnées sont importés avec une géométrie nulle).
   - `dirname` est optionnel (télécharge le fichier CSV national depuis data.gouv.fr par défaut).
   - Options :
-    - `--schema TEXT` (défaut: `public`)
+    - `--schema TEXT` (défaut: `IMPORT_SCHEMA`, sinon `public`)
     - `--table-name TEXT` (défaut: `patrimoine_architecture_contemporaine_remarquable`)
     - `--recreate / --no-recreate` (défaut: `--recreate`)
 
@@ -506,7 +507,7 @@ uv run python urbaflow/main.py --help
   - `dirname` est optionnel (télécharge le fichier GeoParquet national depuis data.gouv.fr par défaut).
   - Options :
     - `-d, --departement TEXT` (optionnel : limite l'import au département spécifié)
-    - `--schema TEXT` (défaut: `public`)
+    - `--schema TEXT` (défaut: `IMPORT_SCHEMA`, sinon `public`)
     - `--table-name TEXT` (défaut: `geosirene_etablissement`)
     - `--recreate / --no-recreate` (défaut: `--recreate`)
 
@@ -516,7 +517,7 @@ uv run python urbaflow/main.py --help
   - Par défaut, l'import est filtré sur les communes déjà présentes dans la table `geosirene_etablissement` (`--filter-by-geosirene-communes`, activé par défaut), afin de limiter le volume de données traitées. Un département fourni via `-d/--departement` prend le pas sur ce filtrage automatique.
   - Options :
     - `-d, --departement TEXT` (optionnel : limite l'import au département spécifié, prioritaire sur `--filter-by-geosirene-communes`)
-    - `--schema TEXT` (défaut: `public`)
+    - `--schema TEXT` (défaut: `IMPORT_SCHEMA`, sinon `public`)
     - `--table-name TEXT` (défaut: `sirene_etablissement`)
     - `--geosirene-table-name TEXT` (défaut: `geosirene_etablissement`, table source des communes utilisées pour le filtrage)
     - `--filter-by-geosirene-communes / --no-filter-by-geosirene-communes` (défaut: `--filter-by-geosirene-communes`)
@@ -526,7 +527,7 @@ uv run python urbaflow/main.py --help
   - Crée la table `geosirene_etablissement_detail`, résultat de la jointure entre `geosirene_etablissement` (établissements géolocalisés) et `sirene_etablissement` (données descriptives) sur le SIRET.
   - Seuls les établissements présents dans les **deux** tables sont conservés. Nécessite que `geosirene_etablissement` et `sirene_etablissement` aient été importées au préalable (commandes `geosirene` et `sirene-etablissement`).
   - Options :
-    - `--schema TEXT` (défaut: `public`)
+    - `--schema TEXT` (défaut: `IMPORT_SCHEMA`, sinon `public`)
     - `--detail-table-name TEXT` (défaut: `geosirene_etablissement_detail`)
     - `--geosirene-table-name TEXT` (défaut: `geosirene_etablissement`)
     - `--sirene-table-name TEXT` (défaut: `sirene_etablissement`)
@@ -536,7 +537,7 @@ uv run python urbaflow/main.py --help
   - Importe les sites référencés dans Cartofriches (friches industrielles, commerciales, etc.).
   - `dirname` est optionnel (télécharge le fichier GeoPackage national depuis data.gouv.fr par défaut).
   - Options :
-    - `--schema TEXT` (défaut: `public`)
+    - `--schema TEXT` (défaut: `IMPORT_SCHEMA`, sinon `public`)
     - `--table-name TEXT` (défaut: `friches_cartofriches`)
     - `--recreate / --no-recreate` (défaut: `--recreate`)
 

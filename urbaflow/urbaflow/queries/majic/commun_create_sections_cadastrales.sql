@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS public.sections_cadastrales_france (
+CREATE TABLE IF NOT EXISTS sections_cadastrales_france (
     ogc_fid serial PRIMARY KEY,
     wkb_geometry public.GEOMETRY (MULTIPOLYGON, 4326),
     id character varying,
@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS public.sections_cadastrales_france (
 );
 
 CREATE INDEX IF NOT EXISTS sections_cadastrales_france_geom_idx
-ON public.sections_cadastrales_france USING gist (wkb_geometry);
+ON sections_cadastrales_france USING gist (wkb_geometry);
 
 CREATE UNIQUE INDEX IF NOT EXISTS sections_cadastrales_france_id_idx
-ON public.sections_cadastrales_france (id);
+ON sections_cadastrales_france (id);

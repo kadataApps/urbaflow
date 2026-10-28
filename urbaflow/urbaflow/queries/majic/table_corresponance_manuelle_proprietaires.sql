@@ -1,4 +1,10 @@
-DROP TABLE IF EXISTS correction_typologie_proprietaire;
+DO $$
+BEGIN
+    EXECUTE format(
+        'DROP TABLE IF EXISTS %I.correction_typologie_proprietaire', current_schema()
+    );
+END
+$$;
 
 CREATE TABLE correction_typologie_proprietaire (
     ddenom text,

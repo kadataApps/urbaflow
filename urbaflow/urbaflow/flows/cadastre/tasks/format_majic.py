@@ -1,5 +1,5 @@
-from shared_tasks.config import TEMP_DIR
-from shared_tasks.db_engine import create_engine
+from shared_tasks.config import TEMP_DIR, majic_schema
+from shared_tasks.db_engine import create_engine, quote_identifier
 from shared_tasks.db_sql_utils import run_sql_script
 from shared_tasks.logging_config import get_logger
 from shared_tasks.sql_query_utils import replace_parameters_in_script
@@ -15,7 +15,11 @@ def clean_with_drop_db_for_majic_import():
         "Nettoyage base de données - Suppression tables métiers MAJIC - cf.QgisCadastre"
     )
     script_path = TEMP_DIR / "sql/commun_drop_metier.sql"
-    e = create_engine()
+    schema = majic_schema()
+    replace_parameters_in_script(
+        script_path, {"[MAJIC_SCHEMA]": quote_identifier(schema)}
+    )
+    e = create_engine(schema=schema)
     with e.begin() as conn:
         run_sql_script(sql_filepath=script_path, connection=conn)
     logger.info(
@@ -33,7 +37,7 @@ def init_db_for_majic_import():
     script_path_create = TEMP_DIR / "sql/commun_create_metier.sql"
     script_path_nomenclature = TEMP_DIR / "sql/commun_insert_nomenclature.sql"
 
-    e = create_engine()
+    e = create_engine(schema=majic_schema())
     with e.begin() as conn:
         run_sql_script(sql_filepath=script_path_create, connection=conn)
         run_sql_script(sql_filepath=script_path_nomenclature, connection=conn)
@@ -62,7 +66,7 @@ def execute_format_majic_scripts():
         "traitements/majic/5-proprietaire_local10_update_gdprop.sql",
     ]
 
-    e = create_engine()
+    e = create_engine(schema=majic_schema())
     with e.begin() as conn:
         scripts_count = len(script_list)
         etape = 0

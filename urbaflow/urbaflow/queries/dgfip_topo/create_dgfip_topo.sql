@@ -1,4 +1,9 @@
-DROP TABLE IF EXISTS commune_france;
+DO $$
+BEGIN
+    EXECUTE format('DROP TABLE IF EXISTS %I.commune_france', current_schema());
+    EXECUTE format('DROP TABLE IF EXISTS %I.voie_france', current_schema());
+END
+$$;
 CREATE TABLE commune_france (
     commune text,
     geo_commune text,
@@ -16,7 +21,6 @@ CREATE TABLE commune_france (
     idcom text
 );
 
-DROP TABLE IF EXISTS voie_france;
 CREATE TABLE voie_france (
     voie text,
     ccodep text,

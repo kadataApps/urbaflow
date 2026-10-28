@@ -19,7 +19,24 @@ def db_config():
 
 
 def db_schema() -> str:
+    """Renvoie le schéma de destination des imports et des résultats consolidés."""
     return os.getenv("IMPORT_SCHEMA", default="public")
+
+
+def majic_schema() -> str:
+    """Renvoie un schéma de travail MAJIC distinct du schéma de destination."""
+    schema = os.getenv("MAJIC_SCHEMA", default="majic")
+    if (
+        not schema
+        or schema == db_schema()
+        or schema in {"public", "information_schema"}
+        or schema.startswith("pg_")
+    ):
+        raise ValueError(
+            "MAJIC_SCHEMA doit désigner un schéma de travail non système, "
+            "différent de public et d'IMPORT_SCHEMA."
+        )
+    return schema
 
 
 def majic_config():

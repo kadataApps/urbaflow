@@ -46,6 +46,7 @@ from flows.lovac.import_lovac import import_lovac_flow
 from flows.lovac.import_lovac_fil import import_lovac_fil_flow
 from flows.mh.import_mh import import_mh_flow
 from flows.ocsge.import_ocsge import import_ocsge_flow
+from shared_tasks.config import db_schema as get_import_schema
 from shared_tasks.logging_config import setup_logging
 
 # Load environment variables from .env file in the root directory
@@ -327,7 +328,9 @@ OPTIONAL_DIRNAME_CARTOFRICHES_ARGUMENT = typer.Argument(
 
 YEAR_IREP_OPTION = typer.Option(2024, help="Year of the IREP dataset (e.g. 2024)")
 
-SCHEMA_OPTION = typer.Option("public", help="Database schema name")
+SCHEMA_OPTION = typer.Option(
+    get_import_schema(), envvar="IMPORT_SCHEMA", help="Nom du schéma de destination"
+)
 LOVAC_FIL_TABLE_OPTION = typer.Option("lovac_fil", help="Database table name")
 RISQUES_CAVITE_TABLE_OPTION = typer.Option("risques_cavite", help="Database table name")
 RISQUES_REMNAPPES_TABLE_OPTION = typer.Option(
@@ -972,7 +975,11 @@ def bdtopo_troncon_route(
     ),
     millesime: str | None = BDTOPO_MILLESIME_OPTION,
     db_schema: str = typer.Option(
-        "public", "--schema", "--db-schema", help="Nom du schéma cible existant."
+        get_import_schema(),
+        "--schema",
+        "--db-schema",
+        envvar="IMPORT_SCHEMA",
+        help="Nom du schéma cible existant.",
     ),
     table_name: str = typer.Option(
         "bdtopo_troncon_de_route", help="Nom de la table cible."

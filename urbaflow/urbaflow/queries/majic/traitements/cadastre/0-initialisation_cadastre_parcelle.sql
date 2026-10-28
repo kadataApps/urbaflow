@@ -1,4 +1,13 @@
-DROP TABLE IF EXISTS cadastre_parcelles CASCADE;
+DO $$
+BEGIN
+    EXECUTE format(
+        'DROP TABLE IF EXISTS %I.cadastre_parcelles CASCADE', current_schema()
+    );
+    EXECUTE format(
+        'DROP SEQUENCE IF EXISTS %I.cadastre_parcelles_ogc_fid_seq', current_schema()
+    );
+END
+$$;
 --
 -- Name: cadastre_parcelles; Type: TABLE; Schema: public; Owner: spreadsheep_ids
 --
@@ -21,7 +30,6 @@ CREATE TABLE cadastre_parcelles (
 --
 -- Name: cadastre_parcelles_ogc_fid_seq; Type: SEQUENCE; Schema: public; Owner: spreadsheep_ids
 --
-DROP SEQUENCE IF EXISTS cadastre_parcelles_ogc_fid_seq;
 CREATE SEQUENCE cadastre_parcelles_ogc_fid_seq
     -- AS integer
     START WITH 1

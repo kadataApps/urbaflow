@@ -1,4 +1,4 @@
-from shared_tasks.config import TEMP_DIR
+from shared_tasks.config import TEMP_DIR, majic_schema
 from shared_tasks.db_engine import create_engine
 from shared_tasks.db_sql_utils import run_sql_script
 from shared_tasks.logging_config import get_logger
@@ -15,7 +15,7 @@ def execute_init_cadastre():
     script_path_create = (
         TEMP_DIR / "sql/traitements/cadastre/0-initialisation_cadastre_parcelle.sql"
     )
-    e = create_engine()
+    e = create_engine(schema=majic_schema())
     with e.begin() as conn:
         run_sql_script(sql_filepath=script_path_create, connection=conn)
         logger.info("La table cadastre_parcelles a été créée si nécessaire.")
@@ -32,7 +32,7 @@ def execute_format_cadastre():
         TEMP_DIR / "sql/traitements/cadastre/1-traitement_cadastre_parcelles.sql"
     )
 
-    e = create_engine()
+    e = create_engine(schema=majic_schema())
     with e.begin() as conn:
         run_sql_script(sql_filepath=script_path, connection=conn)
         logger.info("Table cadastre_parcelles mise à jour.")
@@ -46,7 +46,7 @@ def execute_init_bati():
     logger.info("Création table cadastre_bati")
     script_path = TEMP_DIR / "sql/traitements/bati/0-initialisation_cadastre_bati.sql"
 
-    e = create_engine()
+    e = create_engine(schema=majic_schema())
     with e.begin() as conn:
         run_sql_script(sql_filepath=script_path, connection=conn)
         logger.info("La table cadastre_bati a été créée si nécessaire.")
@@ -59,7 +59,7 @@ def execute_init_sections():
         TEMP_DIR / "sql/traitements/cadastre/0-initialisation_cadastre_sections.sql"
     )
 
-    engine = create_engine()
+    engine = create_engine(schema=majic_schema())
     with engine.begin() as connection:
         run_sql_script(sql_filepath=script_path, connection=connection)
         logger.info("La table cadastre_sections a été créée.")

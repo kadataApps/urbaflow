@@ -2,8 +2,8 @@ import os
 import re
 from pathlib import Path
 
-from shared_tasks.config import majic_config
-from shared_tasks.db_engine import create_engine
+from shared_tasks.config import majic_config, majic_schema
+from shared_tasks.db_engine import create_engine, quote_identifier
 from shared_tasks.db_sql_utils import run_sql_script
 from shared_tasks.logging_config import get_logger
 
@@ -56,9 +56,7 @@ def get_majic_source_filenames(config):
 
 def import_majic_files(majic_source_dir: Path):
     """
-    Method wich read each majic file
-    and bulk import data into temp tables
-    Returns False if no file processed
+    Lit les fichiers MAJIC et charge les données brutes dans MAJIC_SCHEMA.
     """
     logger = get_logger()
     config = majic_config()
@@ -111,24 +109,29 @@ def import_majic_files(majic_source_dir: Path):
         logger.info(table)
         files_to_proceed_counter += len(majic_files_found[table])
 
-    logger.info(f"Majic files found : ({files_to_proceed_counter} files)")
+    logger.info(f"Fichiers MAJIC trouvés : {files_to_proceed_counter}")
     logger.info(majic_files_found)
-    logger.info("Directions found :")
+    logger.info("Directions trouvées :")
     logger.info(depdirs)
 
     local_step = 0
-    e = create_engine()
+    schema = majic_schema()
+    e = create_engine(schema=schema)
     with e.begin() as conn:
         for item in majic_source_filenames:
             table = item["table"]
+            qualified_table = f'{quote_identifier(schema)}."{table}"'
             local_step += 1
             logger.info(
                 "Etape " + str(local_step) + "/" + str(total_steps) + ": " + table
             )
 
             # Drop & create tables where to import data
-            logger.info(f"Drop & create table {table}")
-            sql = f'DROP TABLE IF EXISTS "{table}"; CREATE TABLE "{table}" (tmp text);'
+            logger.info(f"Recréation de la table {schema}.{table}")
+            sql = (
+                f"DROP TABLE IF EXISTS {qualified_table}; "
+                f"CREATE TABLE {qualified_table} (tmp text);"
+            )
             run_sql_script(sql=sql, connection=conn)
 
             current_file = 0
@@ -147,8 +150,8 @@ def import_majic_files(majic_source_dir: Path):
                         # Build INSERT list
                         sql = "\n".join(
                             [
-                                "INSERT INTO \"{}\" VALUES (E'{}');".format(
-                                    table,
+                                "INSERT INTO {} VALUES (E'{}');".format(
+                                    qualified_table,
                                     r_quote_string.sub(
                                         "\\'", r.sub(" ", x.strip("\r\n"))
                                     ),
@@ -158,4 +161,4 @@ def import_majic_files(majic_source_dir: Path):
                             ]
                         )
                         run_sql_script(sql=sql, connection=conn)
-                logger.info(f"Import done and commited for {fpath}")
+                logger.info(f"Import effectué pour {fpath}")

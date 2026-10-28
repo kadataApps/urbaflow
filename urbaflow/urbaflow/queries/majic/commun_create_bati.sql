@@ -2,7 +2,7 @@
 -- Name: bati_france; Type: TABLE; Schema: public; Owner: spreadsheep_ids
 --
 
-CREATE TABLE IF NOT EXISTS public.bati_france (
+CREATE TABLE IF NOT EXISTS bati_france (
     ogc_fid serial PRIMARY KEY,
     wkb_geometry public.geometry(MultiPolygon,4326),
     type character varying,
@@ -14,4 +14,4 @@ CREATE TABLE IF NOT EXISTS public.bati_france (
 
 
 
-CREATE INDEX IF NOT EXISTS bati_france_geom_idx ON public.bati_france USING gist (wkb_geometry);
+CREATE INDEX IF NOT EXISTS bati_france_geom_idx ON bati_france USING gist (wkb_geometry);

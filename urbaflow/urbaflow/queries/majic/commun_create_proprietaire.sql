@@ -1,8 +1,8 @@
--- Table: public.proprietaire_droit;
+-- Table: proprietaire_droit;
 
--- DROP TABLE public.proprietaire_droit;
+-- DROP TABLE proprietaire_droit;
 
-CREATE TABLE IF NOT EXISTS public.proprietaire_droit (
+CREATE TABLE IF NOT EXISTS proprietaire_droit (
     -- Computed fields are marked with *
     -- Numbering is the one as from CEREMA
     -- Fields without numbers are additional fields
@@ -118,5 +118,5 @@ CREATE TABLE IF NOT EXISTS public.proprietaire_droit (
 TABLESPACE pg_default;
 
 CREATE INDEX IF NOT EXISTS sidx_proprietaire_droit
-ON public.proprietaire_droit (idprocpte)
+ON proprietaire_droit (idprocpte)
 TABLESPACE pg_default;

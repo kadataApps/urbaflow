@@ -13,20 +13,20 @@ class FormatMajicTests(unittest.TestCase):
         self.sql_directory = Path("/temp/sql")
         self.connection = Mock()
         self.engine = Mock()
-        self.engine.begin.return_value.__enter__ = Mock(
-            return_value=self.connection
-        )
+        self.engine.begin.return_value.__enter__ = Mock(return_value=self.connection)
         self.engine.begin.return_value.__exit__ = Mock(return_value=False)
         self.run_sql_script = Mock()
         self.replace_parameters = Mock()
         module_attributes = {
-            "shared_tasks.config": {"TEMP_DIR": self.sql_directory.parent},
+            "shared_tasks.config": {
+                "TEMP_DIR": self.sql_directory.parent,
+                "majic_schema": Mock(return_value="majic_test"),
+            },
             "shared_tasks.db_engine": {
-                "create_engine": Mock(return_value=self.engine)
+                "create_engine": Mock(return_value=self.engine),
+                "quote_identifier": lambda identifier: f'"{identifier}"',
             },
-            "shared_tasks.db_sql_utils": {
-                "run_sql_script": self.run_sql_script
-            },
+            "shared_tasks.db_sql_utils": {"run_sql_script": self.run_sql_script},
             "shared_tasks.logging_config": {"get_logger": Mock(return_value=Mock())},
             "shared_tasks.sql_query_utils": {
                 "replace_parameters_in_script": self.replace_parameters
@@ -101,6 +101,17 @@ class FormatMajicTests(unittest.TestCase):
                 ]
             ],
         )
+        self.format_majic.create_engine.assert_called_once_with(schema="majic_test")
+
+    def test_cleanup_only_targets_majic_schema(self):
+        """Qualifie les suppressions pour préserver les autres schémas."""
+        self.format_majic.clean_with_drop_db_for_majic_import()
+
+        script_path = self.sql_directory / "commun_drop_metier.sql"
+        self.replace_parameters.assert_called_once_with(
+            script_path, {"[MAJIC_SCHEMA]": '"majic_test"'}
+        )
+        self.format_majic.create_engine.assert_called_once_with(schema="majic_test")
 
     def test_correspondence_failure_stops_qualification(self):
         """Interrompt le formatage si le script de correspondance échoue."""

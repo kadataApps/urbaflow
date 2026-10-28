@@ -1,4 +1,8 @@
-DROP TABLE IF EXISTS parcellaire;
+DO $$
+BEGIN
+    EXECUTE format('DROP TABLE IF EXISTS %I.parcellaire', current_schema());
+END
+$$;
 
 CREATE TABLE parcellaire AS (
     SELECT
