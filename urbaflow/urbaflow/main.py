@@ -107,7 +107,7 @@ OPTIONAL_DIRNAME_CAVITE_ARGUMENT = typer.Argument(
     file_okay=False,
     dir_okay=True,
     readable=True,
-    help="Directory path containing CSV files. Optional if --department is provided.",
+    help="Répertoire des fichiers CSV. Optionnel si --departement est fourni.",
 )
 
 OPTIONAL_DIRNAME_RGA_ARGUMENT = typer.Argument(
@@ -361,7 +361,7 @@ FILTER_BY_GEOSIRENE_COMMUNES_OPTION = typer.Option(
     True,
     help=(
         "Filter the Sirene Etablissement import to communes already present in "
-        "the geosirene_etablissement table (ignored if --department is provided)."
+        "the geosirene_etablissement table (ignored if --departement is provided)."
     ),
 )
 PATRIMOINE_MH_TABLE_OPTION = typer.Option(
@@ -379,19 +379,15 @@ RECREATE_FALSE_OPTION = typer.Option(False, help="Drop/recreate table if it exis
 DEPARTMENT_OPTION = typer.Option(
     None,
     "-d",
-    "--department",
-    help="Department code (e.g., '75' for Paris). Required if dirname is not provided.",
-)
-DEPARTEMENT_OPTION = typer.Option(
-    None,
-    "-d",
     "--departement",
-    help="Department code (e.g., '75' for Paris). Required if dirname is not provided.",
+    "--department",
+    help="Code du département (ex. : '75' pour Paris).",
 )
 BDTOPO_DEPARTEMENTS_OPTION = typer.Option(
     None,
     "-d",
     "--departement",
+    "--department",
     help=(
         "Code(s) de département séparés par des virgules (ex: '35' ou '35,22'). "
         "Exclusif avec --epci et --communes."
@@ -576,12 +572,12 @@ def risques_cavite(
     Import des données de risques de cavités.
 
     DIRNAME : Chemin optionnel du répertoire contenant les fichiers CSV de cavités.
-    Si non fourni, l'option --department (-d) doit être spécifiée.
+    Si non fourni, l'option --departement (-d) doit être spécifiée.
     """
     # Validate that at least one of dirname or department is provided
     if dirname is None and department is None:
         typer.echo(
-            "Error: Either provide a dirname argument or use --department (-d) option.",
+            "Erreur : fournir un répertoire ou utiliser l'option --departement/-d.",
             err=True,
         )
         raise typer.Exit(1)
@@ -616,7 +612,7 @@ def dgfip_geoparquet(
 @app.command()
 def risques_rga(
     dirname: Path = OPTIONAL_DIRNAME_RGA_ARGUMENT,
-    departement: str = DEPARTEMENT_OPTION,
+    department: str = DEPARTMENT_OPTION,
     schema: str = SCHEMA_OPTION,
     recreate: bool = RECREATE_FALSE_OPTION,
 ):
@@ -627,7 +623,7 @@ def risques_rga(
     pour télécharger les données.
     """
     # Validate that at least one of dirname or departement is provided
-    if dirname is None and departement is None:
+    if dirname is None and department is None:
         typer.echo(
             "Error: Either provide a dirname argument or use --departement/-d option.",
             err=True,
@@ -636,7 +632,7 @@ def risques_rga(
 
     import_rga_flow(
         dirname=dirname,
-        department=departement,
+        department=department,
         schema=schema,
         replace=recreate,
     )
@@ -645,7 +641,7 @@ def risques_rga(
 @app.command()
 def risques_remnappes(
     dirname: Path = OPTIONAL_DIRNAME_REMNAPPES_ARGUMENT,
-    departement: str = DEPARTEMENT_OPTION,
+    department: str = DEPARTMENT_OPTION,
     schema: str = SCHEMA_OPTION,
     table_name: str = RISQUES_REMNAPPES_TABLE_OPTION,
     recreate: bool = RECREATE_FALSE_OPTION,
@@ -657,7 +653,7 @@ def risques_remnappes(
     pour télécharger les données.
     """
     # Validate that at least one of dirname or departement is provided
-    if dirname is None and departement is None:
+    if dirname is None and department is None:
         typer.echo(
             "Error: Either provide a dirname argument or use --departement/-d option.",
             err=True,
@@ -666,7 +662,7 @@ def risques_remnappes(
 
     import_remnappes_flow(
         dirname=dirname,
-        department=departement,
+        department=department,
         schema=schema,
         table=table_name,
         replace=recreate,
@@ -676,7 +672,7 @@ def risques_remnappes(
 @app.command()
 def risques_mvt(
     dirname: Path = OPTIONAL_DIRNAME_MVT_ARGUMENT,
-    departement: str = DEPARTEMENT_OPTION,
+    department: str = DEPARTMENT_OPTION,
     schema: str = SCHEMA_OPTION,
     table_name: str = RISQUES_MVT_TABLE_OPTION,
     recreate: bool = RECREATE_FALSE_OPTION,
@@ -688,7 +684,7 @@ def risques_mvt(
     pour télécharger les données.
     """
     # Validate that at least one of dirname or departement is provided
-    if dirname is None and departement is None:
+    if dirname is None and department is None:
         typer.echo(
             "Error: Either provide a dirname argument or use --departement/-d option.",
             err=True,
@@ -697,7 +693,7 @@ def risques_mvt(
 
     import_risques_mvt_flow(
         path=dirname,
-        department=departement,
+        department=department,
         db_schema=schema,
         table_name=table_name,
         recreate=recreate,
@@ -707,7 +703,7 @@ def risques_mvt(
 @app.command()
 def risques_casias(
     dirname: Path = OPTIONAL_DIRNAME_CASIAS_ARGUMENT,
-    departement: str = DEPARTEMENT_OPTION,
+    department: str = DEPARTMENT_OPTION,
     schema: str = SCHEMA_OPTION,
     table_name: str = RISQUES_CASIAS_TABLE_OPTION,
     recreate: bool = RECREATE_FALSE_OPTION,
@@ -719,7 +715,7 @@ def risques_casias(
     pour télécharger les données.
     """
     # Validate that at least one of dirname or departement is provided
-    if dirname is None and departement is None:
+    if dirname is None and department is None:
         typer.echo(
             "Error: Either provide a dirname argument or use --departement/-d option.",
             err=True,
@@ -728,7 +724,7 @@ def risques_casias(
 
     import_risques_casias_flow(
         path=dirname,
-        department=departement,
+        department=department,
         db_schema=schema,
         table_name=table_name,
         recreate=recreate,
@@ -738,7 +734,7 @@ def risques_casias(
 @app.command()
 def risques_sis(
     dirname: Path = OPTIONAL_DIRNAME_SIS_ARGUMENT,
-    departement: str = DEPARTEMENT_OPTION,
+    department: str = DEPARTMENT_OPTION,
     schema: str = SCHEMA_OPTION,
     table_name: str = RISQUES_SIS_TABLE_OPTION,
     db_schema: str = SCHEMA_OPTION,
@@ -751,7 +747,7 @@ def risques_sis(
     pour télécharger les données.
     """
     # Validate that at least one of dirname or departement is provided
-    if dirname is None and departement is None:
+    if dirname is None and department is None:
         typer.echo(
             "Error: Either provide a dirname argument or use --departement/-d option.",
             err=True,
@@ -760,7 +756,7 @@ def risques_sis(
 
     import_risques_sis_flow(
         path=dirname,
-        department=departement,
+        department=department,
         db_schema=db_schema,
         table_name=table_name,
         recreate=recreate,
@@ -770,7 +766,7 @@ def risques_sis(
 @app.command()
 def risques_sup(
     dirname: Path = OPTIONAL_DIRNAME_SUP_ARGUMENT,
-    departement: str = DEPARTEMENT_OPTION,
+    department: str = DEPARTMENT_OPTION,
     db_schema: str = SCHEMA_OPTION,
     table_name: str = RISQUES_SUP_TABLE_OPTION,
     recreate: bool = RECREATE_FALSE_OPTION,
@@ -782,7 +778,7 @@ def risques_sup(
     pour télécharger les données.
     """
     # Validate that at least one of dirname or departement is provided
-    if dirname is None and departement is None:
+    if dirname is None and department is None:
         typer.echo(
             "Error: Either provide a dirname argument or use --departement/-d option.",
             err=True,
@@ -791,7 +787,7 @@ def risques_sup(
 
     import_risques_sup_flow(
         path=dirname,
-        department=departement,
+        department=department,
         db_schema=db_schema,
         table_name=table_name,
         recreate=recreate,
@@ -801,7 +797,7 @@ def risques_sup(
 @app.command()
 def risques_tri(
     dirname: Path = OPTIONAL_DIRNAME_TRI_ARGUMENT,
-    departement: str = DEPARTEMENT_OPTION,
+    department: str = DEPARTMENT_OPTION,
     db_schema: str = SCHEMA_OPTION,
     table_name: str = RISQUES_TRI_TABLE_OPTION,
     recreate: bool = RECREATE_FALSE_OPTION,
@@ -813,7 +809,7 @@ def risques_tri(
     pour télécharger les données.
     """
     # Validate that at least one of dirname or departement is provided
-    if dirname is None and departement is None:
+    if dirname is None and department is None:
         typer.echo(
             "Error: Either provide a dirname argument or use --departement/-d option.",
             err=True,
@@ -822,7 +818,7 @@ def risques_tri(
 
     import_tri_flow(
         dirname=dirname,
-        department=departement,
+        department=department,
         schema=db_schema,
         table=table_name,
         replace=recreate,
@@ -940,7 +936,7 @@ def banatic_communes(
 
 @app.command(name="bdtopo-batiment")
 def bdtopo_batiment(
-    departement: str = BDTOPO_DEPARTEMENTS_OPTION,
+    departments: str = BDTOPO_DEPARTEMENTS_OPTION,
     epci: str = BDTOPO_EPCI_OPTION,
     communes: str = BDTOPO_COMMUNES_OPTION,
     millesime: str = BDTOPO_MILLESIME_OPTION,
@@ -957,7 +953,7 @@ def bdtopo_batiment(
     Les bâtiments déjà présents sur le périmètre sont supprimés avant l'import.
     """
     import_bdtopo_batiment_flow(
-        departements=departement,
+        departements=departments,
         epci=epci,
         communes=communes,
         edition_date=millesime,
@@ -970,8 +966,12 @@ def bdtopo_batiment(
 
 @app.command(name="bdtopo-troncon-route")
 def bdtopo_troncon_route(
-    departement: str = typer.Option(
-        ..., "-d", "--departement", help="Code du département (ex. : 35, 2A, 974)."
+    department: str = typer.Option(
+        ...,
+        "-d",
+        "--departement",
+        "--department",
+        help="Code du département (ex. : 35, 2A, 974).",
     ),
     millesime: str | None = BDTOPO_MILLESIME_OPTION,
     db_schema: str = typer.Option(
@@ -988,7 +988,7 @@ def bdtopo_troncon_route(
 ):
     """Importe les tronçons de route BD TOPO IGN d'un département."""
     import_bdtopo_troncon_route_flow(
-        department=departement,
+        department=department,
         edition_date=millesime,
         db_schema=db_schema,
         table_name=table_name,
@@ -998,7 +998,7 @@ def bdtopo_troncon_route(
 
 @app.command(name="ocsge")
 def ocsge(
-    departement: str = BDTOPO_DEPARTEMENTS_OPTION,
+    departments: str = BDTOPO_DEPARTEMENTS_OPTION,
     epci: str = BDTOPO_EPCI_OPTION,
     communes: str = BDTOPO_COMMUNES_OPTION,
     millesime: str = OCSGE_MILLESIME_OPTION,
@@ -1019,7 +1019,7 @@ def ocsge(
     Les données déjà présentes sur le périmètre sont supprimées avant l'import.
     """
     import_ocsge_flow(
-        departements=departement,
+        departements=departments,
         epci=epci,
         communes=communes,
         edition_date=millesime,
@@ -1110,7 +1110,7 @@ def gpu_plu(
 @app.command()
 def bpe(
     dirname: Path = OPTIONAL_DIRNAME_BPE_ARGUMENT,
-    departement: str = DEPARTEMENT_OPTION,
+    department: str = DEPARTMENT_OPTION,
     schema: str = SCHEMA_OPTION,
     table_name: str = INSEE_BPE_TABLE_OPTION,
     recreate: bool = RECREATE_TRUE_OPTION,
@@ -1123,7 +1123,7 @@ def bpe(
     le fichier ZIP BPE est téléchargé.
     """
     import_bpe_flow(
-        department=departement,
+        department=department,
         dirname=dirname,
         db_schema=schema,
         table_name=table_name,
@@ -1176,7 +1176,7 @@ def acr(
 @app.command()
 def geosirene(
     dirname: Path = OPTIONAL_DIRNAME_GEOSIRENE_ARGUMENT,
-    department: str = DEPARTEMENT_OPTION,
+    department: str = DEPARTMENT_OPTION,
     schema: str = SCHEMA_OPTION,
     table_name: str = GEOSIRENE_TABLE_OPTION,
     recreate: bool = RECREATE_TRUE_OPTION,
@@ -1199,7 +1199,7 @@ def geosirene(
 @app.command(name="sirene-etablissement")
 def sirene_etablissement(
     dirname: Path = OPTIONAL_DIRNAME_SIRENE_ETABLISSEMENT_ARGUMENT,
-    department: str = DEPARTEMENT_OPTION,
+    department: str = DEPARTMENT_OPTION,
     schema: str = SCHEMA_OPTION,
     table_name: str = SIRENE_ETABLISSEMENT_TABLE_OPTION,
     geosirene_table_name: str = GEOSIRENE_TABLE_OPTION,

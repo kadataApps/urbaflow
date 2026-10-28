@@ -147,6 +147,12 @@ make urbaflow
 
 Le point d'entrée CLI est `urbaflow/main.py` (Typer).
 
+Pour toutes les commandes proposant un filtre par département, les options
+`-d`, `--departement` et `--department` sont équivalentes. La forme
+`--departement` est privilégiée dans la documentation ; `--department` reste
+disponible pour les scripts existants. La commande `dvf` conserve son argument
+positionnel `departements`.
+
 ### Lancement de la CLI
 
 - Avec Docker :
@@ -246,9 +252,9 @@ uv run python urbaflow/main.py --help
 
 - `risques-cavite [dirname] [OPTIONS]`
   - Importe les données de risques de cavités.
-  - Fournir soit `dirname`, soit `--department`.
+  - Fournir soit `dirname`, soit `--departement`.
   - Options :
-    - `-d, --department TEXT`
+    - `-d, --departement TEXT` (alias : `--department`)
     - `--schema TEXT` (défaut: `IMPORT_SCHEMA`, sinon `public`)
     - `--table-name TEXT` (défaut: `risques_cavite`)
     - `--recreate / --no-recreate` (défaut: `--recreate`)
