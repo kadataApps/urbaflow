@@ -2,12 +2,10 @@ from pathlib import Path
 
 import duckdb
 import pandas as pd
-import requests
 from prefect import flow, task
-from shared_tasks.config import TEMP_DIR
 from shared_tasks.db_engine import create_engine
+from shared_tasks.etl_file_utils import fetch_or_find_file
 from shared_tasks.etl_gpd_utils import load
-from shared_tasks.file_utils import list_files_at_path
 from shared_tasks.logging_config import get_logger
 from sqlalchemy import DDL, text
 
@@ -26,37 +24,12 @@ def fetch_geosirene_parquet(dirname: Path | None = None) -> Path:
     """
     Télécharge le fichier GeoParquet GeoSirene s'il n'est pas fourni localement.
     """
-    if dirname is None:
-        target_dir = TEMP_DIR / "geosirene"
-        target_dir.mkdir(parents=True, exist_ok=True)
-        parquet_path = target_dir / "geosirene.parquet"
-
-        if not parquet_path.exists():
-            logger.info(
-                "Téléchargement du fichier GeoParquet GeoSirene depuis %s",
-                GEOSIRENE_PARQUET_URL,
-            )
-            headers = {"User-Agent": "Mozilla/5.0"}
-            response = requests.get(GEOSIRENE_PARQUET_URL, headers=headers, stream=True)
-            response.raise_for_status()
-            with open(parquet_path, "wb") as f:
-                for chunk in response.iter_content(chunk_size=65536):
-                    f.write(chunk)
-            logger.info(
-                "Téléchargement du fichier GeoParquet terminé : %s", parquet_path
-            )
-        else:
-            logger.info(
-                "Fichier GeoParquet GeoSirene trouvé en cache local : %s",
-                parquet_path,
-            )
-        return parquet_path
-    else:
-        logger.info("Recherche du fichier parquet GeoSirene dans %s", dirname)
-        files = list_files_at_path(dirname, r".*", extension=".parquet")
-        if not files:
-            raise ValueError(f"Aucun fichier .parquet trouvé dans {dirname}")
-        return Path(files[0])
+    return fetch_or_find_file(
+        url=GEOSIRENE_PARQUET_URL,
+        cache_subdir="geosirene",
+        cache_filename="geosirene.parquet",
+        dirname=dirname,
+    )
 
 
 @task

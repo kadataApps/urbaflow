@@ -1,14 +1,16 @@
-import re
 from pathlib import Path
 
 import duckdb
 import pandas as pd
-import requests
 from prefect import flow, task
-from shared_tasks.config import TEMP_DIR
 from shared_tasks.db_engine import create_engine
+from shared_tasks.duckdb_utils import (
+    camel_to_snake_case,
+    duckdb_type_to_postgres_type,
+    get_parquet_schema,
+)
+from shared_tasks.etl_file_utils import fetch_or_find_file
 from shared_tasks.etl_gpd_utils import load
-from shared_tasks.file_utils import list_files_at_path
 from shared_tasks.logging_config import get_logger
 from sqlalchemy import DDL, text
 
@@ -26,35 +28,6 @@ SIRENE_ETABLISSEMENT_PARQUET_URL = (
     "https://www.data.gouv.fr/api/1/datasets/r/a29c1297-1f92-4e2a-8f6b-8c902ce96c5f"
 )
 
-# Mapping des types de colonnes DuckDB vers les types PostgreSQL
-DUCKDB_TO_POSTGRES_TYPES = {
-    "VARCHAR": "text",
-    "BIGINT": "bigint",
-    "INTEGER": "integer",
-    "DOUBLE": "double precision",
-    "BOOLEAN": "boolean",
-    "DATE": "date",
-    "TIMESTAMP": "timestamp",
-}
-
-
-def camel_to_snake_case(name: str) -> str:
-    """
-    Convertit un nom de colonne camelCase (convention Sirene/INSEE) en snake_case
-    (convention PostgreSQL utilisée dans le projet).
-    """
-    step1 = re.sub(r"(.)([A-Z][a-z]+)", r"\1_\2", name)
-    step2 = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", step1)
-    return step2.lower()
-
-
-def duckdb_type_to_postgres_type(duckdb_type: str) -> str:
-    """
-    Convertit un type de colonne DuckDB en type PostgreSQL équivalent. Retombe sur
-    `text` si le type n'est pas explicitement pris en charge.
-    """
-    return DUCKDB_TO_POSTGRES_TYPES.get(duckdb_type.upper(), "text")
-
 
 @task
 def fetch_sirene_etablissement_parquet(dirname: Path | None = None) -> Path:
@@ -64,65 +37,12 @@ def fetch_sirene_etablissement_parquet(dirname: Path | None = None) -> Path:
 
     Ce fichier pèse plusieurs Go, le téléchargement peut donc prendre du temps.
     """
-    if dirname is None:
-        target_dir = TEMP_DIR / "sirene_etablissement"
-        target_dir.mkdir(parents=True, exist_ok=True)
-        parquet_path = target_dir / "sirene_etablissement.parquet"
-
-        if not parquet_path.exists():
-            logger.info(
-                "Téléchargement du fichier GeoParquet Sirene Etablissement depuis "
-                "%s (ce fichier est volumineux, le téléchargement peut prendre "
-                "plusieurs minutes)",
-                SIRENE_ETABLISSEMENT_PARQUET_URL,
-            )
-            headers = {"User-Agent": "Mozilla/5.0"}
-            response = requests.get(
-                SIRENE_ETABLISSEMENT_PARQUET_URL, headers=headers, stream=True
-            )
-            response.raise_for_status()
-            downloaded_bytes = 0
-            with open(parquet_path, "wb") as f:
-                for chunk in response.iter_content(chunk_size=1024 * 1024):
-                    f.write(chunk)
-                    downloaded_bytes += len(chunk)
-                    if downloaded_bytes % (100 * 1024 * 1024) < (1024 * 1024):
-                        logger.info(
-                            "Téléchargement en cours : %.1f Mo",
-                            downloaded_bytes / (1024 * 1024),
-                        )
-            logger.info(
-                "Téléchargement du fichier GeoParquet terminé : %s", parquet_path
-            )
-        else:
-            logger.info(
-                "Fichier GeoParquet Sirene Etablissement trouvé en cache local : %s",
-                parquet_path,
-            )
-        return parquet_path
-    else:
-        logger.info(
-            "Recherche du fichier parquet Sirene Etablissement dans %s", dirname
-        )
-        files = list_files_at_path(dirname, r".*", extension=".parquet")
-        if not files:
-            raise ValueError(f"Aucun fichier .parquet trouvé dans {dirname}")
-        return Path(files[0])
-
-
-@task
-def get_parquet_schema(parquet_path: Path) -> list[tuple[str, str]]:
-    """
-    Récupère le schéma (nom de colonne, type DuckDB) du fichier GeoParquet Sirene
-    Etablissement, afin de générer dynamiquement la table PostgreSQL correspondante.
-    """
-    con = duckdb.connect()
-    rows = con.execute(
-        f"DESCRIBE SELECT * FROM read_parquet('{parquet_path.as_posix()}') LIMIT 0"
-    ).fetchall()
-    columns = [(row[0], row[1]) for row in rows]
-    logger.info("Schéma du fichier Sirene Etablissement : %d colonnes", len(columns))
-    return columns
+    return fetch_or_find_file(
+        url=SIRENE_ETABLISSEMENT_PARQUET_URL,
+        cache_subdir="sirene_etablissement",
+        cache_filename="sirene_etablissement.parquet",
+        dirname=dirname,
+    )
 
 
 @task

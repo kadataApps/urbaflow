@@ -7,6 +7,7 @@ from pathlib import Path
 
 import requests
 from shared_tasks.config import TEMP_DIR
+from shared_tasks.file_utils import list_files_at_path
 from shared_tasks.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -92,6 +93,44 @@ def download_file(
 
     logger.info("Téléchargement terminé : %s", target_path)
     return target_path
+
+
+def fetch_or_find_file(
+    url: str,
+    cache_subdir: str,
+    cache_filename: str,
+    dirname: str | Path | None = None,
+    extension: str = ".parquet",
+) -> Path:
+    """
+    Résout le chemin d'un fichier source à utiliser pour un import : si `dirname`
+    est fourni, recherche un fichier portant l'extension indiquée dans ce
+    répertoire ; sinon, télécharge (avec mise en cache) le fichier depuis `url`.
+
+    Utile pour les flux d'import proposant une URL nationale de téléchargement
+    par défaut, tout en permettant de fournir un fichier déjà téléchargé
+    localement (ex: fichiers GeoParquet volumineux).
+
+    Args:
+        url: URL du fichier à télécharger si `dirname` n'est pas fourni.
+        cache_subdir: sous-répertoire de `TEMP_DIR` utilisé pour mettre en cache
+            le fichier téléchargé.
+        cache_filename: nom du fichier utilisé pour la mise en cache.
+        dirname: répertoire local à utiliser en priorité, si fourni.
+        extension: extension recherchée dans `dirname`. Défaut : ".parquet".
+
+    Returns:
+        Path: chemin du fichier à utiliser (local ou téléchargé).
+    """
+    if dirname is not None:
+        logger.info("Recherche d'un fichier %s dans %s", extension, dirname)
+        files = list_files_at_path(dirname, r".*", extension=extension)
+        if not files:
+            raise ValueError(f"Aucun fichier {extension} trouvé dans {dirname}")
+        return Path(files[0])
+
+    target_path = TEMP_DIR / cache_subdir / cache_filename
+    return download_file(url=url, target_path=target_path)
 
 
 def extract_7z_members(

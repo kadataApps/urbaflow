@@ -99,6 +99,14 @@ L'ETL charge les données dans une base PostGIS qui doit être configurée dans 
 
 Jeu de données: <https://files.data.gouv.fr/geo-sirene/last/dep/>
 
+### SIRENE Etablissement
+
+[Base Sirene des entreprises et de leurs établissements](https://www.data.gouv.fr/fr/datasets/base-sirene-des-entreprises-et-de-leurs-etablissements-siren-siret/), stock complet des établissements (données descriptives, non géolocalisées), au format GeoParquet.
+
+Jeu de données: <https://www.data.gouv.fr/api/1/datasets/r/a29c1297-1f92-4e2a-8f6b-8c902ce96c5f>
+
+Ce fichier est volumineux (plusieurs Go) : la commande `sirene-etablissement` filtre par défaut l'import sur les communes déjà présentes dans la table `geosirene_etablissement` (ou sur un département avec `-d/--departement`). La table `geosirene_etablissement_detail` (commande `geosirene-detail`) permet ensuite d'enrichir les établissements géolocalisés avec ces données descriptives via une jointure sur le SIRET.
+
 ### LOCOMVAC
 
 [documentation LOCOMVAC sur le site collectivites-locales.gouv.fr](https://www.collectivites-locales.gouv.fr/sites/default/files/migration/fiche_technique_locaux_vacants_commerciaux_2020.pdf)
@@ -397,6 +405,28 @@ uv run python urbaflow/main.py --help
     - `--table-name TEXT` (défaut: `geosirene_etablissement`)
     - `--recreate / --no-recreate` (défaut: `--recreate`)
 
+- `sirene-etablissement [dirname] [OPTIONS]`
+  - Importe les données descriptives des établissements Sirene (INSEE) au format GeoParquet, dans la table `sirene_etablissement`.
+  - `dirname` est optionnel (télécharge le fichier GeoParquet national depuis data.gouv.fr par défaut). Ce fichier est volumineux (plusieurs Go).
+  - Par défaut, l'import est filtré sur les communes déjà présentes dans la table `geosirene_etablissement` (`--filter-by-geosirene-communes`, activé par défaut), afin de limiter le volume de données traitées. Un département fourni via `-d/--departement` prend le pas sur ce filtrage automatique.
+  - Options :
+    - `-d, --departement TEXT` (optionnel : limite l'import au département spécifié, prioritaire sur `--filter-by-geosirene-communes`)
+    - `--schema TEXT` (défaut: `public`)
+    - `--table-name TEXT` (défaut: `sirene_etablissement`)
+    - `--geosirene-table-name TEXT` (défaut: `geosirene_etablissement`, table source des communes utilisées pour le filtrage)
+    - `--filter-by-geosirene-communes / --no-filter-by-geosirene-communes` (défaut: `--filter-by-geosirene-communes`)
+    - `--recreate / --no-recreate` (défaut: `--recreate`)
+
+- `geosirene-detail [OPTIONS]`
+  - Crée la table `geosirene_etablissement_detail`, résultat de la jointure entre `geosirene_etablissement` (établissements géolocalisés) et `sirene_etablissement` (données descriptives) sur le SIRET.
+  - Seuls les établissements présents dans les **deux** tables sont conservés. Nécessite que `geosirene_etablissement` et `sirene_etablissement` aient été importées au préalable (commandes `geosirene` et `sirene-etablissement`).
+  - Options :
+    - `--schema TEXT` (défaut: `public`)
+    - `--detail-table-name TEXT` (défaut: `geosirene_etablissement_detail`)
+    - `--geosirene-table-name TEXT` (défaut: `geosirene_etablissement`)
+    - `--sirene-table-name TEXT` (défaut: `sirene_etablissement`)
+    - `--recreate / --no-recreate` (défaut: `--recreate`)
+
 - `cartofriches [dirname] [OPTIONS]`
   - Importe les sites référencés dans Cartofriches (friches industrielles, commerciales, etc.).
   - `dirname` est optionnel (télécharge le fichier GeoPackage national depuis data.gouv.fr par défaut).
@@ -437,6 +467,18 @@ docker compose run --rm urbaflow python urbaflow/main.py ocsge -d 35
 
 # OCS GE IGN sur toutes les communes d'un EPCI
 docker compose run --rm urbaflow python urbaflow/main.py ocsge -e 243500139
+
+# GeoSirene (établissements géolocalisés) pour un département
+docker compose run --rm urbaflow python urbaflow/main.py geosirene -d 85
+
+# Sirene Etablissement (données descriptives), filtré sur les communes déjà présentes dans geosirene_etablissement
+docker compose run --rm urbaflow python urbaflow/main.py sirene-etablissement
+
+# Sirene Etablissement limité à un département
+docker compose run --rm urbaflow python urbaflow/main.py sirene-etablissement -d 85
+
+# Création de la table de détail geosirene_etablissement_detail (après geosirene et sirene-etablissement)
+docker compose run --rm urbaflow python urbaflow/main.py geosirene-detail
 
 # LOVAC FIL avec options
 docker compose run --rm urbaflow python urbaflow/main.py lovac-fil /data/ --schema public --table-name lovac_fil --recursive --recreate
