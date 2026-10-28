@@ -2,6 +2,7 @@ from pathlib import Path
 
 import typer
 from dotenv import load_dotenv
+from flows.acr.import_acr import import_acr_flow
 from flows.banatic.import_banatic_communes import import_banatic_communes_flow
 from flows.base_functions import install_base_functions_flow
 from flows.bdtopo.import_bdtopo_batiment import import_bdtopo_batiment_flow
@@ -244,6 +245,18 @@ OPTIONAL_DIRNAME_MH_ARGUMENT = typer.Argument(
     ),
 )
 
+OPTIONAL_DIRNAME_ACR_ARGUMENT = typer.Argument(
+    None,
+    exists=True,
+    file_okay=False,
+    dir_okay=True,
+    readable=True,
+    help=(
+        "Directory path containing ACR CSV file. "
+        "Optional (downloads national CSV if omitted)."
+    ),
+)
+
 OPTIONAL_DIRNAME_GEOSIRENE_ARGUMENT = typer.Argument(
     None,
     exists=True,
@@ -318,6 +331,9 @@ FILTER_BY_GEOSIRENE_COMMUNES_OPTION = typer.Option(
 )
 PATRIMOINE_MH_TABLE_OPTION = typer.Option(
     "patrimoine_immeubles_proteges_mh", help="Database table name"
+)
+PATRIMOINE_ACR_TABLE_OPTION = typer.Option(
+    "patrimoine_architecture_contemporaine_remarquable", help="Database table name"
 )
 FRICHES_CARTOFRICHES_TABLE_OPTION = typer.Option(
     "friches_cartofriches", help="Database table name"
@@ -1048,6 +1064,27 @@ def mh(
     est téléchargé automatiquement depuis data.gouv.fr.
     """
     import_mh_flow(
+        dirname=dirname,
+        db_schema=schema,
+        table_name=table_name,
+        recreate=recreate,
+    )
+
+
+@app.command()
+def acr(
+    dirname: Path = OPTIONAL_DIRNAME_ACR_ARGUMENT,
+    schema: str = SCHEMA_OPTION,
+    table_name: str = PATRIMOINE_ACR_TABLE_OPTION,
+    recreate: bool = RECREATE_TRUE_OPTION,
+):
+    """
+    Import des édifices labellisés Architecture Contemporaine Remarquable (ACR).
+
+    Base nationale CSV. Si le répertoire n'est pas fourni, le fichier CSV
+    est téléchargé automatiquement depuis data.gouv.fr.
+    """
+    import_acr_flow(
         dirname=dirname,
         db_schema=schema,
         table_name=table_name,

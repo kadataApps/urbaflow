@@ -412,6 +412,15 @@ uv run python urbaflow/main.py --help
     - `--table-name TEXT` (défaut: `patrimoine_immeubles_proteges_mh`)
     - `--recreate / --no-recreate` (défaut: `--recreate`)
 
+- `acr [dirname] [OPTIONS]`
+  - Importe les édifices labellisés Architecture Contemporaine Remarquable (ACR).
+  - Source : [data.gouv.fr](https://www.data.gouv.fr/datasets/liste-des-edifices-labellises-architecture-contemporaine-remarquable-acr) (CSV séparé par `|`, coordonnées WGS84 `lat,lon` converties en points Lambert 93 ; les édifices sans coordonnées sont importés avec une géométrie nulle).
+  - `dirname` est optionnel (télécharge le fichier CSV national depuis data.gouv.fr par défaut).
+  - Options :
+    - `--schema TEXT` (défaut: `public`)
+    - `--table-name TEXT` (défaut: `patrimoine_architecture_contemporaine_remarquable`)
+    - `--recreate / --no-recreate` (défaut: `--recreate`)
+
 - `geosirene [dirname] [OPTIONS]`
   - Importe les établissements géolocalisés GeoSirene au format GeoParquet.
   - `dirname` est optionnel (télécharge le fichier GeoParquet national depuis data.gouv.fr par défaut).
