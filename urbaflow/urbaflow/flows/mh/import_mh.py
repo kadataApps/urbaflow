@@ -13,6 +13,7 @@ from shared_tasks.file_utils import list_files_at_path
 from shared_tasks.logging_config import get_logger
 
 # Base des immeubles protégés au titre des Monuments Historiques (MH)
+# URL de la page du dataset : https://culture.data.gouv.fr/datasets/5af120e5b595087cfabcde81
 # URL de téléchargement data.gouv.fr : https://www.data.gouv.fr/api/1/datasets/r/74376ed3-2ebd-4c5f-bf16-d5d05d151ad7
 
 logger = get_logger(__name__)
