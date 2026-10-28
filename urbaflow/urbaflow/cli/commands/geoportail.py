@@ -54,7 +54,7 @@ GPU_PLU_KEEP_FILES_OPTION = typer.Option(
 @app.command(name="gpu-sup")
 def gpu_sup(
     dirname: Path | None = OPTIONAL_DIRNAME_GPU_SUP_ARGUMENT,
-    db_schema: str = SCHEMA_OPTION,
+    schema: str = SCHEMA_OPTION,
     recreate: bool = RECREATE_TRUE_OPTION,
 ) -> None:
     """
@@ -65,7 +65,7 @@ def gpu_sup(
     """
     import_gpu_sup_flow(
         dirname=dirname,
-        db_schema=db_schema,
+        db_schema=schema,
         replace=recreate,
     )
 

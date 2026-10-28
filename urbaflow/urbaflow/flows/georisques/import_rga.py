@@ -23,7 +23,7 @@ def import_rga_shape(
 
 
 def import_rga_flow(
-    dirname, department: str, schema: str = "public", replace: bool = False
+    dirname, department: str, db_schema: str = "public", replace: bool = False
 ):
     """
     Import data from Georisques RGA (Retrait Gonflement des Argiles).
@@ -51,4 +51,4 @@ def import_rga_flow(
         download_and_unzip(url, extract_to_path=target_dir)
         dirname = target_dir
     files = list_files_at_path(dirname, r"AleaRG.*", extension=".shp")
-    import_rga_shape(files, schema, replace=replace)
+    import_rga_shape(files, schema=db_schema, replace=replace)

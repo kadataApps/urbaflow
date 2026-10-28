@@ -30,7 +30,7 @@ def import_icpe_shape(
 
 def import_icpe_flow(
     dirname=None,
-    schema: str = "public",
+    db_schema: str = "public",
     table: str = "risques_icpe",
     replace: bool = False,
 ):
@@ -60,4 +60,4 @@ def import_icpe_flow(
     if not files:
         files = list_files_at_path(dirname, r".*", extension=".shp")
 
-    import_icpe_shape(files, schema=schema, table=table, replace=replace)
+    import_icpe_shape(files, schema=db_schema, table=table, replace=replace)

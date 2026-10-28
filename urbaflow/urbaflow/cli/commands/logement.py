@@ -58,7 +58,7 @@ def lovac_fil(
     typer.echo(f"Recréation de la table : {recreate}")
     result = import_lovac_fil_flow(
         dirname=dirname,
-        schema=schema,
+        db_schema=schema,
         table_name=table_name,
         recursive=recursive,
         recreate=recreate,

@@ -36,7 +36,7 @@ def download_wfs_data(wfs_url, layername) -> gpd.GeoDataFrame:
 
 
 @flow
-def import_bruit(schema="public"):
+def import_bruit(db_schema="public"):
     logger = get_run_logger()
     e = create_engine()
     peb = download_wfs_data(wfs_url_geoplateforme, layername_peb)
@@ -45,7 +45,7 @@ def import_bruit(schema="public"):
             gdf=peb,
             connection=conn,
             table_name="bruit_peb",
-            schema=schema,
+            schema=db_schema,
             logger=logger,
             recreate=True,
             srs=2154,
@@ -54,7 +54,7 @@ def import_bruit(schema="public"):
             peb.to_crs("EPSG:2154"),
             connection=conn,
             table_name="bruit_peb",
-            schema=schema,
+            schema=db_schema,
             how="replace",
             logger=logger,
         )
@@ -64,7 +64,7 @@ def import_bruit(schema="public"):
             gdf=pgs,
             connection=conn,
             table_name="bruit_pgs",
-            schema=schema,
+            schema=db_schema,
             logger=logger,
             recreate=True,
             srs=2154,
@@ -73,7 +73,7 @@ def import_bruit(schema="public"):
             pgs.to_crs("EPSG:2154"),
             connection=conn,
             table_name="bruit_pgs",
-            schema=schema,
+            schema=db_schema,
             how="replace",
             logger=logger,
         )

@@ -26,7 +26,7 @@ OPTIONAL_DIRNAME_BANATIC_ARGUMENT = typer.Argument(
 @app.command(name="banatic-communes")
 def banatic_communes(
     dirname: Path | None = OPTIONAL_DIRNAME_BANATIC_ARGUMENT,
-    db_schema: str = SCHEMA_OPTION,
+    schema: str = SCHEMA_OPTION,
     table_name: str = BANATIC_COMMUNES_TABLE_OPTION,
     recreate: bool = RECREATE_TRUE_OPTION,
 ) -> None:
@@ -42,7 +42,7 @@ def banatic_communes(
     import_banatic_communes_flow(
         epci_fp_file=epci_file,
         communes_siren_file=communes_file,
-        db_schema=db_schema,
+        db_schema=schema,
         table_name=table_name,
         recreate=recreate,
     )

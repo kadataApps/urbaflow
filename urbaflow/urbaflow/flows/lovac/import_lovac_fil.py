@@ -610,26 +610,26 @@ def create_lovac_fil_parcelle_table(
 
 def import_lovac_fil_flow(
     dirname: Path,
-    schema: str = "public",
+    db_schema: str = "public",
     table_name: str = "lovac_fil",
     recursive: bool = True,
     recreate: bool = False,
 ):
     """
-    Complete flow to import LOVAC FIL data from CSV files.
+    Importe les données LOVAC FIL depuis des fichiers CSV.
 
-    This flow orchestrates the entire process:
-    1. Find lovac_fil.csv files in the specified directory
-    2. Extract and clean data from each file
-    3. Create the database table or truncate existing one
-    4. Load all data into the database
+    Ce flow orchestre l'ensemble du processus :
+    1. Recherche les fichiers lovac_fil.csv dans le répertoire indiqué.
+    2. Extrait et nettoie les données de chaque fichier.
+    3. Crée la table ou vide la table existante.
+    4. Charge les données dans la base.
 
     Args:
-        dirname: Path to directory containing lovac_fil.csv files
-        schema: Database schema name (default: "public")
-        table_name: Table name (default: "lovac_fil")
-        recursive: If True, search recursively in subdirectories (default: True)
-        recreate: If True, drop and recreate the table (default: False)
+        dirname: Répertoire contenant les fichiers lovac_fil.csv.
+        db_schema: Schéma de destination (par défaut : "public").
+        table_name: Nom de la table (par défaut : "lovac_fil").
+        recursive: Recherche aussi les sous-répertoires (par défaut : True).
+        recreate: Supprime et recrée la table si nécessaire (par défaut : False).
     """
     logger.info(f"Starting LOVAC FIL import flow from {dirname}")
 
@@ -638,7 +638,9 @@ def import_lovac_fil_flow(
     logger.info(f"Found {len(files)} LOVAC FIL files to process")
 
     # Step 2: Create the database table (this will drop existing table if present)
-    create_table_lovac_fil(schema=schema, table_name=table_name, recreate=recreate)
+    create_table_lovac_fil(
+        schema=db_schema, table_name=table_name, recreate=recreate
+    )
 
     # Step 3: Process each file and combine data
     all_data = []
@@ -659,7 +661,7 @@ def import_lovac_fil_flow(
         return
 
     # Step 5: Load combined data into database
-    load_lovac_fil_data(combined_data, schema=schema, table_name=table_name)
+    load_lovac_fil_data(combined_data, schema=db_schema, table_name=table_name)
 
     logger.info(
         f"LOVAC FIL import flow completed successfully. "
@@ -667,11 +669,11 @@ def import_lovac_fil_flow(
     )
 
     # Step 6: Create centroid geometry column
-    create_centroid_geometry(schema=schema, table_name=table_name)
+    create_centroid_geometry(schema=db_schema, table_name=table_name)
 
     # Step 7: Create lovac_fil_parcelle table
     create_lovac_fil_parcelle_table(
-        schema=schema,
+        schema=db_schema,
         dst_table_name="lovac_fil_parcelle",
         lovac_fil_table_name=table_name,
         parcelle_table_name="parcellaire",
@@ -681,6 +683,6 @@ def import_lovac_fil_flow(
     return {
         "fields_processed": len(files),
         "total_rows": len(combined_data),
-        "schema": schema,
+        "db_schema": db_schema,
         "table_name": table_name,
     }

@@ -35,7 +35,7 @@ def bdtopo_batiment(
     epci: str | None = EPCI_OPTION,
     communes: str | None = COMMUNES_OPTION,
     millesime: str | None = BDTOPO_MILLESIME_OPTION,
-    db_schema: str = SCHEMA_OPTION,
+    schema: str = SCHEMA_OPTION,
     table_name: str = BDTOPO_BATIMENT_TABLE_OPTION,
     recreate: bool = RECREATE_FALSE_OPTION,
     keep_files: bool = KEEP_FILES_OPTION,
@@ -52,7 +52,7 @@ def bdtopo_batiment(
         epci=epci,
         communes=communes,
         edition_date=millesime,
-        db_schema=db_schema,
+        db_schema=schema,
         table_name=table_name,
         recreate=recreate,
         keep_files=keep_files,
@@ -68,10 +68,9 @@ def bdtopo_troncon_route(
         help="Code du département (ex. : 35, 2A, 974).",
     ),
     millesime: str | None = BDTOPO_MILLESIME_OPTION,
-    db_schema: str = typer.Option(
+    schema: str = typer.Option(
         get_import_schema(),
         "--schema",
-        "--db-schema",
         envvar="IMPORT_SCHEMA",
         help="Nom du schéma cible existant.",
     ),
@@ -84,7 +83,7 @@ def bdtopo_troncon_route(
     import_bdtopo_troncon_route_flow(
         department=department,
         edition_date=millesime,
-        db_schema=db_schema,
+        db_schema=schema,
         table_name=table_name,
         keep_files=keep_files,
     )

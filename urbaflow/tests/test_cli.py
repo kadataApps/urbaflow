@@ -92,6 +92,38 @@ REPLACE_PARAMETER_COMMANDS = {
     "gpu-sup",
 }
 
+SCHEMA_COMMANDS = sorted(
+    command_name
+    for command_name, command in get_command(app).commands.items()
+    if any(parameter.name in {"schema", "db_schema"} for parameter in command.params)
+)
+
+SCHEMA_FLOW_COMMANDS = [
+    ("lovac-fil", "import_lovac_fil_flow", ["{tmp_path}"]),
+    ("risques-cavite", "import_risques_cavite_flow", ["--departement", "35"]),
+    ("risques-rga", "import_rga_flow", ["--departement", "35"]),
+    ("risques-remnappes", "import_remnappes_flow", ["--departement", "35"]),
+    ("risques-tri", "import_tri_flow", ["--departement", "35"]),
+    ("risques-icpe", "import_icpe_flow", []),
+    ("risques-sis", "import_risques_sis_flow", ["--departement", "35"]),
+    ("risques-sup", "import_risques_sup_flow", ["--departement", "35"]),
+    ("risques-irep", "import_risques_irep_flow", []),
+    ("risques-gaspar", "import_risques_gaspar_flow", []),
+    ("gpu-sup", "import_gpu_sup_flow", []),
+    ("banatic-communes", "import_banatic_communes_flow", []),
+    (
+        "bdtopo-batiment",
+        "import_bdtopo_batiment_flow",
+        ["--departement", "35"],
+    ),
+    (
+        "bdtopo-troncon-route",
+        "import_bdtopo_troncon_route_flow",
+        ["--departement", "35"],
+    ),
+    ("ocsge", "import_ocsge_flow", ["--departement", "35"]),
+]
+
 
 @pytest.mark.parametrize("option", ["-d", "--departement"])
 @pytest.mark.parametrize(
@@ -135,6 +167,49 @@ def test_command_help(command_name):
     result = CliRunner().invoke(app, [command_name, "--help"])
 
     assert result.exit_code == 0, result.output
+
+
+@pytest.mark.parametrize("command_name", SCHEMA_COMMANDS)
+def test_schema_option_name(command_name):
+    """Vérifie que les commandes exposent --schema et pas --db-schema."""
+    command = get_command(app).commands[command_name]
+    options = {
+        option
+        for parameter in command.params
+        for option in getattr(parameter, "opts", [])
+    }
+
+    assert "--schema" in options
+    assert "--db-schema" not in options
+
+
+@pytest.mark.parametrize(
+    ("command_name", "flow_name", "extra_arguments"), SCHEMA_FLOW_COMMANDS
+)
+def test_schema_forwarding(
+    monkeypatch, tmp_path, command_name, flow_name, extra_arguments
+):
+    """Vérifie que --schema est transmis au flow sous le nom db_schema."""
+    run_flow = MagicMock()
+    command = get_command(app).commands[command_name]
+    command_module = inspect.getmodule(inspect.unwrap(command.callback))
+    monkeypatch.setattr(command_module, flow_name, run_flow)
+    arguments = [
+        command_name,
+        *[
+            str(tmp_path) if argument == "{tmp_path}" else argument
+            for argument in extra_arguments
+        ],
+        "--schema",
+        "schema_test",
+    ]
+
+    result = CliRunner().invoke(app, arguments)
+
+    assert result.exit_code == 0, result.output
+    run_flow.assert_called_once()
+    assert run_flow.call_args.kwargs["db_schema"] == "schema_test"
+    assert "schema" not in run_flow.call_args.kwargs
 
 
 @pytest.mark.parametrize(

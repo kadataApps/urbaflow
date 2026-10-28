@@ -31,7 +31,7 @@ def import_tri_shape(
 def import_tri_flow(
     dirname=None,
     department: str = None,
-    schema: str = "public",
+    db_schema: str = "public",
     table: str = "risques_tri",
     replace: bool = False,
 ):
@@ -71,4 +71,4 @@ def import_tri_flow(
     if not files:
         files = list_files_at_path(dirname, r".*", extension=".shp")
 
-    import_tri_shape(files, schema=schema, table=table, replace=replace)
+    import_tri_shape(files, schema=db_schema, table=table, replace=replace)

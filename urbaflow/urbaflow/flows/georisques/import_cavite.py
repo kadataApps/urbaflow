@@ -243,39 +243,33 @@ def import_cavite_files(path: Path):
 def import_risques_cavite_flow(
     path: Path,
     department: str,
-    schema="public",
+    db_schema="public",
     table_name="risques_cavite",
     recreate: bool = True,
 ):
     """
-    Flow to import cavite data from georisques.gouv.fr for a given department.
+    Importe les données de cavités depuis georisques.gouv.fr pour un département.
 
-    Parameters
-    ----------
-    path : Path
-        Path to the directory where the cavite files will be stored. If provided,
-        no download will be performed. department parameter will be ignored.
-    department : str
-        Department code (e.g., "76" for Seine-Maritime).
-    schema : str, optional
-        Database schema name, by default "public".
-    table_name : str, optional
-        Database table name, by default "risques_cavite".
-    recreate : bool, optional
-        Whether to drop and recreate the table if it exists, by default True.
+    Args:
+        path: Répertoire des fichiers de cavités. S'il est fourni, aucun
+            téléchargement n'est effectué et department est ignoré.
+        department: Code du département (par exemple "76").
+        db_schema: Schéma de destination (par défaut : "public").
+        table_name: Nom de la table cible (par défaut : "risques_cavite").
+        recreate: Supprime et recrée la table si nécessaire (par défaut : True).
     """
 
     if path is None and department is None:
         logger.error("Either path or department must be provided")
         return
 
-    create_table_cavite(schema=schema, table_name=table_name, recreate=recreate)
-    add_geometry_column_to_table(schema=schema, table_name=table_name)
+    create_table_cavite(schema=db_schema, table_name=table_name, recreate=recreate)
+    add_geometry_column_to_table(schema=db_schema, table_name=table_name)
 
     if path is None:
         logger.info(f"Downloading cavite data for department {department}")
         source = f"https://georisques.gouv.fr/webappReport/ws/cavites/departements/{department}/fichecommunes.csv"
-        load_cavite(source, schema=schema, table_name=table_name)
+        load_cavite(source, schema=db_schema, table_name=table_name)
 
     else:
         if not path.exists():
@@ -284,4 +278,4 @@ def import_risques_cavite_flow(
         logger.info(f"Using existing files in {path}")
         import_cavite_files(path)
 
-    populate_geom(schema=schema, table_name=table_name)
+    populate_geom(schema=db_schema, table_name=table_name)

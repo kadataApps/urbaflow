@@ -182,7 +182,7 @@ def risques_cavite(
         path=dirname,
         department=department,
         recreate=recreate,
-        schema=schema,
+        db_schema=schema,
         table_name=table_name,
     )
 
@@ -205,7 +205,7 @@ def risques_rga(
     import_rga_flow(
         dirname=dirname,
         department=department,
-        schema=schema,
+        db_schema=schema,
         replace=recreate,
     )
 
@@ -229,7 +229,7 @@ def risques_remnappes(
     import_remnappes_flow(
         dirname=dirname,
         department=department,
-        schema=schema,
+        db_schema=schema,
         table=table_name,
         replace=recreate,
     )
@@ -291,7 +291,6 @@ def risques_sis(
     department: str | None = DEPARTMENT_OPTION,
     schema: str = SCHEMA_OPTION,
     table_name: str = RISQUES_SIS_TABLE_OPTION,
-    db_schema: str = SCHEMA_OPTION,
     recreate: bool = RECREATE_FALSE_OPTION,
 ) -> None:
     """
@@ -305,7 +304,7 @@ def risques_sis(
     import_risques_sis_flow(
         path=dirname,
         department=department,
-        db_schema=db_schema,
+        db_schema=schema,
         table_name=table_name,
         recreate=recreate,
     )
@@ -315,7 +314,7 @@ def risques_sis(
 def risques_sup(
     dirname: Path | None = OPTIONAL_DIRNAME_SUP_ARGUMENT,
     department: str | None = DEPARTMENT_OPTION,
-    db_schema: str = SCHEMA_OPTION,
+    schema: str = SCHEMA_OPTION,
     table_name: str = RISQUES_SUP_TABLE_OPTION,
     recreate: bool = RECREATE_FALSE_OPTION,
 ) -> None:
@@ -330,7 +329,7 @@ def risques_sup(
     import_risques_sup_flow(
         path=dirname,
         department=department,
-        db_schema=db_schema,
+        db_schema=schema,
         table_name=table_name,
         recreate=recreate,
     )
@@ -340,7 +339,7 @@ def risques_sup(
 def risques_tri(
     dirname: Path | None = OPTIONAL_DIRNAME_TRI_ARGUMENT,
     department: str | None = DEPARTMENT_OPTION,
-    db_schema: str = SCHEMA_OPTION,
+    schema: str = SCHEMA_OPTION,
     table_name: str = RISQUES_TRI_TABLE_OPTION,
     recreate: bool = RECREATE_FALSE_OPTION,
 ) -> None:
@@ -355,7 +354,7 @@ def risques_tri(
     import_tri_flow(
         dirname=dirname,
         department=department,
-        schema=db_schema,
+        db_schema=schema,
         table=table_name,
         replace=recreate,
     )
@@ -376,7 +375,7 @@ def risques_icpe(
     """
     import_icpe_flow(
         dirname=dirname,
-        schema=schema,
+        db_schema=schema,
         table=table_name,
         replace=recreate,
     )
@@ -386,7 +385,7 @@ def risques_icpe(
 def risques_irep(
     dirname: Path | None = OPTIONAL_DIRNAME_IREP_ARGUMENT,
     year: int = YEAR_IREP_OPTION,
-    db_schema: str = SCHEMA_OPTION,
+    schema: str = SCHEMA_OPTION,
     table_name: str = RISQUES_IREP_TABLE_OPTION,
     recreate: bool = RECREATE_FALSE_OPTION,
 ) -> None:
@@ -399,7 +398,7 @@ def risques_irep(
     import_risques_irep_flow(
         dirname=dirname,
         year=year,
-        db_schema=db_schema,
+        db_schema=schema,
         table_name=table_name,
         recreate=recreate,
     )
@@ -408,7 +407,7 @@ def risques_irep(
 @app.command()
 def risques_gaspar(
     dirname: Path | None = OPTIONAL_DIRNAME_GASPAR_ARGUMENT,
-    db_schema: str = SCHEMA_OPTION,
+    schema: str = SCHEMA_OPTION,
     table_name: str = RISQUES_GASPAR_TABLE_OPTION,
     recreate: bool = RECREATE_FALSE_OPTION,
 ) -> None:
@@ -420,7 +419,7 @@ def risques_gaspar(
     """
     import_risques_gaspar_flow(
         dirname=dirname,
-        db_schema=db_schema,
+        db_schema=schema,
         table_name=table_name,
         recreate=recreate,
     )

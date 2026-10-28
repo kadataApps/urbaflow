@@ -31,7 +31,7 @@ def import_remnappes_shape(
 def import_remnappes_flow(
     dirname=None,
     department: str = None,
-    schema: str = "public",
+    db_schema: str = "public",
     table: str = "risques_remnappes",
     replace: bool = False,
 ):
@@ -60,4 +60,4 @@ def import_remnappes_flow(
     if not files:
         files = list_files_at_path(dirname, r".*", extension=".shp")
 
-    import_remnappes_shape(files, schema=schema, table=table, replace=replace)
+    import_remnappes_shape(files, schema=db_schema, table=table, replace=replace)

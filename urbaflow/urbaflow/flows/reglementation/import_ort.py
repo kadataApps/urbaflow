@@ -137,16 +137,16 @@ def insert_ort_data(df, schema="public", table_name="ort"):
 
 
 @flow
-def import_ort(schema="public", table_name="ort"):
+def import_ort(db_schema="public", table_name="ort"):
     """
     Import ORT (Opérations de Revitalisation de Territoire) data
     """
     logger = get_logger()
     logger.info("Starting ORT import flow")
 
-    drop_table_ort(schema=schema, table_name=table_name)
-    create_table_ort(schema=schema, table_name=table_name)
+    drop_table_ort(schema=db_schema, table_name=table_name)
+    create_table_ort(schema=db_schema, table_name=table_name)
     df = read_ort_csv()
-    insert_ort_data(df, schema=schema, table_name=table_name)
+    insert_ort_data(df, schema=db_schema, table_name=table_name)
 
     logger.info("ORT import flow completed successfully")

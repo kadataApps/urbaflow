@@ -38,12 +38,12 @@ def import_znieff_shape(file, schema="public", table=None):
 
 
 @flow
-def import_znieff_flow(path, schema="public"):
+def import_znieff_flow(path, db_schema="public"):
     logger = get_logger()
     logger.info(f"Downloading ZNIEFF 1. Url: {url_znieff1}")
     file = download_znieff(url_znieff1, path, "1")
-    import_znieff_shape(file, schema, "inpn_znieff1")
+    import_znieff_shape(file, db_schema, "inpn_znieff1")
 
     logger.info(f"Downloading ZNIEFF 2. Url: {url_znieff2}")
     file = download_znieff(url_znieff2, path, "2")
-    import_znieff_shape(file, schema, "inpn_znieff2")
+    import_znieff_shape(file, db_schema, "inpn_znieff2")
