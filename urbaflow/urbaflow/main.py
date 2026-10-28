@@ -15,6 +15,10 @@ from flows.cadastre.flow_cadastre import (
     import_cadastre_majic_flow,
 )
 from flows.cadastre.flow_dgfip_topo import import_dgfip_topo_flow
+from flows.cadastre.import_dgfip_geoparquet import (
+    DEFAULT_PARQUET_URL,
+    import_dgfip_geoparquet_flow,
+)
 from flows.cartofriches.import_cartofriches import import_cartofriches_flow
 from flows.docurba.import_docurba_documents import import_docurba_documents_flow
 from flows.dvf.dvf import dvf_flow
@@ -50,6 +54,18 @@ load_dotenv(Path(__file__).parent.parent.parent / ".env")
 setup_logging()
 
 app = typer.Typer()
+
+CADASTRE_SOURCE_OPTION = typer.Option(
+    DEFAULT_PARQUET_URL,
+    "--source",
+    help="URL ou chemin local du fichier cadastral GeoParquet.",
+)
+CADASTRE_SCHEMA_OPTION = typer.Option(
+    "public",
+    "--schema",
+    envvar="IMPORT_SCHEMA",
+    help="Schéma de destination PostgreSQL.",
+)
 
 DEFAULT_DIRNAME = Path("/data/")
 
@@ -560,6 +576,24 @@ def risques_cavite(
         recreate=recreate,
         schema=schema,
         table_name=table_name,
+    )
+
+
+@app.command(name="dgfip-geoparquet")
+def dgfip_geoparquet(
+    departement: str | None = BDTOPO_DEPARTEMENTS_OPTION,
+    epci: str | None = BDTOPO_EPCI_OPTION,
+    communes: str | None = BDTOPO_COMMUNES_OPTION,
+    schema: str = CADASTRE_SCHEMA_OPTION,
+    source: str = CADASTRE_SOURCE_OPTION,
+):
+    """Importe les contours DGFiP : communes, sections et bâtiments."""
+    import_dgfip_geoparquet_flow(
+        departements=departement,
+        epci=epci,
+        communes=communes,
+        db_schema=schema,
+        source=source,
     )
 
 

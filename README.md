@@ -184,6 +184,43 @@ uv run python urbaflow/main.py --help
   - Importe les entités topographiques DGFiP.
   - `dirname` est optionnel (par défaut: `/data/`).
 
+- `dgfip-geoparquet [OPTIONS]`
+  - Importe les contours des communes, sections et bâtiments dans
+    `dgfip_commune`, `dgfip_section` et `dgfip_batiment`.
+  - Source par défaut : [cadastre GeoParquet du 1er septembre 2026](https://cadastre.data.gouv.fr/data/etalab-cadastre/2026-09-01/geoparquet/france/cadastre.parquet).
+  - Périmètres facultatifs et mutuellement exclusifs :
+    - `-c, --communes TEXT` : codes INSEE séparés par des virgules ;
+    - `-e, --epci TEXT` : SIREN de l'EPCI, résolu via `geo.api.gouv.fr` ;
+    - `-d, --departement TEXT` : codes départementaux séparés par des virgules
+      (y compris Corse et outre-mer).
+  - Sans périmètre, importe toute la France. Attention au volume national :
+    le fichier source fait environ 21 Go.
+  - `--source TEXT` permet de choisir une autre URL ou un fichier local.
+  - `--schema TEXT` choisit le schéma cible (défaut : `IMPORT_SCHEMA`, sinon
+    `public`). PostGIS doit être activé et le compte doit pouvoir créer les tables.
+  - Lecture distante via DuckDB/HTTP Range et insertion par lots, sans
+    téléchargement préalable du fichier complet. Le volume effectivement lu
+    dépend de l'organisation du GeoParquet. L'extension DuckDB `httpfs` est
+    installée au premier accès distant (accès réseau requis).
+  - Les attributs source sont conservés, sauf `geometry_bbox` et `type_objet`
+    (la table indique le type d'objet) ; `modeConfec` devient `mode_confec`.
+    `id` peut être nul dans la source, notamment pour les bâtiments :
+    une clé technique `fid` est ajoutée.
+  - Les géométries sont stockées en `MultiPolygon` EPSG:2154, avec des index
+    spatiaux et des index sur `commune` et `departement`. Le champ `geom_srid`
+    indique le SRID source utilisé pour chaque objet, car le CRS global du
+    fichier ne décrit pas correctement ses coordonnées.
+  - Chaque relance remplace uniquement le périmètre demandé, dans une même
+    transaction pour les trois tables. Les autres territoires sont conservés.
+    Une erreur ou l'absence totale de contours communaux annule l'import.
+    Un import national remplace tout le contenu des trois tables.
+
+  ```shell
+  docker compose run --rm urbaflow python urbaflow/main.py dgfip-geoparquet --communes 35001,35238
+  docker compose run --rm urbaflow python urbaflow/main.py dgfip-geoparquet --epci 243500139
+  docker compose run --rm urbaflow python urbaflow/main.py dgfip-geoparquet --departement 35,22
+  ```
+
 - `locomvac [dirname]`
   - Importe les fichiers LOCOMVAC.
   - `dirname` est optionnel (par défaut: `/data/`).
