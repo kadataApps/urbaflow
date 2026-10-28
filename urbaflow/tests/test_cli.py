@@ -21,6 +21,7 @@ DEPARTMENT_COMMANDS = [
     ("bdtopo-batiment", "import_bdtopo_batiment_flow", "departements"),
     ("bdtopo-troncon-route", "import_bdtopo_troncon_route_flow", "department"),
     ("ocsge", "import_ocsge_flow", "departements"),
+    ("dgfip-geoparquet", "import_dgfip_geoparquet_flow", "departements"),
 ]
 
 RECREATE_DEFAULTS = {

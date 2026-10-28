@@ -2,10 +2,10 @@ from pathlib import Path
 
 import typer
 from cli.options import (
-    BDTOPO_COMMUNES_OPTION,
-    BDTOPO_DEPARTEMENTS_OPTION,
-    BDTOPO_EPCI_OPTION,
+    COMMUNES_OPTION,
+    DEPARTMENTS_OPTION,
     DIRNAME_ARGUMENT,
+    EPCI_OPTION,
 )
 from flows.cadastre.flow_cadastre import (
     STEPS_FLOW_CADASTRE,
@@ -63,9 +63,9 @@ def dgfip_topo(
 
 @app.command(name="dgfip-geoparquet")
 def dgfip_geoparquet(
-    departments: str | None = BDTOPO_DEPARTEMENTS_OPTION,
-    epci: str | None = BDTOPO_EPCI_OPTION,
-    communes: str | None = BDTOPO_COMMUNES_OPTION,
+    departments: str | None = DEPARTMENTS_OPTION,
+    epci: str | None = EPCI_OPTION,
+    communes: str | None = COMMUNES_OPTION,
     schema: str = CADASTRE_SCHEMA_OPTION,
     source: str = CADASTRE_SOURCE_OPTION,
 ) -> None:
