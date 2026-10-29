@@ -35,7 +35,6 @@ DEPARTMENT_OPTION = typer.Option(
     None,
     "-d",
     "--departement",
-    "--department",
     help="Code du département (ex. : '75' pour Paris).",
 )
 
@@ -43,7 +42,6 @@ DEPARTMENTS_OPTION = typer.Option(
     None,
     "-d",
     "--departement",
-    "--department",
     help=(
         "Code(s) de département séparés par des virgules (ex: '35' ou '35,22'). "
         "Exclusif avec --epci et --communes."

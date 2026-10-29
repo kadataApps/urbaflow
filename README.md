@@ -180,10 +180,8 @@ PYTHONPATH=urbaflow uv run pytest tests/test_cli.py tests/test_cli_bootstrap.py
 ```
 
 Pour toutes les commandes proposant un filtre par département, les options
-`-d`, `--departement` et `--department` sont équivalentes. La forme
-`--departement` est privilégiée dans la documentation ; `--department` reste
-disponible pour les scripts existants. La commande `dvf` conserve son argument
-positionnel `departements`.
+`-d` et `--departement` sont équivalentes. La commande `dvf` conserve son
+argument positionnel `departements`.
 
 ### Lancement de la CLI
 
@@ -286,7 +284,7 @@ uv run python urbaflow/main.py --help
   - Importe les données de risques de cavités.
   - Fournir soit `dirname`, soit `--departement`.
   - Options :
-    - `-d, --departement TEXT` (alias : `--department`)
+    - `-d, --departement TEXT`
     - `--schema TEXT` (défaut: `IMPORT_SCHEMA`, sinon `public`)
     - `--table-name TEXT` (défaut: `risques_cavite`)
     - `--recreate / --no-recreate` (défaut: `--recreate`)

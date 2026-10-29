@@ -12,7 +12,7 @@ urbaflow: ## Run bash environment with available python dependencies for data ur
 
 .PHONY: run
 
-run: ## Exécuter une commande urbaflow (ex. : make run risques-cavite -- --department 59)
+run: ## Exécuter une commande urbaflow (ex. : make run risques-cavite -- --departement 59)
 	docker compose run --rm urbaflow python urbaflow/main.py $(filter-out $@,$(MAKECMDGOALS))
 
 $(filter-out run,$(MAKECMDGOALS)):

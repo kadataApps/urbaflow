@@ -93,12 +93,12 @@ REPLACE_PARAMETER_COMMANDS = {
 }
 
 
-@pytest.mark.parametrize("option", ["-d", "--departement", "--department"])
+@pytest.mark.parametrize("option", ["-d", "--departement"])
 @pytest.mark.parametrize(
     ("command_name", "flow_name", "parameter"), DEPARTMENT_COMMANDS
 )
 def test_department_aliases(monkeypatch, command_name, flow_name, parameter, option):
-    """Vérifie les trois alias et la transmission du code sans exécuter de flow."""
+    """Vérifie les options départementales et la transmission sans exécuter de flow."""
     run_flow = MagicMock()
     command = get_command(app).commands[command_name]
     command_module = inspect.getmodule(inspect.unwrap(command.callback))

@@ -65,7 +65,6 @@ def bdtopo_troncon_route(
         ...,
         "-d",
         "--departement",
-        "--department",
         help="Code du département (ex. : 35, 2A, 974).",
     ),
     millesime: str | None = BDTOPO_MILLESIME_OPTION,
