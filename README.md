@@ -105,7 +105,14 @@ Jeu de données: <https://files.data.gouv.fr/geo-sirene/last/dep/>
 
 Jeu de données: <https://www.data.gouv.fr/api/1/datasets/r/a29c1297-1f92-4e2a-8f6b-8c902ce96c5f>
 
-Ce fichier est volumineux (plusieurs Go) : la commande `sirene-etablissement` filtre par défaut l'import sur les communes déjà présentes dans la table `geosirene_etablissement` (ou sur un département avec `-d/--departement`). La table `geosirene_etablissement_detail` (commande `geosirene-detail`) permet ensuite d'enrichir les établissements géolocalisés avec ces données descriptives via une jointure sur le SIRET.
+Ce fichier est volumineux (plusieurs Go) : la commande `sirene-etablissement` filtre par défaut l'import sur les communes déjà présentes dans la table `geosirene_etablissement` (ou sur un département avec `-d/--departement`). La table `geosirene_detail` (commande `geosirene-detail`) enrichit les établissements géolocalisés avec ces données descriptives sur le SIRET et les unités légales sur le SIREN.
+
+### SIRENE Unités légales
+
+Source : [stock INSEE des unités légales au format Parquet](https://www.data.gouv.fr/api/1/datasets/r/350182c9-148a-46e0-8389-76c2ec1374a3).
+La commande `sirene-unite-legale` importe toutes les colonnes, en snake_case, pour les SIREN présents dans `sirene_etablissement`. Le traitement est effectué par lots ; le remplacement est transactionnel.
+
+Tests ciblés : depuis `urbaflow`, exécuter `PYTHONPATH=urbaflow uv run pytest tests/test_geosirene_detail.py`. Définir `SIRENE_TEST_DATABASE_URL` avec une URL PostgreSQL de test pour inclure les tests d'intégration ; ils créent puis suppriment leurs propres schémas.
 
 ### LOCOMVAC
 
@@ -554,14 +561,25 @@ uv run python urbaflow/main.py --help
     - `--filter-by-geosirene-communes / --no-filter-by-geosirene-communes` (défaut: `--filter-by-geosirene-communes`)
     - `--recreate / --no-recreate` (défaut: `--recreate`)
 
+- `sirene-unite-legale [dirname] [OPTIONS]`
+  - Importe le stock Parquet dans `sirene_unite_legale`, filtré sur les SIREN de `sirene_etablissement` (à importer au préalable).
+  - `dirname` permet d'utiliser un parquet local ; sinon, le stock national est téléchargé et mis en cache.
+  - Options : `--schema`, `--table-name` (défaut : `sirene_unite_legale`), `--sirene-table-name` (défaut : `sirene_etablissement`), `--recreate / --no-recreate` (défaut : `--recreate`).
+  - Avec `--no-recreate`, seules les unités légales du périmètre courant sont remplacées.
+
 - `geosirene-detail [OPTIONS]`
-  - Crée la table `geosirene_etablissement_detail`, résultat de la jointure entre `geosirene_etablissement` (établissements géolocalisés) et `sirene_etablissement` (données descriptives) sur le SIRET.
-  - Seuls les établissements présents dans les **deux** tables sont conservés. Nécessite que `geosirene_etablissement` et `sirene_etablissement` aient été importées au préalable (commandes `geosirene` et `sirene-etablissement`).
+  - Crée la table `geosirene_detail`, résultat de la jointure entre `geosirene_etablissement` et `sirene_etablissement` sur le SIRET, puis d'une `LEFT JOIN` avec `sirene_unite_legale` sur le SIREN.
+  - Seuls les établissements présents dans les **deux tables d'établissements** sont conservés ; l'absence d'unité légale ne les exclut pas. Les trois tables doivent être importées au préalable.
+  - Toutes les colonnes descriptives sont conservées : préfixe `sirene_` pour les établissements et `unite_legale_` pour les unités légales (hors clé SIREN déjà présente).
+  - `denomination_unite_legale` expose directement la dénomination légale (sans substitution par une enseigne).
+  - `noms_usuels` est un tableau PostgreSQL `text[]` des trois dénominations usuelles de l'unité légale, de celle de l'établissement et de ses trois enseignes, dans cet ordre. Les espaces de début/fin, doublons exacts, valeurs vides et `[ND]` sont éliminés. Sans nom connu, le tableau est vide.
+  - Migration : le nom par défaut était `geosirene_etablissement_detail`. Pour continuer à alimenter cette table, utiliser `--detail-table-name geosirene_etablissement_detail`. L'ancienne table n'est pas supprimée automatiquement. Après actualisation des sources, relancer la création avec `--recreate` pour actualiser le détail.
   - Options :
     - `--schema TEXT` (défaut: `IMPORT_SCHEMA`, sinon `public`)
-    - `--detail-table-name TEXT` (défaut: `geosirene_etablissement_detail`)
+    - `--detail-table-name TEXT` (défaut: `geosirene_detail`)
     - `--geosirene-table-name TEXT` (défaut: `geosirene_etablissement`)
     - `--sirene-table-name TEXT` (défaut: `sirene_etablissement`)
+    - `--unite-legale-table-name TEXT` (défaut: `sirene_unite_legale`)
     - `--recreate / --no-recreate` (défaut: `--recreate`)
 
 - `cartofriches [dirname] [OPTIONS]`
@@ -617,7 +635,10 @@ docker compose run --rm urbaflow python urbaflow/main.py sirene-etablissement
 # Sirene Etablissement limité à un département
 docker compose run --rm urbaflow python urbaflow/main.py sirene-etablissement -d 85
 
-# Création de la table de détail geosirene_etablissement_detail (après geosirene et sirene-etablissement)
+# Unités légales des établissements importés
+docker compose run --rm urbaflow python urbaflow/main.py sirene-unite-legale
+
+# Création de geosirene_detail (après les trois imports)
 docker compose run --rm urbaflow python urbaflow/main.py geosirene-detail
 
 # LOVAC FIL avec options

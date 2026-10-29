@@ -47,6 +47,7 @@ RECREATE_DEFAULTS = {
     "acr": True,
     "geosirene": True,
     "sirene-etablissement": True,
+    "sirene-unite-legale": True,
     "geosirene-detail": True,
     "cartofriches": True,
 }
@@ -79,6 +80,7 @@ RECREATE_FLOW_NAMES = {
     "mh": "import_mh_flow",
     "acr": "import_acr_flow",
     "geosirene-detail": "create_geosirene_etablissement_detail",
+    "sirene-unite-legale": "import_sirene_unite_legale_data",
     "cartofriches": "import_cartofriches_flow",
 }
 

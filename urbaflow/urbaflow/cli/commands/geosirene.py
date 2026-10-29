@@ -11,6 +11,7 @@ from flows.geosirene.import_sirene_etablissement import (
     create_geosirene_etablissement_detail,
     import_sirene_etablissement_data,
 )
+from flows.geosirene.import_sirene_unite_legale import import_sirene_unite_legale_data
 
 app = typer.Typer()
 
@@ -47,7 +48,20 @@ SIRENE_ETABLISSEMENT_TABLE_OPTION = typer.Option(
 )
 
 GEOSIRENE_DETAIL_TABLE_OPTION = typer.Option(
-    "geosirene_etablissement_detail", help="Nom de la table cible"
+    "geosirene_detail", help="Nom de la table de détail"
+)
+
+SIRENE_UNITE_LEGALE_TABLE_OPTION = typer.Option(
+    "sirene_unite_legale", help="Nom de la table des unités légales"
+)
+
+OPTIONAL_DIRNAME_SIRENE_UNITE_LEGALE_ARGUMENT = typer.Argument(
+    None,
+    exists=True,
+    file_okay=False,
+    dir_okay=True,
+    readable=True,
+    help="Répertoire du parquet des unités légales (sinon téléchargement national).",
 )
 
 FILTER_BY_GEOSIRENE_COMMUNES_OPTION = typer.Option(
@@ -111,6 +125,24 @@ def sirene_etablissement(
     )
 
 
+@app.command(name="sirene-unite-legale")
+def sirene_unite_legale(
+    dirname: Path | None = OPTIONAL_DIRNAME_SIRENE_UNITE_LEGALE_ARGUMENT,
+    schema: str = SCHEMA_OPTION,
+    table_name: str = SIRENE_UNITE_LEGALE_TABLE_OPTION,
+    sirene_table_name: str = SIRENE_ETABLISSEMENT_TABLE_OPTION,
+    recreate: bool = RECREATE_TRUE_OPTION,
+) -> None:
+    """Importe les unités légales des établissements Sirene déjà chargés."""
+    import_sirene_unite_legale_data(
+        dirname=dirname,
+        db_schema=schema,
+        table_name=table_name,
+        sirene_table_name=sirene_table_name,
+        recreate=recreate,
+    )
+
+
 @app.command(name="geosirene-detail")
 def geosirene_detail(
     schema: str = SCHEMA_OPTION,
@@ -118,14 +150,15 @@ def geosirene_detail(
     geosirene_table_name: str = GEOSIRENE_TABLE_OPTION,
     sirene_table_name: str = SIRENE_ETABLISSEMENT_TABLE_OPTION,
     recreate: bool = RECREATE_TRUE_OPTION,
+    unite_legale_table_name: str = SIRENE_UNITE_LEGALE_TABLE_OPTION,
 ) -> None:
     """
-    Création de la table geosirene_etablissement_detail (jointure entre
-    geosirene_etablissement et sirene_etablissement).
+    Crée geosirene_detail à partir des établissements et des unités légales.
 
     Seuls les établissements présents dans les deux tables sont conservés.
-    Nécessite que les tables geosirene_etablissement et sirene_etablissement
-    aient été importées au préalable.
+    Les unités légales sont jointes sur le SIREN, sans exclure les établissements
+    sans correspondance. Exécuter auparavant geosirene, sirene-etablissement
+    et sirene-unite-legale.
     """
     create_geosirene_etablissement_detail(
         db_schema=schema,
@@ -133,4 +166,5 @@ def geosirene_detail(
         geosirene_table_name=geosirene_table_name,
         sirene_table_name=sirene_table_name,
         recreate=recreate,
+        unite_legale_table_name=unite_legale_table_name,
     )

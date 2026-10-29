@@ -249,18 +249,20 @@ def extract_and_load_sirene_etablissement(
 @task
 def create_geosirene_etablissement_detail_table(
     db_schema: str = "public",
-    detail_table_name: str = "geosirene_etablissement_detail",
+    detail_table_name: str = "geosirene_detail",
     geosirene_table_name: str = "geosirene_etablissement",
     sirene_table_name: str = "sirene_etablissement",
     recreate: bool = True,
+    unite_legale_table_name: str = "sirene_unite_legale",
 ):
     """
-    Crée la table geosirene_etablissement_detail, résultat de la jointure entre
+    Crée la table geosirene_detail, résultat de la jointure entre
     geosirene_etablissement (établissements géolocalisés) et sirene_etablissement
     (données descriptives Sirene). Seuls les établissements présents dans
     geosirene_etablissement ET dans sirene_etablissement sont conservés : les
     établissements de sirene_etablissement sans correspondance dans
-    geosirene_etablissement ne sont pas repris.
+    geosirene_etablissement ne sont pas repris. Les unités légales sont jointes
+    sur le SIREN sans exclure les établissements sans correspondance.
     """
     e = create_engine()
     with e.begin() as conn:
@@ -308,22 +310,77 @@ def create_geosirene_etablissement_detail_table(
             f"s.{q(name)} AS {q(f'sirene_{name}')}" for name in sirene_column_names
         )
 
+        legal_columns = conn.execute(
+            text(
+                """
+                SELECT column_name FROM information_schema.columns
+                WHERE table_schema = :schema AND table_name = :table_name
+                ORDER BY ordinal_position
+                """
+            ),
+            {"schema": db_schema, "table_name": unite_legale_table_name},
+        ).fetchall()
+        legal_column_names = [row[0] for row in legal_columns]
+        required_legal_columns = {
+            "siren",
+            "denomination_unite_legale",
+            "denomination_usuelle1_unite_legale",
+            "denomination_usuelle2_unite_legale",
+            "denomination_usuelle3_unite_legale",
+        }
+        if not required_legal_columns.issubset(legal_column_names):
+            raise ValueError(
+                f"La table {db_schema}.{unite_legale_table_name} est absente ou "
+                "incomplète. Exécutez d'abord sirene-unite-legale."
+            )
+        legal_select = ", ".join(
+            f"u.{q(name)} AS {q(f'unite_legale_{name}')}"
+            for name in legal_column_names
+            if name != "siren"
+        )
+        name_columns = [
+            "u.denomination_usuelle1_unite_legale",
+            "u.denomination_usuelle2_unite_legale",
+            "u.denomination_usuelle3_unite_legale",
+            "s.denomination_usuelle_etablissement",
+            "s.enseigne1_etablissement",
+            "s.enseigne2_etablissement",
+            "s.enseigne3_etablissement",
+        ]
+        names_array = ", ".join(name_columns)
+
         conn.execute(DDL(f"DROP TABLE IF EXISTS {q(db_schema)}.{q(detail_table_name)}"))
         logger.info(
-            "Création de la table %s.%s par jointure entre %s et %s",
+            "Création de la table %s.%s par jointure entre %s, %s et %s",
             db_schema,
             detail_table_name,
             geosirene_table_name,
             sirene_table_name,
+            unite_legale_table_name,
         )
         conn.execute(
             DDL(
                 f"""
                 CREATE TABLE {q(db_schema)}.{q(detail_table_name)} AS
-                SELECT g.*, {sirene_select}
+                SELECT g.*, {sirene_select}, {legal_select},
+                    u.denomination_unite_legale AS denomination_unite_legale,
+                    ARRAY(
+                        SELECT cleaned_name
+                        FROM (
+                            SELECT btrim(name) AS cleaned_name,
+                                min(position) AS first_position
+                            FROM unnest(ARRAY[{names_array}]::text[])
+                                WITH ORDINALITY AS names(name, position)
+                            WHERE name IS NOT NULL AND btrim(name) NOT IN ('', '[ND]')
+                            GROUP BY btrim(name)
+                        ) AS unique_names
+                        ORDER BY first_position
+                    ) AS noms_usuels
                 FROM {q(db_schema)}.{q(geosirene_table_name)} AS g
                 INNER JOIN {q(db_schema)}.{q(sirene_table_name)} AS s
                     ON g.siret = s.siret
+                LEFT JOIN {q(db_schema)}.{q(unite_legale_table_name)} AS u
+                    ON s.siren = u.siren
                 """
             )
         )
@@ -402,21 +459,22 @@ def import_sirene_etablissement_data(
 @flow
 def create_geosirene_etablissement_detail(
     db_schema: str = "public",
-    detail_table_name: str = "geosirene_etablissement_detail",
+    detail_table_name: str = "geosirene_detail",
     geosirene_table_name: str = "geosirene_etablissement",
     sirene_table_name: str = "sirene_etablissement",
     recreate: bool = True,
+    unite_legale_table_name: str = "sirene_unite_legale",
 ):
     """
-    Flow de création de la table geosirene_etablissement_detail, jointure entre
-    geosirene_etablissement et sirene_etablissement.
+    Crée le détail géolocalisé enrichi des établissements et unités légales Sirene.
     """
-    logger.info("Début de la création de la table geosirene_etablissement_detail")
+    logger.info("Début de la création de la table %s", detail_table_name)
     create_geosirene_etablissement_detail_table(
         db_schema=db_schema,
         detail_table_name=detail_table_name,
         geosirene_table_name=geosirene_table_name,
         sirene_table_name=sirene_table_name,
         recreate=recreate,
+        unite_legale_table_name=unite_legale_table_name,
     )
-    logger.info("Création de la table geosirene_etablissement_detail terminée !")
+    logger.info("Création de la table %s terminée", detail_table_name)
