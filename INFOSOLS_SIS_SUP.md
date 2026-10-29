@@ -50,7 +50,7 @@ Les flux créent et alimentent les tables `risques_sis` et `risques_sup` dans le
 | `date_maj` | `date` | Date de la dernière mise à jour | `2020-09-29` |
 | `url_fiche` | `text` | URL d'accès direct à la fiche détaillée | `https://fiches-risques.brgm.fr/georisques/infosols/classification/SSP00047400101` |
 | `bbox_geojson` | `text` | Emprise géométrique brute au format GeoJSON | `{"type": "Polygon", "coordinates": [...]}` |
-| `geom` | SUP : `geometry(MULTIPOLYGON, 2154)` ; SIS : `geometry(GEOMETRY, 2154)` | Emprise reprojetée en Lambert 93 | *Geom PostGIS (EPSG:2154)* |
+| `geom` | SIS et SUP : `geometry(MultiPolygon, 2154)` | Géométrie reprojetée en Lambert 93 | *Geom PostGIS (EPSG:2154)* |
 
 ### Reprojection et Géométrie PostGIS
 
@@ -69,8 +69,8 @@ WHERE bbox_geojson IS NOT NULL AND bbox_geojson != '';
 
 Un index spatial GIST `sidx_{table_name}_geom` est créé automatiquement sur la colonne `geom`.
 
-Pour les SUP, le type de la colonne `geom` est imposé à
-`geometry(MULTIPOLYGON, 2154)`, y compris si la table existe déjà et que l'import
+Pour les SIS et les SUP, le type de la colonne `geom` est imposé à
+`geometry(MultiPolygon, 2154)`, y compris si la table existe déjà et que l'import
 est exécuté avec `--no-recreate`. Les polygones existants sont convertis avec
 `ST_Multi`, sans suppression des enregistrements ; les géométries nulles sont
 conservées. Une géométrie non polygonale provoque une erreur PostGIS et annule

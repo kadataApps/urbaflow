@@ -181,7 +181,7 @@ def add_geometry_column_to_table(
     schema: str = "public", table_name: str = "risques_sis"
 ):
     """
-    Ajoute la colonne de géométrie PostGIS geom et l'index spatial GIST associé.
+    Garantit une colonne geom MultiPolygon en Lambert 93 et son index spatial GIST.
     """
     e = create_engine()
     with e.begin() as conn:
@@ -191,7 +191,10 @@ def add_geometry_column_to_table(
                 f"""
                 ALTER TABLE {q(schema)}.{q(table_name)} 
                     ADD COLUMN IF NOT EXISTS 
-                    geom geometry(GEOMETRY, 2154);
+                    geom geometry(MultiPolygon, 2154);
+                ALTER TABLE {q(schema)}.{q(table_name)}
+                    ALTER COLUMN geom TYPE geometry(MultiPolygon, 2154)
+                    USING ST_Multi(geom);
                 CREATE INDEX IF NOT EXISTS {q(f"sidx_{table_name}_geom")}
                     ON {q(schema)}.{q(table_name)} USING GIST (geom);
                 """
