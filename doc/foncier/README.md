@@ -32,6 +32,10 @@ avec `-m` (`AAAA-MM-JJ`). Les périodes d'existence des parcelles sont
 consultables via `dgfip_parcelle_historique` et la fonction
 `dgfip_parcelles_au_millesime(date)`.
 
+Cet historique peut servir à la
+[géolocalisation des autorisations SITADEL](../urbanisme/README.md#géolocalisation-sitadel-par-les-parcelles-historiques)
+avec la commande `sitadel-geolocate`.
+
 Documentation détaillée :
 
 - [Traitements MAJIC et Fichiers Fonciers](../../MAJIC.md)

@@ -4,6 +4,7 @@ import typer
 from cli.options import SCHEMA_OPTION
 from flows.sitadel.download_sitadel import download_sitadel_flow
 from flows.sitadel.enrich_commune import enrich_commune_sitadel_flow
+from flows.sitadel.geolocate_sitadel import geolocate_sitadel_flow
 
 app = typer.Typer()
 
@@ -24,12 +25,40 @@ SITADEL_SOURCE_ARGUMENT = typer.Argument(
     readable=True,
     help="CSV annuel communal des logements ; téléchargé si absent.",
 )
+SITADEL_DETAIL_ARGUMENT = typer.Argument(
+    None,
+    exists=True,
+    dir_okay=False,
+    readable=True,
+    help="CSV détaillé local ; sinon, télécharge les quatre exports détaillés.",
+)
 
 
 @app.command()
 def sitadel(dirname: Path | None = SITADEL_DIRECTORY_ARGUMENT) -> None:
     """Télécharge les CSV SITADEL communaux et détaillés, sans import en base."""
     download_sitadel_flow(dirname=dirname)
+
+
+@app.command()
+def sitadel_geolocate(
+    source_file: Path | None = SITADEL_DETAIL_ARGUMENT,
+    schema: str = SCHEMA_OPTION,
+    parcels_schema: str | None = typer.Option(
+        None,
+        help="Schéma des parcelles historiques ; sinon, schéma de destination.",
+    ),
+    table_name: str = typer.Option(
+        "sitadel_geolocalisation", help="Table de résultat de la géolocalisation."
+    ),
+) -> None:
+    """Géolocalise les autorisations SITADEL à partir des parcelles historiques."""
+    geolocate_sitadel_flow(
+        source_file=source_file,
+        db_schema=schema,
+        parcels_schema=parcels_schema,
+        table_name=table_name,
+    )
 
 
 @app.command()

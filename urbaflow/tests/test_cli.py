@@ -67,6 +67,7 @@ COMMAND_NAMES = set(RECREATE_DEFAULTS) | {
     "gpu-plu",
     "sitadel",
     "sitadel-indicators",
+    "sitadel-geolocate",
 }
 
 RECREATE_FLOW_NAMES = {
