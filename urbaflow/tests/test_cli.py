@@ -22,6 +22,7 @@ DEPARTMENT_COMMANDS = [
     ("bdtopo-troncon-route", "import_bdtopo_troncon_route_flow", "department"),
     ("ocsge", "import_ocsge_flow", "departements"),
     ("dgfip-geoparquet", "import_dgfip_geoparquet_flow", "departements"),
+    ("parcelles-historique", "import_parcelles_historique_flow", "departements"),
 ]
 
 RECREATE_DEFAULTS = {
@@ -57,6 +58,7 @@ COMMAND_NAMES = set(RECREATE_DEFAULTS) | {
     "dvf",
     "dgfip-topo",
     "dgfip-geoparquet",
+    "parcelles-historique",
     "locomvac",
     "lovac",
     "majic",

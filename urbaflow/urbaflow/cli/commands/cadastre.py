@@ -16,6 +16,10 @@ from flows.cadastre.import_dgfip_geoparquet import (
     DEFAULT_PARQUET_URL,
     import_dgfip_geoparquet_flow,
 )
+from flows.cadastre.import_parcelles_historique import (
+    ETALAB_CADASTRE_URL,
+    import_parcelles_historique_flow,
+)
 
 app = typer.Typer()
 
@@ -42,6 +46,30 @@ CADASTRE_SCHEMA_OPTION = typer.Option(
     "--schema",
     envvar="IMPORT_SCHEMA",
     help="Schéma de destination PostgreSQL.",
+)
+
+HISTORY_DEPARTMENTS_OPTION = typer.Option(
+    None,
+    "-d",
+    "--departement",
+    help=(
+        "Code(s) de département séparés par des virgules (ex: '35' ou '35,22'). "
+        "Par défaut, tous les départements publiés."
+    ),
+)
+HISTORY_MILLESIMES_OPTION = typer.Option(
+    None,
+    "-m",
+    "--millesimes",
+    help=(
+        "Millésime(s) AAAA-MM-JJ séparés par des virgules. Par défaut, tous les "
+        "millésimes publiés depuis le 2018-04-03 et non encore importés."
+    ),
+)
+HISTORY_SOURCE_OPTION = typer.Option(
+    ETALAB_CADASTRE_URL,
+    "--source",
+    help="URL ou répertoire local reproduisant l'arborescence etalab-cadastre.",
 )
 
 STEPS_ARGUMENT = typer.Argument(
@@ -76,6 +104,22 @@ def dgfip_geoparquet(
         communes=communes,
         db_schema=schema,
         source=source,
+    )
+
+
+@app.command(name="parcelles-historique")
+def parcelles_historique(
+    departments: str | None = HISTORY_DEPARTMENTS_OPTION,
+    millesimes: str | None = HISTORY_MILLESIMES_OPTION,
+    schema: str = CADASTRE_SCHEMA_OPTION,
+    source: str = HISTORY_SOURCE_OPTION,
+) -> None:
+    """Construit ou complète de manière incrémentale l'historique des parcelles."""
+    import_parcelles_historique_flow(
+        departements=departments,
+        millesimes=millesimes,
+        db_schema=schema,
+        base_location=source,
     )
 
 

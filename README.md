@@ -355,6 +355,58 @@ uv run python urbaflow/main.py --help
   docker compose run --rm urbaflow python urbaflow/main.py dgfip-geoparquet --departement 35,22
   ```
 
+- `parcelles-historique [OPTIONS]`
+  - Construit et complète de manière incrémentale `dgfip_parcelle_historique`,
+    qui contient toutes les parcelles, y compris les parcelles disparues.
+  - Sources [Etalab cadastre](https://cadastre.data.gouv.fr/data/etalab-cadastre/) :
+    GeoParquet national à partir du millésime du 1er avril 2025, shapefiles
+    départementaux pour les millésimes du 3 avril 2018 au 1er janvier 2025.
+    Les millésimes du 6 juillet 2017, du 12 octobre 2017 et du 2 janvier 2018,
+    publiés uniquement à la commune, ne sont pas importés.
+  - Modèle : une ligne par période d'existence d'une parcelle.
+    - `millesime_debut` : premier millésime où la parcelle apparaît ;
+    - `millesime_fin` : premier millésime où elle n'existe plus (`NULL` si elle
+      existe dans le dernier millésime importé) ;
+    - `periode` : `daterange` généré `[millesime_debut, millesime_fin)`, indexé.
+    Une parcelle qui réapparaît après avoir disparu obtient une nouvelle ligne.
+  - Chaque import, par département et millésime, n'insère que les identifiants
+    absents des parcelles actives et renseigne `millesime_fin` des parcelles
+    actives absentes de la source. Une parcelle dont l'identifiant est inchangé
+    conserve la géométrie et les attributs de sa première apparition.
+  - Filtrer un millésime (ou l'état connu à n'importe quelle date) :
+
+    ```sql
+    SELECT * FROM dgfip_parcelles_au_millesime('2022-01-01');
+    -- équivalent : SELECT * FROM dgfip_parcelle_historique WHERE periode @> DATE '2022-01-01';
+    SELECT * FROM dgfip_parcelle_actuelle; -- parcelles du dernier millésime importé
+    ```
+
+  - `dgfip_parcelle_historique_import` journalise chaque import (département,
+    millésime, format, source, nombre de parcelles, nouvelles et disparues).
+    Les millésimes sont intégrés par ordre chronologique : un millésime
+    antérieur ou égal au dernier importé pour un département est ignoré
+    (reconstruire la table pour intégrer un millésime plus ancien).
+  - Options :
+    - `-d, --departement TEXT` : codes départementaux séparés par des virgules
+      (par défaut tous les départements publiés). La détection des parcelles
+      disparues se fait à l'échelle du département : les périmètres EPCI ou
+      communes ne sont pas proposés ;
+    - `-m, --millesimes TEXT` : millésimes `AAAA-MM-JJ` séparés par des
+      virgules (par défaut tous les millésimes publiés non encore importés) ;
+    - `--schema TEXT` (défaut : `IMPORT_SCHEMA`, sinon `public`) ;
+    - `--source TEXT` : URL ou répertoire local reproduisant l'arborescence
+      `etalab-cadastre`.
+  - Une source absente (404) ou vide est ignorée avec un avertissement ; un
+    avertissement est aussi émis si plus de 10 % des parcelles actives
+    disparaissent. Chaque import département × millésime est transactionnel.
+  - Les géométries sont stockées en `MultiPolygon` EPSG:2154 ; `geom_srid`
+    conserve le SRID source (projection du `.prj` ou `geom_srid` GeoParquet).
+
+  ```shell
+  docker compose run --rm urbaflow python urbaflow/main.py parcelles-historique --departement 35
+  docker compose run --rm urbaflow python urbaflow/main.py parcelles-historique -d 35,22 -m 2018-04-03,2018-06-29
+  ```
+
 - `locomvac [dirname]`
   - Importe les fichiers LOCOMVAC.
   - `dirname` est optionnel (par défaut: `/data/`).
