@@ -10,6 +10,7 @@ ETL de traitement des données liées à l'urbanisme :
 - Bati
 - PLU
 - Géosirene
+- SITADEL (séries communales et autorisations d'urbanisme détaillées)
 
 L'ETL est composé de scripts python et de fichiers SQL.
 Il a été testé pour les environnements linux et OSX.
@@ -151,6 +152,100 @@ make urbaflow
 ```
 
 ## Commandes disponibles (CLI `main.py`)
+
+### Téléchargement SITADEL
+
+La commande `sitadel [dirname]` télécharge les huit CSV nationaux complets
+du dernier millésime disponible auprès du SDES, via l'API DiDo :
+
+- séries annuelles et mensuelles **à la commune**, pour les logements et les
+  locaux non résidentiels (quatre fichiers `sitadel_communes_*.csv`) ;
+- données **détaillées par autorisation** : logements, locaux non résidentiels,
+  permis d'aménager et permis de démolir (quatre fichiers `sitadel_detail_*.csv`).
+
+Il s'agit d'un téléchargement des fichiers sources, sans filtrage territorial,
+transformation ni import PostgreSQL. Sans argument, la destination est
+`urbaflow/temp/sitadel`. Le répertoire est créé si nécessaire. Chaque relance
+récupère les exports à jour et remplace chaque fichier après son téléchargement
+complet. Si un transfert échoue, son ancien fichier est conservé, le fichier
+partiel est supprimé et la commande échoue ; les fichiers déjà actualisés restent
+disponibles. Prévoir de l'espace disque et un temps de transfert importants pour
+les exports détaillés.
+
+```shell
+# Depuis le répertoire urbaflow, en local
+uv run python urbaflow/main.py sitadel
+uv run python urbaflow/main.py sitadel /chemin/vers/sitadel
+
+# Avec Docker, conserver les fichiers dans le volume de données
+docker compose run --rm urbaflow python urbaflow/main.py sitadel /data/sitadel
+```
+
+Sources : [catalogue SDES](https://www.statistiques.developpement-durable.gouv.fr/la-construction-neuve),
+[présentation des données détaillées](https://www.statistiques.developpement-durable.gouv.fr/donnees-des-permis-de-construire-et-autres-autorisations-durbanisme)
+et [documentation de l'API DiDo](https://data.statistiques.developpement-durable.gouv.fr/dido/api/v1/apidoc.html).
+
+#### Indicateurs SITADEL dans la table commune
+
+La commande `sitadel-indicators [source_file]` appelle le flow
+`enrich_commune_sitadel_flow` pour enrichir une **table existante** (par défaut
+`commune`, dans `IMPORT_SCHEMA`, sinon `public`). Par défaut, le code INSEE est
+lu dans `code_insee` (texte, cinq caractères, Corse et outre-mer compris) et la
+population numérique dans `population`. Ces noms sont adaptables.
+
+Les « logements créés » sont ici approchés par les **logements commencés**
+(`LOG_COM` du CSV annuel communal), et non par les logements autorisés ou livrés.
+La période couvre dix années civiles révolues : **2016 à 2025 inclus en 2026**.
+`--end-year 2024` permet par exemple de calculer la période 2015–2024.
+Les données SDES sont brutes et peuvent être incomplètes, notamment pour les
+années récentes ; ce ne sont pas des estimations corrigées des documents manquants.
+
+Quatre colonnes sont ajoutées si nécessaire puis recalculées :
+
+| Colonne | Calcul |
+| --- | --- |
+| `housing_created_10y` | Somme des lignes « Tous Logements », résidences comprises |
+| `collective_housing_created_10y` | Somme des logements « Collectif », hors résidences |
+| `individual_housing_created_10y` | Somme des logements « Individuel pur » et « Individuel groupe » |
+| `housing_created_10y_per_1000_inhabitants` | Total décennal × 1000 / population de la table cible |
+
+Le taux porte sur le cumul des dix années, sans division supplémentaire par dix.
+Une population absente, nulle ou négative donne un taux `NULL`.
+Pour chaque indicateur, une année/type absent ou un `LOG_COM` vide donne `NULL`,
+pas zéro ni une somme partielle ; les zéros explicites sont conservés.
+Les communes sans correspondance exacte de code INSEE ont des indicateurs `NULL`
+(pas de reconstitution des fusions de communes). Ces situations sont journalisées.
+Si une année entière manque au fichier, si le CSV est invalide ou contient des
+doublons commune/année/type, ou si aucune commune ne correspond, le flow échoue
+sans modifier la table. Les anciennes valeurs sont remplacées, y compris par
+`NULL` si elles ne sont plus calculables. Les autres colonnes et toutes les lignes
+sont conservées. Ajout des colonnes et mise à jour sont transactionnels.
+Les commentaires PostgreSQL des colonnes précisent la période du dernier calcul.
+
+Sans fichier local, seul le CSV annuel communal des logements est téléchargé
+à jour. Avec un fichier explicite, aucun accès réseau n'est effectué.
+
+```shell
+# Depuis le répertoire urbaflow
+uv run python urbaflow/main.py sitadel-indicators
+uv run python urbaflow/main.py sitadel-indicators \
+  temp/sitadel/sitadel_communes_logements_annuels.csv --end-year 2024
+
+# Variante utilisant directement les communes et la population municipale BANATIC
+uv run python urbaflow/main.py sitadel-indicators \
+  --table-name banatic_communes --population-column pop_mun_commune
+
+# Avec Docker et un CSV déjà téléchargé dans le volume de données
+docker compose run --rm urbaflow python urbaflow/main.py sitadel-indicators \
+  /data/sitadel/sitadel_communes_logements_annuels.csv --schema public
+```
+
+Tests ciblés : depuis `urbaflow`, lancer
+`PYTHONPATH=urbaflow uv run pytest tests/test_sitadel.py tests/test_sitadel_indicators.py tests/test_cli.py`.
+Les tests PostgreSQL utilisent une base dédiée indiquée par
+`SITADEL_TEST_DATABASE_URL` et créent puis suppriment leurs propres schémas.
+
+### Organisation de la CLI
 
 Le point d'entrée CLI est `urbaflow/main.py` (Typer).
 

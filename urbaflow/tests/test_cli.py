@@ -63,6 +63,8 @@ COMMAND_NAMES = set(RECREATE_DEFAULTS) | {
     "bdtopo-troncon-route",
     "epci-gpu",
     "gpu-plu",
+    "sitadel",
+    "sitadel-indicators",
 }
 
 RECREATE_FLOW_NAMES = {

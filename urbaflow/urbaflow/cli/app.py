@@ -13,6 +13,7 @@ from cli.commands.geosirene import app as geosirene_app
 from cli.commands.logement import app as logement_app
 from cli.commands.ocsge import app as ocsge_app
 from cli.commands.patrimoine import app as patrimoine_app
+from cli.commands.sitadel import app as sitadel_app
 
 app = typer.Typer()
 
@@ -30,3 +31,4 @@ app.add_typer(bpe_app)
 app.add_typer(patrimoine_app)
 app.add_typer(geosirene_app)
 app.add_typer(cartofriches_app)
+app.add_typer(sitadel_app)
